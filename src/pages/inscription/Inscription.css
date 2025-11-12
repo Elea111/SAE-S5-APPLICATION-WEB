@@ -1,0 +1,166 @@
+.inscription-section {
+    background-color: #f1f4f2;
+    color: #ffffff;
+    padding: 3rem 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+}
+
+.inscription-container {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    width: 100%;
+}
+
+.inscription-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.inscription-title {
+    font-size: 2rem;
+    font-family: "Gill Sans", sans-serif;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    text-align: left;
+    color: black;
+}
+
+.inscription-form {
+    background: #ffffff;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.form-description {
+    font-family: "Gill Sans", sans-serif;
+    color: grey;
+    text-align: left;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+.name-fields {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 0.5rem; /* Réduit de 1.5rem à 0.5rem */
+}
+
+.form-field.half {
+    flex: 1;
+}
+
+.form-field {
+    margin-bottom: 0.5rem; /* Réduit de 1.5rem à 0.5rem */
+    text-align: left;
+}
+
+.field-label {
+    display: block;
+    margin-bottom: 0.3rem; /* Réduit de 0.5rem à 0.3rem */
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: #000000;
+}
+
+.form-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: #ffffff;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+    color: #000000;
+    box-sizing: border-box;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #999e48;
+}
+
+.form-actions {
+    margin-top: 1rem;
+}
+
+.create-account-btn {
+    background: #999e48;
+    color: white;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    width: 100%;
+}
+
+.create-account-btn:hover {
+    background: #cc6a62;
+}
+
+.alternative-options {
+    text-align: center;
+    margin-top: 1.5rem;
+}
+
+.google-btn {
+    background: #ffffff;
+    color: #000000;
+    border: 1px solid #d1d5db;
+    padding: 0.75rem 2rem;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    margin-bottom: 1.5rem;
+}
+
+.google-btn:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
+}
+
+.login-redirect {
+    color: black;
+    font-size: 0.9rem;
+}
+
+.login-link {
+    color: black;
+    text-decoration: underline;
+    font-weight: 500;
+}
+
+.login-link:hover {
+    color: #f5f5f5;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .inscription-container {
+        padding: 0 1rem;
+    }
+
+    .inscription-title {
+        font-size: 1.75rem;
+    }
+
+    .inscription-form {
+        padding: 1.5rem;
+    }
+
+    .name-fields {
+        flex-direction: column;
+        gap: 0;
+    }
+}

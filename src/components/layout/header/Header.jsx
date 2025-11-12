@@ -4,10 +4,8 @@ import './Header.css';
 const Header = () => {
 
     const handleInscription = () => {
-        alert('Redirection vers la page d\'inscription');
-        // navigate('/inscription');
-    };
-
+        window.location.href = '/inscription';
+};
     const handleConnexion = () => {
         alert('Redirection vers la page de connexion');
     };
