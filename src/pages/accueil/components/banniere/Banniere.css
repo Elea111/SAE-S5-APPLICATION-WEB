@@ -1,4 +1,4 @@
-.hero-section {
+.banniere-section {
     background-color: #999e48;
     color: #ffffff;
     padding: 3rem 0;
@@ -7,14 +7,14 @@
     align-items: center;
 }
 
-.hero-container {
+.banniere-container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 2rem;
     width: 100%;
 }
 
-.hero-content {
+.banniere-content {
     display: flex;
     flex-direction: column;
     gap: 3rem;
@@ -28,14 +28,14 @@
 }
 
 .text-section {
-    flex: 1.2; /* Donne plus d'espace au texte */
+    flex: 1.2;
     max-width: 700px;
     display: flex;
     flex-direction: column;
     justify-content: center;
 }
 
-.hero-title {
+.banniere-title {
     font-size: 3rem;
     font-family: "Gill Sans", sans-serif;
     font-weight: bold;
@@ -43,62 +43,71 @@
     line-height: 1.2;
 }
 
-.hero-subtitle {
+.banniere-subtitle {
     font-size: 1.3rem;
     margin-bottom: 1rem;
     line-height: 1.4;
     font-weight: bold;
 }
 
-.hero-description {
+.banniere-description {
     font-size: 1.1rem;
     margin-bottom: 0;
     opacity: 0.9;
 }
 
+.find-tool-btn {
+    background: #b05750;
+    color: white;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    width: fit-content;
+    white-space: nowrap;
+    margin-top: 20px;
+
+}
+
+.find-tool-btn:hover {
+    background: #cc6a62;
+}
+
 .image-section {
-    flex: 0.8; /* Réduit l'espace alloué à l'image */
+    flex: 0.8;
     display: flex;
     justify-content: center;
     align-items: center;
-    max-width: 400px; /* Largeur maximale réduite */
+    max-width: 400px;
 }
 
-.hero-tools-image {
+.banniere-tools-image {
     width: 100%;
-    max-height: 300px; /* Hauteur maximale réduite */
-    object-fit: contain; /* Change de cover à contain pour voir l'image entière */
+    max-height: 300px;
+    object-fit: contain;
     border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
 /* Section recherche en dessous */
 .search-section {
-    background: rgba(255, 255, 255, 0.1);
+    background: #ffffff;
     padding: 2rem;
     border-radius: 12px;
-    backdrop-filter: blur(10px);
-    max-width: 600px;
-    margin: 0 auto;
     width: 100%;
-}
-
-.search-title {
-    font-size: 1.5rem;
-    margin-bottom: 1.5rem;
-    font-weight: 600;
-    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .search-form {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
+    width: 100%;
 }
 
 .input-group {
     display: flex;
     gap: 1.5rem;
+    align-items: flex-end;
 }
 
 .form-field {
@@ -111,22 +120,21 @@
     margin-bottom: 0.5rem;
     font-weight: 500;
     font-size: 1rem;
-    color: #ffffff;
+    color: #000000;
 }
 
 .search-input {
     width: 100%;
     padding: 0.75rem 1rem;
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    border: 2px solid rgba(158, 158, 158, 0.3);
     border-radius: 8px;
-    background: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
+    background: rgb(244, 247, 244);
     font-size: 1rem;
     transition: border-color 0.3s ease;
 }
 
 .search-input::placeholder {
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(136, 136, 136, 0.7);
 }
 
 .search-input:focus {
@@ -135,7 +143,7 @@
 }
 
 .search-button {
-    background: #b05750;
+    background: #446145;
     color: white;
     border: none;
     padding: 0.75rem 2rem;
@@ -144,10 +152,10 @@
     font-weight: 600;
     cursor: pointer;
     transition: background 0.3s ease;
-    margin-top: 0.5rem;
-    width: 100%;
+    height: fit-content;
+    white-space: nowrap;
 }
 
 .search-button:hover {
-    background: #cc6a62;
+    background: #619362;
 }

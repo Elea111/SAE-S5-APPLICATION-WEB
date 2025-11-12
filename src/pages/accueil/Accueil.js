@@ -1,12 +1,12 @@
 import React from 'react';
 import './Accueil.css';
 import Header from '../../components/layout/header/Header';
-import Hero from "./components/hero/Hero";
+import Banniere from "./components/banniere/Banniere";
 
 function Accueil() {
   return (
       <div className="accueil-page">
-          <Hero />
+          <Banniere />
 
 
       </div>
