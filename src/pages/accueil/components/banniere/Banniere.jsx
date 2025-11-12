@@ -11,8 +11,7 @@ const Banniere = () => {
                         <div className="text-section">
                             <h1 className="banniere-title"><strong>Louez les outils dont vous avez besoin.</strong></h1>
                             <p className="banniere-subtitle">
-                                La plateforme idéale pour la location de matériel professionnel entre pairs.
-                            </p>
+                                La plateforme idéale pour la location de <br></br> matériel professionnel entre pairs. </p>
                             <p className="banniere-description">
                                 Economisez, gagnez de l'argent et construisez mieux.
                             </p>
