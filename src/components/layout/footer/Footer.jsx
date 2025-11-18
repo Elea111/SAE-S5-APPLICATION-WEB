@@ -4,7 +4,16 @@ import './Footer.css';
 const Footer = () => {
     return (
         <footer className="footer">
+            {/* Section Newsletter avec le logo en superposition */}
             <div className="newsletter-section">
+                {/* Logo en haut à gauche */}
+                <div className="brand-section">
+                    <h1 className="brand-logo">Outilio®</h1>
+                    <p className="brand-tagline">
+                        La plateforme de location d'outils <br/>entre professionnels.
+                    </p>
+                </div>
+
                 <div className="newsletter-container">
                     <h2 className="newsletter-title">NEWSLETTER</h2>
                     <p className="newsletter-subtitle">
@@ -27,6 +36,7 @@ const Footer = () => {
                 </div>
             </div>
 
+            {/* Le reste du footer reste inchangé */}
             <div className="footer-links-section">
                 <div className="footer-container">
                     <div className="footer-grid">
@@ -85,8 +95,7 @@ const Footer = () => {
             <div className="copyright-section">
                 <div className="copyright-container">
                     <p className="copyright-text">
-                        <strong>KGPD</strong><br />
-                        © 2025 Outillio. Tous droits réservés.
+                        © 2025 Outilio. Tous droits réservés.
                     </p>
                 </div>
             </div>
