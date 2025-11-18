@@ -2,10 +2,14 @@ import React, { useState } from 'react';
 import './Header.css';
 
 const Header = () => {
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const toggleMenu = () => {
+        setIsMenuOpen(!isMenuOpen);
+    };
 
     const handleInscription = () => {
         window.location.href = '/inscription';
-};
+    };
     const handleConnexion = () => {
         alert('Redirection vers la page de connexion');
     };
@@ -16,8 +20,16 @@ const Header = () => {
                 <div className="logo">
                     <h1>Outillio</h1>
                 </div>
+                <div
+                    className={`hamburger-menu ${isMenuOpen ? 'active' : ''}`}
+                    onClick={toggleMenu}
+                >
+                    <div className="hamburger-line"></div>
+                    <div className="hamburger-line"></div>
+                    <div className="hamburger-line"></div>
+                </div>
 
-                <div className="nav-section">
+                <div className={`nav-section ${isMenuOpen ? 'active' : ''}`}>
                     <nav className="navigation">
                         <a href="#" className="nav-link">Découvrir</a>
                         <a href="#" className="nav-link">Proposer un outil</a>
