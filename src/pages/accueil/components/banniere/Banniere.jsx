@@ -26,31 +26,31 @@ const Banniere = () => {
                     </div>
 
                     <div className="search-section">
-                    <form className="search-form">
-                        <div className="input-group">
-                            <div className="form-field">
-                                <label className="field-label">Quel outil cherchez-vous ?</label>
-                                <input
-                                    type="text"
-                                    placeholder="Ex: perceuse, ponceuse..."
-                                    className="search-input"
-                                />
-                            </div>
+                        <form className="search-form">
+                            <div className="input-group">
+                                <div className="form-field">
+                                    <label className="field-label">Quel outil cherchez-vous ?</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Ex: perceuse, ponceuse..."
+                                        className="search-input"
+                                    />
+                                </div>
 
-                            <div className="form-field">
-                                <label className="field-label">Lieu</label>
-                                <input
-                                    type="text"
-                                    placeholder="Ex: Paris, Lyon..."
-                                    className="search-input"
-                                />
-                            </div>
+                                <div className="form-field">
+                                    <label className="field-label">Lieu</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Ex: Paris, Lyon..."
+                                        className="search-input"
+                                    />
+                                </div>
 
-                            <button type="submit" className="search-button">
-                                Rechercher
-                            </button>
-                        </div>
-                    </form>
+                                <button type="submit" className="search-button">
+                                    Rechercher
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>

@@ -1,0 +1,60 @@
+{
+  "tools": [
+    {
+      "id": 1,
+      "category": "Electroportatif",
+      "name": "Percense-visseuse sans fil",
+      "price": 25,
+      "image": "img1.png"
+    },
+    {
+      "id": 2,
+      "category": "Electroportatif",
+      "name": "Scie circulaire",
+      "price": 35,
+      "image": "img1.png"
+    },
+    {
+      "id": 3,
+      "category": "Jardinage",
+      "name": "Tondeuse à gazon",
+      "price": 40,
+      "image": "img1.png"
+    },
+    {
+      "id": 4,
+      "category": "Construction",
+      "name": "Échelle extensible",
+      "price": 20,
+      "image": "img1.png"
+    },
+    {
+      "id": 5,
+      "category": "Electroportatif",
+      "name": "Percense-visseuse sans fil",
+      "price": 25,
+      "image": "img1.png"
+    },
+    {
+      "id": 6,
+      "category": "Electroportatif",
+      "name": "Scie circulaire",
+      "price": 35,
+      "image": "img1.png"
+    },
+    {
+      "id": 7,
+      "category": "Jardinage",
+      "name": "Tondeuse à gazon",
+      "price": 40,
+      "image": "img1.png"
+    },
+    {
+      "id": 8,
+      "category": "Construction",
+      "name": "Échelle extensible",
+      "price": 20,
+      "image": "img1.png"
+    }
+  ]
+}

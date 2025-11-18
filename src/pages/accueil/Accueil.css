@@ -9,3 +9,40 @@ body {
   'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
   sans-serif;
 }
+
+/*Section*/
+.section{
+  padding: 4rem 0;
+  background-color: #f1f4f2;
+}
+
+.section-container{
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  text-align: center;
+}
+.section-title{
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 3rem;
+  color: #999e48;
+  font-family: "Gill Sans", sans-serif;
+  text-align: center;
+}
+
+/* Version mobile */
+@media (max-width: 768px) {
+  .section {
+         padding: 3rem 0;
+     }
+
+     .section-container {
+         padding: 0 1rem;
+     }
+
+     .section-title {
+         font-size: 2rem;
+         margin-bottom: 0;
+     }
+}

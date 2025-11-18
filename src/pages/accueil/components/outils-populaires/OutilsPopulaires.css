@@ -1,0 +1,204 @@
+.section-outils-populaires-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    width: 100%;
+}
+
+.outils-populaires-title {
+    color: #b05750;
+    margin: 0;
+}
+
+.voir-tout-link {
+    color: #000000;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: color 0.3s ease;
+    white-space: nowrap;
+}
+
+.voir-tout-link:hover {
+    color: #4c4c4c;
+    text-decoration: underline;
+}
+
+.tools-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+}
+
+.tool-card {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 2px solid #e1e5e9;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.tool-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    border-color: #b05750;
+}
+
+.tool-image {
+    width: 100%;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: #f8f9fa;
+    padding: 1rem;
+}
+
+.tool-image img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.tool-content {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.tool-category {
+    font-size: 0.9rem;
+    color: #446145;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.5px;
+    border-radius: 10px;
+    padding: 0.25rem 0.5rem;
+    display: inline-block;
+    background-color: #dde4e0;
+    width: fit-content;
+    max-width: 100%;
+}
+
+.tool-name {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #333333;
+    margin-bottom: 1.5rem;
+    line-height: 1.4;
+    flex-grow: 1;
+}
+
+.tool-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+}
+
+.price-container {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.tool-price {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #999e48;
+}
+
+.price-unit {
+    font-size: 1rem;
+    color: #333333;
+    white-space: nowrap;
+}
+
+.reserve-btn {
+    background: #999e48;
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    white-space: nowrap;
+}
+
+.reserve-btn:hover {
+    background: #b8bd62;
+}
+
+/* Version tablette */
+@media (max-width: 1024px) {
+    .tools-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+}
+
+/* Version mobile */
+@media (max-width: 768px) {
+    .section-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+
+    .tools-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .tool-content {
+        padding: 1.25rem;
+    }
+
+    .tool-image {
+        height: 180px;
+    }
+
+    .tool-name {
+        font-size: 1.2rem;
+    }
+
+    .tool-price {
+        font-size: 1.3rem;
+    }
+
+    .tool-footer {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+
+    .reserve-btn {
+        width: 100%;
+    }
+}
+
+/* Version très petits mobiles */
+@media (max-width: 480px) {
+    .outils-populaires-title {
+        font-size: 1.8rem;
+    }
+
+    .tool-image {
+        height: 150px;
+    }
+
+    .tool-footer {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .reserve-btn {
+        width: auto;
+    }
+}
