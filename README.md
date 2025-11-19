@@ -11,6 +11,52 @@
 
 
 
+
+##  Couches de l'Application
+
+### 1. Domain Layer (Enterprise Business Rules)
+- **Entities** : User, Equipment, Booking, Payment, Review
+- **Business Rules** : Règles métier pures, indépendantes de la technique
+
+### 2. Application Layer (Application Business Rules)  
+- **Use Cases** : RegisterUser, BookEquipment, ProcessPayment, etc.
+- **Interfaces** : UserRepository, PaymentService, NotificationGateway
+
+### 3. Infrastructure Layer (Frameworks & Drivers)
+- **Repositories** : PostgreSQLUserRepository, StripePaymentService
+- **Controllers** : REST API endpoints
+- **External Services** : Email, SMS, File Storage
+
+### 4. Presentation Layer (UI & Delivery)
+- **React Components** : Pages, Forms, Layouts
+- **PWA Setup** : Service Worker, Manifest
+- **State Management** : Context/Redux
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
