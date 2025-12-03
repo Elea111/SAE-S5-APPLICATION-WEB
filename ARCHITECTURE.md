@@ -74,3 +74,20 @@ Interfaces (Ports)
 * EquipmentListing
 * EquipmentSearch
 * BookingForm
+
+* src/
+├── **metier/**           (DOMAIN)
+│   ├── **entites/**      (User, Equipment, Booking)
+│   └── **regles/**       (calculs prix, validations)
+│
+├── **cas-usage/**        (APPLICATION)  
+│   ├── **actions/**      (inscrire, reserver, payer)
+│   └── **contrats/**     (interfaces pour la base de données)
+│
+├── **infrastructure/**   (à faire PLUS TARD)
+│   ├── **api/**          (controllers - PAS MAINTENANT)
+│   └── **database/**     (PostgreSQL - PAS MAINTENANT)
+│
+└── **tests/**
+    ├── **test-metier/**
+    └── **test-cas-usage/**
