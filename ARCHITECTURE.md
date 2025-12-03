@@ -4,8 +4,7 @@
 
 ### 1. Domain Layer (Enterprise Business Rules)
 - **Entities** : User, Equipment, Booking, Payment, Review
-- **Business Rules** : Règles métier pures, indépendantes de la technique
-
+- **Business Rules** :  prix calculé, disponibilité vérifiée etc...
 ### 2. Application Layer (Application Business Rules)  
 - **Use Cases** : RegisterUser, BookEquipment, ProcessPayment, etc.
 - **Interfaces** : UserRepository, PaymentService, NotificationGateway
