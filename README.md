@@ -58,7 +58,7 @@
 *check to trello for more info*
 
 * [ ] Implementing the first and the second layer.
-* [ ] Start database integration.
+* [ ] Implementing the  Infrastructure Layer a.k.a 3 layer.
 * [ ] ...
 
 ---
