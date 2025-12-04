@@ -39,14 +39,34 @@
 
 
 
-## WHAT HAVE BE DONE SO FAR BY THE TEAM ##
+# Project Progress - Summary of Completed Tasks
 
+## ✅ What Has Been Done So Far By The Team
 
-** HOME PAGE , INCLUDED HEADER AND FOOTER WAS DONE BY ELEA AND LEONA **
-** GITHUB PROJET  SETUP WAS DONE BY ELEA **
-** TRELLO , TO FOLLOW OUR PROJECT ADVANCEMENT, WAS DONE BY EMMANUEL **
-** PLATFORME DESIGN ( MAQUETTE) , WAS DONE BY THE TEAM **
-** CAHIER DE CHARGE , WAS DONE BY THE ENTIRE TEAM **
+| Task | Responsible(s) | Notes |
+| :--- | :--- | :--- |
+| **Home Page** (Including Header and Footer) | Elea and Leona | Design and initial integration completed. |
+| **GitHub Project Setup** | Elea | Repository and basic structure established. |
+| **Trello Setup** (For project advancement tracking) | Emmanuel | Task management and progress monitoring implemented. |
+| **Platform Design (Mockup)** | The entire team | Overall product vision validated. |
+| **Specifications Document (Cahier des charges)** | The entire team | Reference document for project requirements. |
+
+---
+
+## 🎯 Next Steps
+*(To be filled in with objectives for the next work period)*
+
+* [ ] Define initial backend functionalities.
+* [ ] Start database integration.
+* [ ] ...
+
+---
+
+## 👥 Team Members and Roles
+
+* **Elea:** GitHub Setup and Front-end Development.
+* **Leona:** Front-end Development (Design and Integration).
+* **Emmanuel:** Project Management and Task Tracking (Trello).
 
 
 
