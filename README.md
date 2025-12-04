@@ -54,9 +54,9 @@
 ---
 
 ## 🎯 Next Steps
-*(To be filled in with objectives for the next work period)*
+*check to trello for more info*
 
-* [ ] Define initial backend functionalities.
+* [ ] Implementing the first and the second layer.
 * [ ] Start database integration.
 * [ ] ...
 
@@ -67,6 +67,7 @@
 * **Elea:** GitHub Setup and Front-end Development.
 * **Leona:** Front-end Development (Design and Integration).
 * **Emmanuel:** Project Management and Task Tracking (Trello).
+* **Romain:** Project Management and Task Tracking (Trello).
 
 
 
