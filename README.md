@@ -66,8 +66,8 @@
 
 * **Elea:** GitHub Setup and Front-end Development.
 * **Leona:** Front-end Development (Design and Integration).
-* **Emmanuel:** Project Management and Task Tracking (Trello).
-* **Romain:** Project Management and Task Tracking (Trello).
+* **Emmanuel:** Project Management (Trello).
+* **Romain:** Fullstack dev and Task Tracking (Trello).
 
 
 
