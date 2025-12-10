@@ -89,4 +89,59 @@ domain/
 └── UserAlreadyExistsError.js
 
 
+<<<<<<< HEAD
 PUT HERE THE REST OF OTHER ENTITIES .........
+
+<!-- Quick: push local commits to Branch-Emmanuel -->
+## Git: push to Branch-Emmanuel
+
+If you already committed locally and want to push those commits to the branch Branch-Emmanuel on GitHub:
+
+- If you're already on the branch:
+  ```bash
+  git push -u origin Branch-Emmanuel
+  ```
+
+- If you committed on another branch but want that commit on Branch-Emmanuel:
+  ```bash
+  # create branch at current commit and switch to it
+  git checkout -b Branch-Emmanuel
+  git push -u origin Branch-Emmanuel
+  ```
+
+- If the remote branch exists but not locally:
+  ```bash
+  git fetch origin
+  git checkout -b Branch-Emmanuel origin/Branch-Emmanuel
+  ```
+
+- If you need to move an existing local commit (already made on e.g. main) onto Branch-Emmanuel:
+  ```bash
+  git checkout -b Branch-Emmanuel    # creates branch at current HEAD (your commit)
+  git push -u origin Branch-Emmanuel
+  ```
+
+- If the remote branch has new commits and you want to rebase your work on it:
+  ```bash
+  git fetch origin
+  git checkout Branch-Emmanuel
+  git pull --rebase origin Branch-Emmanuel
+  # resolve conflicts, then:
+  git push
+  ```
+
+- After a rebase that rewrote history, push safely:
+  ```bash
+  git push --force-with-lease origin Branch-Emmanuel
+  ```
+
+Verify you are on the branch and ready to commit:
+```bash
+git branch --show-current
+git status
+```
+
+From now on: commit as usual and use `git push` to send changes to Branch-Emmanuel. Open a PR from Branch-Emmanuel → main when ready...
+=======
+PUT HERE THE REST OF OTHER ENTITIES .........
+>>>>>>> 69dff1badf82a33ae270cc3ce5aaf5db29542a6f
