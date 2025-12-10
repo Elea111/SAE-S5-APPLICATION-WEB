@@ -89,6 +89,7 @@ domain/
 └── UserAlreadyExistsError.js
 
 
+<<<<<<< HEAD
 PUT HERE THE REST OF OTHER ENTITIES .........
 
 <!-- Quick: push local commits to Branch-Emmanuel -->
@@ -141,3 +142,6 @@ git status
 ```
 
 From now on: commit as usual and use `git push` to send changes to Branch-Emmanuel. Open a PR from Branch-Emmanuel → main when ready...
+=======
+PUT HERE THE REST OF OTHER ENTITIES .........
+>>>>>>> 69dff1badf82a33ae270cc3ce5aaf5db29542a6f
