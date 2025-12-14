@@ -89,7 +89,7 @@ const Connexion = () => {
                                 Se connecter avec Google
                             </button>
                             <p className="signup-redirect">
-                                Vous n'avez pas de compte? <a href="#" className="signup-link">S'inscrire</a>
+                                Vous n'avez pas de compte? <a href="/inscription" className="signup-link">S'inscrire</a>
                             </p>
                         </div>
                     </form>

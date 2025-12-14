@@ -114,7 +114,7 @@ const Inscription = () => {
                                 S'inscrire avec Google
                             </button>
                             <p className="login-redirect">
-                                Vous avez déjà un compte? <a href="#" className="login-link">Se connecter</a>
+                                Vous avez déjà un compte? <a href="/connexion" className="login-link">Se connecter</a>
                             </p>
                         </div>
                     </form>
