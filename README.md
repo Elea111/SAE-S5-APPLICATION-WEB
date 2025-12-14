@@ -46,7 +46,7 @@
 | Task | Responsible(s) | Notes |
 | :--- | :--- | :--- |
 | **Home Page** (Including Header and Footer) | Leona | Design and initial integration completed. |
-| **Authentification Page** (Register) | Elea |
+| **Authentification Page** (Register and Login) | Elea |
 | **GitHub Project Setup** | Elea | Repository and basic structure established. |
 | **Trello Setup** (For project advancement tracking) | Emmanuel | Task management and progress monitoring implemented. |
 | **Platform Design (Mockup)** | The entire team | Overall product vision validated. |
