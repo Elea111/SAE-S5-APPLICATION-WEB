@@ -77,13 +77,17 @@ class DateRange {
     }
 
     /**
-     * Vérifie si cette plage est adjacente à une autre (se touche sans chevaucher)
+     * Vérifie si cette plage est adjacente à une autre 
      */
     isAdjacent(otherRange) {
+        if (!(otherRange instanceof DateRange)) {
+            throw new Error('Le paramètre doit être une instance de DateRange');
+        }
+        
         const oneDayMs = 24 * 60 * 60 * 1000;
         return (
-            Math.abs(this.endDate - otherRange.startDate) === oneDayMs ||
-            Math.abs(otherRange.endDate - this.startDate) === oneDayMs
+            Math.abs(this.endDate.getTime() - otherRange.startDate.getTime()) === oneDayMs ||
+            Math.abs(otherRange.endDate.getTime() - this.startDate.getTime()) === oneDayMs
         );
     }
 

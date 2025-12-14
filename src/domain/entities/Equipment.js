@@ -2,9 +2,16 @@ import { v4 as uuidv4 } from 'uuid';
 import Money from '../value-objects/Money';
 import Location from '../value-objects/Location';
 import DateRange from '../value-objects/DateRange';
-import EquipmentCondition from '../value-objects/EquipmentCondition';
-import EquipmentStatus from '../value-objects/EquipmentStatus';
-import EquipmentCategory from '../value-objects/EquipmentCategory';
+import EquipmentCondition from '../value-objects/equipment/EquipmentCondition';
+import EquipmentStatus from '../value-objects/equipment/EquipmentStatus';
+import EquipmentCategory from '../value-objects/equipment/EquipmentCategory';
+import {
+    EquipmentError,
+    EquipmentNotAvailableError,
+    EquipmentOwnerError,
+    EquipmentRentedError,
+    InvalidRentalDurationError
+} from '../exceptions/EquipmentError';
 
 /**
  * Entité représentant un équipement/outil disponible à la location
@@ -27,7 +34,7 @@ class Equipment {
         images = [],
         specifications = {},
         features = [],
-        availabilitySchedule = [], // Tableau de DateRange
+        availabilitySchedule = [],
         minRentalDays = 1,
         maxRentalDays = 30,
         deliveryOptions = {
@@ -81,76 +88,76 @@ class Equipment {
 
     validate() {
         if (!this.ownerId || typeof this.ownerId !== 'string') {
-            throw new Error('ID du propriétaire est requis');
+            throw new EquipmentError('Owner ID is required and must be a string', 'INVALID_OWNER_ID');
         }
 
         if (!this.title || typeof this.title !== 'string' || this.title.trim().length === 0) {
-            throw new Error('Le titre est requis et doit être une chaîne non vide');
+            throw new EquipmentError('Title is required and must be a non-empty string', 'INVALID_TITLE');
         }
 
         if (this.title.length > 100) {
-            throw new Error('Le titre ne peut pas excéder 100 caractères');
+            throw new EquipmentError('Title cannot exceed 100 characters', 'TITLE_TOO_LONG');
         }
 
         if (!this.description || typeof this.description !== 'string' || this.description.trim().length === 0) {
-            throw new Error('La description est requise');
+            throw new EquipmentError('Description is required', 'INVALID_DESCRIPTION');
         }
 
         if (this.description.length > 2000) {
-            throw new Error('La description ne peut pas excéder 2000 caractères');
+            throw new EquipmentError('Description cannot exceed 2000 characters', 'DESCRIPTION_TOO_LONG');
         }
 
         if (!Object.values(EquipmentCategory).includes(this.category)) {
-            throw new Error('Catégorie invalide');
+            throw new EquipmentError('Invalid category', 'INVALID_CATEGORY');
         }
 
         if (!Object.values(EquipmentCondition).includes(this.condition)) {
-            throw new Error('État physique invalide');
+            throw new EquipmentError('Invalid equipment condition', 'INVALID_CONDITION');
         }
 
         if (!Object.values(EquipmentStatus).includes(this.status)) {
-            throw new Error('Statut de disponibilité invalide');
+            throw new EquipmentError('Invalid equipment status', 'INVALID_STATUS');
         }
 
         if (!this.dailyPrice || !(this.dailyPrice instanceof Money)) {
-            throw new Error('Prix journalier valide requis');
+            throw new EquipmentError('Valid daily price is required', 'INVALID_DAILY_PRICE');
         }
 
         if (this.dailyPrice.isNegativeOrZero()) {
-            throw new Error('Le prix journalier doit être positif');
+            throw new EquipmentError('Daily price must be positive', 'INVALID_DAILY_PRICE_VALUE');
         }
 
         if (this.deposit && this.deposit.isNegativeOrZero()) {
-            throw new Error('La caution doit être positive si spécifiée');
+            throw new EquipmentError('Deposit must be positive if specified', 'INVALID_DEPOSIT');
         }
 
         if (this.minRentalDays < 1) {
-            throw new Error('La durée minimale de location doit être d\'au moins 1 jour');
+            throw new EquipmentError('Minimum rental duration must be at least 1 day', 'INVALID_MIN_RENTAL_DAYS');
         }
 
         if (this.maxRentalDays < this.minRentalDays) {
-            throw new Error('La durée maximale de location doit être supérieure à la durée minimale');
+            throw new EquipmentError('Maximum rental duration must be greater than minimum duration', 'INVALID_MAX_RENTAL_DAYS');
         }
 
         if (this.maxRentalDays > 90) {
-            throw new Error('La durée maximale de location ne peut pas excéder 90 jours');
+            throw new EquipmentError('Maximum rental duration cannot exceed 90 days', 'MAX_RENTAL_DAYS_EXCEEDED');
         }
 
         if (this.images.length > 10) {
-            throw new Error('Maximum 10 images autorisées');
+            throw new EquipmentError('Maximum 10 images allowed', 'TOO_MANY_IMAGES');
         }
 
         // Validation des URLs d'images
-        this.images.forEach(image => {
+        this.images.forEach((image, index) => {
             if (!this._isValidUrl(image)) {
-                throw new Error('URL d\'image invalide');
+                throw new EquipmentError(`Invalid image URL at position ${index + 1}`, 'INVALID_IMAGE_URL');
             }
         });
 
         // Validation du calendrier de disponibilité
         this.availabilitySchedule.forEach((range, index) => {
             if (!(range instanceof DateRange)) {
-                throw new Error(`Plage de disponibilité ${index + 1} doit être une instance de DateRange`);
+                throw new EquipmentError(`Availability schedule item ${index + 1} must be a DateRange instance`, 'INVALID_AVAILABILITY_SCHEDULE');
             }
         });
     }
@@ -158,25 +165,24 @@ class Equipment {
     // ==================== GETTERS ====================
 
     /**
-     * Calcule le prix total pour une durée donnée
+     * Calcule le prix total pour une durée donnée avec réductions
      */
     calculateTotalPrice(days) {
         if (days < this.minRentalDays) {
-            throw new Error(`Durée minimale de location: ${this.minRentalDays} jours`);
+            throw new InvalidRentalDurationError(this.minRentalDays, this.maxRentalDays, days);
         }
 
         if (days > this.maxRentalDays) {
-            throw new Error(`Durée maximale de location: ${this.maxRentalDays} jours`);
+            throw new InvalidRentalDurationError(this.minRentalDays, this.maxRentalDays, days);
         }
 
-        // Possibilité d'ajouter des réductions pour longue durée
         let total = this.dailyPrice.amount * days;
 
         return new Money(total, this.dailyPrice.currency);
     }
 
     /**
-     * Obtient le prix moyen par jour 
+     * Obtient le prix moyen par jour
      */
     getAverageDailyPrice(days) {
         const total = this.calculateTotalPrice(days);
@@ -195,20 +201,33 @@ class Equipment {
      * Vérifie si l'équipement est disponible pour une période donnée
      */
     isAvailableForPeriod(startDate, endDate) {
-        if (this.status !== EquipmentStatus.AVAILABLE) {
+        const unavailableStatuses = [
+            EquipmentStatus.RENTED,
+            EquipmentStatus.RESERVED,
+            EquipmentStatus.MAINTENANCE,
+            EquipmentStatus.UNAVAILABLE,
+            EquipmentStatus.DELETED
+        ];
+
+        if (unavailableStatuses.includes(this.status)) {
             return false;
         }
 
-        const requestedRange = new DateRange(startDate, endDate);
+        try {
+            const requestedRange = new DateRange(startDate, endDate);
 
-        // Vérifier les conflits avec le calendrier de disponibilité
-        for (const availableRange of this.availabilitySchedule) {
-            if (availableRange.overlaps(requestedRange)) {
-                return false;
+            // Vérifier les conflits avec le calendrier de disponibilité
+            for (const availableRange of this.availabilitySchedule) {
+                if (availableRange.overlaps(requestedRange)) {
+                    return false;
+                }
             }
-        }
 
-        return true;
+            return true;
+        } catch (error) {
+            // Si la plage de dates est invalide, l'équipement n'est pas disponible
+            return false;
+        }
     }
 
     /**
@@ -224,12 +243,16 @@ class Equipment {
         }
 
         if (!(deliveryLocation instanceof Location)) {
-            throw new Error('L\'adresse de livraison doit être une instance de Location');
+            return false;
         }
 
-        const distance = this.location.distanceTo(deliveryLocation);
-        
-        return distance <= (this.deliveryOptions.deliveryRadius || 50); // 50km par défaut
+        try {
+            const distance = this.location.distanceTo(deliveryLocation);
+            const maxDistance = this.deliveryOptions.deliveryRadius || 50; // 50km par défaut
+            return distance <= maxDistance;
+        } catch (error) {
+            return false;
+        }
     }
 
     /**
@@ -237,10 +260,10 @@ class Equipment {
      */
     calculateDeliveryPrice(deliveryLocation) {
         if (!this.canDeliverTo(deliveryLocation)) {
-            throw new Error('Livraison non disponible à cette adresse');
+            throw new EquipmentError('Delivery not available to this address', 'DELIVERY_NOT_AVAILABLE');
         }
 
-        if (this.deliveryOptions.deliveryPrice) {
+        if (this.deliveryOptions.deliveryPrice !== null && this.deliveryOptions.deliveryPrice !== undefined) {
             return new Money(this.deliveryOptions.deliveryPrice, this.dailyPrice.currency);
         }
 
@@ -274,32 +297,50 @@ class Equipment {
             delivery: false,
         },
     }) {
-        // Validation des champs requis
-        if (!ownerId) throw new Error('ID du propriétaire requis');
-        if (!title) throw new Error('Titre requis');
-        if (!description) throw new Error('Description requise');
-        if (!category) throw new Error('Catégorie requise');
-        if (!dailyPrice) throw new Error('Prix journalier requis');
-        if (!condition) throw new Error('État physique requis');
-        if (!location) throw new Error('Localisation requise');
+        // Validation des champs requis avec messages cohérents
+        if (!ownerId || typeof ownerId !== 'string') {
+            throw new EquipmentError('Owner ID is required and must be a string', 'INVALID_OWNER_ID');
+        }
 
-        // Validation du prix
+        if (!title || typeof title !== 'string' || title.trim().length === 0) {
+            throw new EquipmentError('Title is required and must be a non-empty string', 'INVALID_TITLE');
+        }
+
+        if (!description || typeof description !== 'string' || description.trim().length === 0) {
+            throw new EquipmentError('Description is required', 'INVALID_DESCRIPTION');
+        }
+
+        if (!Object.values(EquipmentCategory).includes(category)) {
+            throw new EquipmentError('Valid category is required', 'INVALID_CATEGORY');
+        }
+
         if (dailyPrice <= 0) {
-            throw new Error('Le prix journalier doit être positif');
+            throw new EquipmentError('Daily price must be positive', 'INVALID_DAILY_PRICE_VALUE');
+        }
+
+        if (!Object.values(EquipmentCondition).includes(condition)) {
+            throw new EquipmentError('Valid equipment condition is required', 'INVALID_CONDITION');
+        }
+
+        if (!location) {
+            throw new EquipmentError('Location is required', 'MISSING_LOCATION');
         }
 
         // Validation de la durée de location
         if (minRentalDays < 1) {
-            throw new Error('Durée minimale de location: 1 jour');
+            throw new EquipmentError('Minimum rental duration must be at least 1 day', 'INVALID_MIN_RENTAL_DAYS');
         }
 
         if (maxRentalDays < minRentalDays) {
-            throw new Error('La durée maximale doit être supérieure à la durée minimale');
+            throw new EquipmentError('Maximum rental duration must be greater than minimum duration', 'INVALID_MAX_RENTAL_DAYS');
         }
 
         if (maxRentalDays > 90) {
-            throw new Error('Durée maximale de location: 90 jours');
+            throw new EquipmentError('Maximum rental duration cannot exceed 90 days', 'MAX_RENTAL_DAYS_EXCEEDED');
         }
+
+        // Créer l'instance de Location si nécessaire
+        const equipmentLocation = location instanceof Location ? location : new Location(location.latitude, location.longitude);
 
         return new Equipment({
             ownerId,
@@ -308,7 +349,7 @@ class Equipment {
             category,
             dailyPrice: new Money(dailyPrice, 'EUR'),
             condition,
-            location: location instanceof Location ? location : new Location(location.latitude, location.longitude),
+            location: equipmentLocation,
             brand,
             model,
             deposit: deposit ? new Money(deposit, 'EUR') : null,
@@ -339,9 +380,10 @@ class Equipment {
         insuranceRequired = null,
         insuranceDetails = null,
     }) {
-        // Ne pas permettre la modification si l'équipement est loué
-        if (this.status === EquipmentStatus.RENTED) {
-            throw new Error('Impossible de modifier un équipement en cours de location');
+        // Ne pas permettre la modification si l'équipement est loué ou réservé
+        const blockedStatuses = [EquipmentStatus.RENTED, EquipmentStatus.RESERVED];
+        if (blockedStatuses.includes(this.status)) {
+            throw new EquipmentRentedError(this.id);
         }
 
         let hasChanges = false;
@@ -626,7 +668,7 @@ class Equipment {
     }
 
     /**
-     * Supprimer l'équipement 
+     * Supprimer l'équipement (soft delete)
      */
     softDelete() {
         if (this.status === EquipmentStatus.RENTED) {
@@ -696,7 +738,7 @@ class Equipment {
             createdAt: this.createdAt.toISOString(),
             updatedAt: this.updatedAt.toISOString(),
             isAvailable: this.status === EquipmentStatus.AVAILABLE,
-            canBeRented: this.status === EquipmentStatus.AVAILABLE,
+            canBeRented: [EquipmentStatus.AVAILABLE, EquipmentStatus.RESERVED].includes(this.status),
         };
     }
 }
