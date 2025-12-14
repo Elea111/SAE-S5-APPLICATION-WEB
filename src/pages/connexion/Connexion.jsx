@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
-import './Inscription.css';
+import './Connexion.css';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
-const Inscription = () => {
+const Connexion = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState({
-        firstName: '',
-        lastName: '',
         email: '',
         password: ''
     });
@@ -26,46 +24,18 @@ const Inscription = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         console.log('Form submitted:', formData);
-
+        // Ajoutez ici votre logique de connexion
     };
 
     return (
-        <section className="inscription-section">
-            <div className="inscription-container">
-                <div className="inscription-content">
-                    <form className="inscription-form" onSubmit={handleSubmit}>
-                        <h1 className="inscription-title">Inscription</h1>
+        <section className="connexion-section">
+            <div className="connexion-container">
+                <div className="connexion-content">
+                    <form className="connexion-form" onSubmit={handleSubmit}>
+                        <h1 className="connexion-title">Connexion</h1>
                         <p className="form-description">
-                            Créez votre compte pour commencer à louer ou proposer des outils.
+                            Entrez votre email ci-dessous pour vous connecter à votre compte.
                         </p>
-
-                        <div className="name-fields">
-                            <div className="form-field half">
-                                <label className="field-label">Prénom</label>
-                                <input
-                                    type="text"
-                                    name="firstName"
-                                    placeholder="Max"
-                                    className="form-input"
-                                    value={formData.firstName}
-                                    onChange={handleInputChange}
-                                    required
-                                />
-                            </div>
-
-                            <div className="form-field half">
-                                <label className="field-label">Nom</label>
-                                <input
-                                    type="text"
-                                    name="lastName"
-                                    placeholder="Robinson"
-                                    className="form-input"
-                                    value={formData.lastName}
-                                    onChange={handleInputChange}
-                                    required
-                                />
-                            </div>
-                        </div>
 
                         <div className="form-field">
                             <label className="field-label">Email</label>
@@ -81,7 +51,12 @@ const Inscription = () => {
                         </div>
 
                         <div className="form-field">
-                            <label className="field-label">Mot de passe</label>
+                            <div className="password-header">
+                                <label className="field-label">Mot de passe</label>
+                                <a href="#" className="forgot-password-link">
+                                    Mot de passe oublié?
+                                </a>
+                            </div>
                             <div className="password-input-container">
                                 <input
                                     type={showPassword ? "text" : "password"}
@@ -104,17 +79,17 @@ const Inscription = () => {
                         </div>
 
                         <div className="form-actions">
-                            <button type="submit" className="create-account-btn">
-                                Créer un compte
+                            <button type="submit" className="login-btn">
+                                Se connecter
                             </button>
                         </div>
 
                         <div className="alternative-options">
                             <button type="button" className="google-btn">
-                                S'inscrire avec Google
+                                Se connecter avec Google
                             </button>
-                            <p className="login-redirect">
-                                Vous avez déjà un compte? <a href="#" className="login-link">Se connecter</a>
+                            <p className="signup-redirect">
+                                Vous n'avez pas de compte? <a href="#" className="signup-link">S'inscrire</a>
                             </p>
                         </div>
                     </form>
@@ -124,4 +99,4 @@ const Inscription = () => {
     );
 };
 
-export default Inscription;
+export default Connexion;

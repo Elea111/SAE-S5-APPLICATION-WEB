@@ -11,7 +11,7 @@ const Header = () => {
         window.location.href = '/inscription';
     };
     const handleConnexion = () => {
-        alert('Redirection vers la page de connexion');
+        window.location.href = '/connexion';
     };
 
     return (
