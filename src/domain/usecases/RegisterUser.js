@@ -1,4 +1,4 @@
-export async function RegisterUser(firstName, lastName, email, password) {
+export async function RegisterUser(firstName, lastName, email, password, userRepository = null) {
 
     if (!firstName || !lastName) {
         throw new Error("Nom et prénom requis");
@@ -12,6 +12,12 @@ export async function RegisterUser(firstName, lastName, email, password) {
         throw new Error("Mot de passe trop court");
     }
 
+    // Si un repository est injecté (architecture hexagonale), l'utiliser
+    if (userRepository && typeof userRepository.create === 'function') {
+        return await userRepository.create({ firstName, lastName, email, password });
+    }
+
+    // Fallback: appel HTTP (compatibilité avec le code frontend actuel)
     const response = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

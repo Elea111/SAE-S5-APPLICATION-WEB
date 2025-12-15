@@ -1,28 +1,28 @@
-export async function LoginUser(email, password) {
-    if (!email) {
-        throw new Error("Email requis");
+export async function LoginUser(email, password, userRepository = null) {
+    if (!email || !password) {
+        throw new Error('Email et mot de passe requis');
     }
 
-    if (!password || password.length < 6) {
-        throw new Error("Mot de passe trop court");
+    if (userRepository && typeof userRepository.findByCredentials === 'function') {
+        return await userRepository.findByCredentials(email, password);
     }
 
-    const response = await fetch("/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+    const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
     });
 
     let data;
     try {
-        data = await response.json(); // lire la réponse JSON une seule fois
+        data = await response.json();
     } catch (e) {
-        throw new Error("Le serveur n'a pas renvoyé un JSON valide");
+        throw new Error('Serveur: JSON invalide');
     }
 
     if (!response.ok) {
-        throw new Error(data.message || "Erreur lors de la connexion");
+        throw new Error(data.message || 'Erreur de connexion');
     }
 
-    return data; // retourne le JSON du backend
+    return data;
 }
