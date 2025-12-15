@@ -8,7 +8,7 @@ const Footer = () => {
             <div className="newsletter-section">
                 {/* Logo en haut à gauche */}
                 <div className="brand-section">
-                    <h1 className="brand-logo">Outilio®</h1>
+                    <h1 className="brand-logo">Outillio®</h1>
                     <p className="brand-tagline">
                         La plateforme de location d'outils <br/>entre professionnels.
                     </p>
@@ -55,7 +55,7 @@ const Footer = () => {
                             <h3 className="column-title">AIDE</h3>
                             <ul className="footer-links">
                                 <li><a href="#">FAQ</a></li>
-                                <li><a href="#">Contact:</a></li>
+                                <li><a href="#">Contact</a></li>
                             </ul>
                         </div>
 
@@ -95,7 +95,7 @@ const Footer = () => {
             <div className="copyright-section">
                 <div className="copyright-container">
                     <p className="copyright-text">
-                        © 2025 Outilio. Tous droits réservés.
+                        © 2025 Outillio. Tous droits réservés.
                     </p>
                 </div>
             </div>

@@ -60,7 +60,7 @@ const CommentCaMarche = () => {
                 <div className="section-header">
                     <h2 className="section-title">Comment ça marche ?</h2>
                     <p className="section-subtitle">
-                        Louer ou proposer un outil sur Outilio est simple, rapide et sécurisé.
+                        Louer ou proposer un outil sur Outillio est simple, rapide et sécurisé.
                     </p>
                 </div>
 
