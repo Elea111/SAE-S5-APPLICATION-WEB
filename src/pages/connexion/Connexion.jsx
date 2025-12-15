@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import './Connexion.css';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { LoginUser } from "../../domain/usecases/LoginUser";
 
 const Connexion = () => {
+    const [message, setMessage] = useState('');
+    const [error, setError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState({
         email: '',
@@ -21,10 +24,17 @@ const Connexion = () => {
         }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log('Form submitted:', formData);
-        // Ajoutez ici votre logique de connexion
+        setMessage('');
+        setError('');
+
+        try {
+            const result = await LoginUser(formData.email, formData.password);
+            setMessage(result.message || "Connexion réussie");
+        } catch (err) {
+            setError(err.message);
+        }
     };
 
     return (
@@ -83,6 +93,9 @@ const Connexion = () => {
                                 Se connecter
                             </button>
                         </div>
+
+                        {message && <p className="success">{message}</p>}
+                        {error && <p className="error">{error}</p>}
 
                         <div className="alternative-options">
                             <button type="button" className="google-btn">

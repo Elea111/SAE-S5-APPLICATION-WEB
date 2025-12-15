@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import './Inscription.css';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { RegisterUser } from "../../domain/usecases/RegisterUser";
 
 const Inscription = () => {
+    const [message, setMessage] = useState(''); // pour afficher le succès ou l'erreur
     const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState({
         firstName: '',
@@ -23,11 +25,26 @@ const Inscription = () => {
         }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log('Form submitted:', formData);
+        setMessage(''); // reset à chaque submission
 
+        try {
+            await RegisterUser(
+                formData.firstName,
+                formData.lastName,
+                formData.email,
+                formData.password
+            );
+            console.log("Utilisateur inscrit avec succès");
+            setMessage("Inscription réussie !"); // ✅ ici on met le message visible
+        } catch (error) {
+            console.error(error.message);
+            setMessage(`Erreur : ${error.message}`); // ✅ message d'erreur
+        }
     };
+
+
 
     return (
         <section className="inscription-section">
@@ -117,6 +134,8 @@ const Inscription = () => {
                                 Vous avez déjà un compte? <a href="/connexion" className="login-link">Se connecter</a>
                             </p>
                         </div>
+                        {message && <p className={message.startsWith("Erreur") ? "error" : "success"}>{message}</p>}
+
                     </form>
                 </div>
             </div>
