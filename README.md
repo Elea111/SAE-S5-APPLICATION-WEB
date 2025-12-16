@@ -33,15 +33,48 @@
 - **State Management** : Context/Redux
 
 
+## ✅ What Has Been Done So Far By The Team , SPRINT 1 
 
 
+src/
+├── metier/                    # DOMAIN LAYER
+│   ├── entites/
+│   │   ├── User.ts           ← Emmanuel (COMPLETED)
+│   │   ├── Equipment.ts      ← Léona (IN PROGRESS)
+│   │   ├── Payment.ts        ← Éléa (IN PROGRESS)
+│   │   └── Review.ts         ← Éléa (IN PROGRESS)
+│   ├── objets-valeur/
+│   │   ├── Email.ts          ← Team (IN PROGRESS)
+│   │   ├── Money.ts          ← Team (IN PROGRESS)
+│   │   └── DateRange.ts      ← Team (IN PROGRESS)
+│   └── regles/
+│       └── (shared responsibility)
+│
+├── cas-usage/                # APPLICATION LAYER
+│   ├── actions/
+│   │   ├── RegisterUser.ts   ← Éléa (IN PROGRESS)
+│   │   ├── LoginUser.ts      ← Éléa (IN PROGRESS)
+│   │   ├── PublishEquipment.ts ← Emmanuel (IN PROGRESS)
+│   │   ├── SearchEquipment.ts  ← Emmanuel (IN PROGRESS)
+│   │   ├── BookEquipment.ts    ← Emmanuel (IN PROGRESS)
+│   │   └── (other use cases)   ← Emmanuel (IN PROGRESS)
+│   ├── contrats/              ← Emmanuel (IN PROGRESS)
+│   └── donnees/               ← Emmanuel (IN PROGRESS)
+│
+└── tests/                    ← Emmanuel (IN PROGRESS)
+    ├── metier/
+    └── cas-usage/
+
+
+## TEST RESULT SCREEN FROM USE CASES 
+![EEAD04D3-CF94-4897-A7D0-2D9F6D9F5E33_1_201_a](https://github.com/user-attachments/assets/2c26831f-3c87-4978-a185-5822c6531fa2)
 
 
 
 
 # Project Progress - Summary of Completed Tasks
 
-## ✅ What Has Been Done So Far By The Team
+## ✅ What Has Been Done So Far By The Team , SPRINT 0 
 
 | Task | Responsible(s) | Notes |
 | :--- | :--- | :--- |
