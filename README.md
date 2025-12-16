@@ -35,61 +35,8 @@
 
 ## ✅ What Has Been Done So Far By The Team , SPRINT 1 
 
+![E7613FB5-FBC1-45A3-9875-BBD823895BD2_1_201_a](https://github.com/user-attachments/assets/5991cc82-834c-400b-90e9-2020abd4986f)
 
-
-Domain Layer (Couche Métier)
-Task	Responsible	Status	Priority
-Define User entity with business rules	Emmanuel	✅ Completed	🔴 High
-Define Equipment entity with business rules	Léona	🔄 In Progress	🔴 High
-Define Payment entity with business rules	Éléa	🔄 In Progress	🟡 Medium
-Define Review entity with business rules	Éléa	🔄 In Progress	🟡 Medium
-Create Value Objects (Email, Money, DateRange)	Emmanuel, Éléa, Léona	🔄 In Progress	🔴 High
-🔄 Application Layer (Use Cases)
-Task	Responsible	Status	Priority
-Use Case: RegisterUser (Inscription)	Éléa	🔄 In Progress	🔴 High
-Use Case: LoginUser (Connexion)	Éléa	🔄 In Progress	🔴 High
-Use Case: PublishEquipment (Publier)	Emmanuel	🔄 In Progress	🔴 High
-Use Case: SearchEquipment (Rechercher)	Emmanuel	🔄 In Progress	🔴 High
-Use Case: BookEquipment (Réserver)	Emmanuel	🔄 In Progress	🔴 High
-Use Case: ProcessPayment (Paiement)	Emmanuel	🔄 In Progress	🟡 Medium
-Use Case: ConfirmHandover (Remise)	Emmanuel	🔄 In Progress	🟡 Medium
-Use Case: ConfirmReturn (Restitution)	Emmanuel	🔄 In Progress	🟡 Medium
-Use Case: LeaveReview (Avis)	Emmanuel	🔄 In Progress	🟢 Low
-Generate tests for all use cases	Emmanuel	🔄 In Progress	🔴 High
-Define repository interfaces (ports)	Emmanuel	🔄 In Progress	🔴 High
-
-
-
-
-
-src/
-├── metier/                    # DOMAIN LAYER
-│   ├── entites/
-│   │   ├── User.ts           ← Emmanuel (COMPLETED)
-│   │   ├── Equipment.ts      ← Léona (IN PROGRESS)
-│   │   ├── Payment.ts        ← Éléa (IN PROGRESS)
-│   │   └── Review.ts         ← Éléa (IN PROGRESS)
-│   ├── objets-valeur/
-│   │   ├── Email.ts          ← Team (IN PROGRESS)
-│   │   ├── Money.ts          ← Team (IN PROGRESS)
-│   │   └── DateRange.ts      ← Team (IN PROGRESS)
-│   └── regles/
-│       └── (shared responsibility)
-│
-├── cas-usage/                # APPLICATION LAYER
-│   ├── actions/
-│   │   ├── RegisterUser.ts   ← Éléa (IN PROGRESS)
-│   │   ├── LoginUser.ts      ← Éléa (IN PROGRESS)
-│   │   ├── PublishEquipment.ts ← Emmanuel (IN PROGRESS)
-│   │   ├── SearchEquipment.ts  ← Emmanuel (IN PROGRESS)
-│   │   ├── BookEquipment.ts    ← Emmanuel (IN PROGRESS)
-│   │   └── (other use cases)   ← Emmanuel (IN PROGRESS)
-│   ├── contrats/              ← Emmanuel (IN PROGRESS)
-│   └── donnees/               ← Emmanuel (IN PROGRESS)
-│
-└── tests/                    ← Emmanuel (IN PROGRESS)
-    ├── metier/
-    └── cas-usage/
 
 
 ## TEST RESULT SCREEN FROM USE CASES 
