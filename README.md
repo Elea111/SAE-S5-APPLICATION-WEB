@@ -36,6 +36,32 @@
 ## ✅ What Has Been Done So Far By The Team , SPRINT 1 
 
 
+
+Domain Layer (Couche Métier)
+Task	Responsible	Status	Priority
+Define User entity with business rules	Emmanuel	✅ Completed	🔴 High
+Define Equipment entity with business rules	Léona	🔄 In Progress	🔴 High
+Define Payment entity with business rules	Éléa	🔄 In Progress	🟡 Medium
+Define Review entity with business rules	Éléa	🔄 In Progress	🟡 Medium
+Create Value Objects (Email, Money, DateRange)	Emmanuel, Éléa, Léona	🔄 In Progress	🔴 High
+🔄 Application Layer (Use Cases)
+Task	Responsible	Status	Priority
+Use Case: RegisterUser (Inscription)	Éléa	🔄 In Progress	🔴 High
+Use Case: LoginUser (Connexion)	Éléa	🔄 In Progress	🔴 High
+Use Case: PublishEquipment (Publier)	Emmanuel	🔄 In Progress	🔴 High
+Use Case: SearchEquipment (Rechercher)	Emmanuel	🔄 In Progress	🔴 High
+Use Case: BookEquipment (Réserver)	Emmanuel	🔄 In Progress	🔴 High
+Use Case: ProcessPayment (Paiement)	Emmanuel	🔄 In Progress	🟡 Medium
+Use Case: ConfirmHandover (Remise)	Emmanuel	🔄 In Progress	🟡 Medium
+Use Case: ConfirmReturn (Restitution)	Emmanuel	🔄 In Progress	🟡 Medium
+Use Case: LeaveReview (Avis)	Emmanuel	🔄 In Progress	🟢 Low
+Generate tests for all use cases	Emmanuel	🔄 In Progress	🔴 High
+Define repository interfaces (ports)	Emmanuel	🔄 In Progress	🔴 High
+
+
+
+
+
 src/
 ├── metier/                    # DOMAIN LAYER
 │   ├── entites/
