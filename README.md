@@ -33,20 +33,26 @@
 - **State Management** : Context/Redux
 
 
+## ✅ What Has Been Done So Far By The Team , SPRINT 1 
+
+![E7613FB5-FBC1-45A3-9875-BBD823895BD2_1_201_a](https://github.com/user-attachments/assets/5991cc82-834c-400b-90e9-2020abd4986f)
 
 
+
+## TEST RESULT SCREEN FROM USE CASES 
+![EEAD04D3-CF94-4897-A7D0-2D9F6D9F5E33_1_201_a](https://github.com/user-attachments/assets/2c26831f-3c87-4978-a185-5822c6531fa2)
 
 
 
 
 # Project Progress - Summary of Completed Tasks
 
-## ✅ What Has Been Done So Far By The Team
+## ✅ What Has Been Done So Far By The Team , SPRINT 0 
 
 | Task | Responsible(s) | Notes |
 | :--- | :--- | :--- |
 | **Home Page** (Including Header and Footer) | Leona | Design and initial integration completed. |
-| **Authentification Page** (Register) | Elea |
+| **Authentification Page** (Register and Login) | Elea |
 | **GitHub Project Setup** | Elea | Repository and basic structure established. |
 | **Trello Setup** (For project advancement tracking) | Emmanuel | Task management and progress monitoring implemented. |
 | **Platform Design (Mockup)** | The entire team | Overall product vision validated. |

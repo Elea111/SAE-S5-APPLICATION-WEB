@@ -1,4 +1,4 @@
-.inscription-section {
+.connexion-section {
     background-color: #f1f4f2;
     color: #ffffff;
     padding: 3rem 0;
@@ -7,20 +7,20 @@
     align-items: center;
 }
 
-.inscription-container {
+.connexion-container {
     max-width: 500px;
     margin: 0 auto;
     padding: 0 2rem;
     width: 100%;
 }
 
-.inscription-content {
+.connexion-content {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
 }
 
-.inscription-title {
+.connexion-title {
     font-size: 2rem;
     font-family: "Gill Sans", sans-serif;
     font-weight: bold;
@@ -29,7 +29,7 @@
     color: black;
 }
 
-.inscription-form {
+.connexion-form {
     background: #ffffff;
     padding: 2rem;
     border-radius: 12px;
@@ -45,31 +45,41 @@
     line-height: 1.4;
 }
 
-.name-fields {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 0.5rem; /* Réduit de 1.5rem à 0.5rem */
-}
-
-.form-field.half {
-    flex: 1;
-}
-
 .form-field {
-    margin-bottom: 0.5rem; /* Réduit de 1.5rem à 0.5rem */
+    margin-bottom: 1.5rem;
     text-align: left;
 }
 
 .field-label {
     display: block;
-    margin-bottom: 0.3rem; /* Réduit de 0.5rem à 0.3rem */
+    margin-bottom: 0.5rem;
     font-weight: 500;
     font-size: 0.9rem;
     color: #000000;
 }
 
+.password-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.forgot-password-link {
+    color: #999e48;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.forgot-password-link:hover {
+    color: #cc6a62;
+    text-decoration: underline;
+}
+
 .form-input {
-    width: 92%;
+    width: 100%;
     padding: 0.75rem 1rem;
     border: 1px solid #d1d5db;
     border-radius: 6px;
@@ -85,11 +95,53 @@
     border-color: #999e48;
 }
 
+.password-input-container {
+    position: relative;
+    width: 100%;
+}
+
+.password-input {
+    padding-right: 45px !important;
+    width: 100%;
+}
+
+.password-toggle-btn {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #666;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    transition: color 0.3s ease;
+}
+
+.password-toggle-btn:hover {
+    color: #999e48;
+    background: none;
+}
+
+.password-toggle-btn:focus {
+    outline: none;
+    background: none;
+}
+
+.password-toggle-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
 .form-actions {
     margin-top: 1rem;
 }
 
-.create-account-btn {
+.login-btn {
     background: #999e48;
     color: white;
     border: none;
@@ -102,7 +154,7 @@
     width: 100%;
 }
 
-.create-account-btn:hover {
+.login-btn:hover {
     background: #cc6a62;
 }
 
@@ -130,54 +182,33 @@
     border-color: #9ca3af;
 }
 
-.login-redirect {
+.signup-redirect {
     color: black;
     font-size: 0.9rem;
 }
 
-.login-link {
+.signup-link {
     color: black;
     text-decoration: underline;
     font-weight: 500;
 }
 
-.login-link:hover {
+.signup-link:hover {
     color: #797676;
-}
-
-.password-toggle-btn {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: #666;
-    padding: 5px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.1rem;
-    transition: color 0.3s ease;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-    .inscription-container {
+    .connexion-container {
         padding: 0 1rem;
     }
 
-    .inscription-title {
+    .connexion-title {
         font-size: 1.75rem;
     }
 
-    .inscription-form {
+    .connexion-form {
         padding: 1.5rem;
     }
 
-    .name-fields {
-        flex-direction: column;
-        gap: 0;
-    }
 }
