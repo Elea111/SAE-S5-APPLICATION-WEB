@@ -111,9 +111,9 @@
 .visa-badge {
     background: linear-gradient(135deg, #1a1f71, #1e5dc9);
     color: white;
-    padding: 12px 24px;
+    padding: 10px 20px;
     border-radius: 12px;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     letter-spacing: 0.5px;
     display: flex;
