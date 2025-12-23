@@ -1,0 +1,9 @@
+.publish-page { padding:2rem; background:#f1f4f2; min-height:80vh; }
+.publish-container { max-width:800px; margin:0 auto; background:#fff; padding:1rem; border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,0.06); }
+.publish-form label { display:block; margin-bottom:0.75rem; color:#111; }
+.publish-form input, .publish-form textarea, .publish-form select { width:100%; padding:0.6rem; border-radius:6px; border:1px solid #ddd; }
+.preview-card { padding:1rem; text-align:left; }
+.preview-image { max-width:100%; height:auto; border-radius:8px; margin-bottom:0.6rem; }
+.preview-actions { margin-top:0.8rem; display:flex; gap:0.6rem; }
+.btn-primary { background:#999e48; color:#fff; padding:0.6rem 1rem; border-radius:8px; border:none; cursor:pointer; }
+.btn-outline { background:transparent; border:1px solid #999e48; color:#999e48; padding:0.6rem 1rem; border-radius:8px; cursor:pointer; }

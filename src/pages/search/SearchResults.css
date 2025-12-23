@@ -1,0 +1,12 @@
+.search-page { padding:2rem; background:#f1f4f2; min-height:80vh; }
+.search-container { max-width:1100px; margin:0 auto; }
+.search-bar { display:flex; gap:0.6rem; margin-bottom:0.6rem; }
+.search-bar input { flex:1; padding:0.6rem; border-radius:6px; border:1px solid #ddd; }
+.suggestions { display:flex; gap:0.5rem; margin-bottom:1rem; flex-wrap:wrap; }
+.suggestion-btn { background:#fff; border:1px solid #ddd; padding:0.4rem 0.6rem; border-radius:6px; cursor:pointer; }
+.result-card { display:flex; gap:1rem; background:#fff; padding:0.8rem; border-radius:8px; margin-bottom:0.8rem; align-items:center; }
+.result-thumb { width:120px; height:80px; object-fit:cover; border-radius:8px; }
+.result-body h4 { margin:0; color:#999e48; }
+.result-actions { margin-top:0.5rem; display:flex; gap:0.5rem; }
+.result-actions button { padding:0.4rem 0.6rem; border-radius:6px; border:1px solid #999e48; background:transparent; color:#999e48; cursor:pointer; }
+.muted { color:#666; font-size:0.9rem; }
