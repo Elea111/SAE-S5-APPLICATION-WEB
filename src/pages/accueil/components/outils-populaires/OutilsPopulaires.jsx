@@ -8,13 +8,18 @@ import img3 from '../../../../assets/images/outilsPopulaires/img1.png';
 import img4 from '../../../../assets/images/outilsPopulaires/img1.png';
 
 const OutilsPopulaires = () => {
-    const categoryImages  = [img1, img2, img3, img4, img1, img2, img3, img4];
+    const categoryImages = [img1, img2, img3, img4, img1, img2, img3, img4];
+
+    const handleReservation = (tool) => {
+        localStorage.setItem("selectedTool", JSON.stringify(tool));
+        window.location.href = "/reservation";
+    };
 
     return (
         <section className="section">
             <div className="section-container">
                 <div className="section-outils-populaires-header">
-                    <h2 className=" section-title, outils-populaires-title" >Outils à la une</h2>
+                    <h2 className="section-title outils-populaires-title">Outils à la une</h2>
                     <a href="/tous-les-outils" className="voir-tout-link">
                         Voir tout →
                     </a>
@@ -36,7 +41,12 @@ const OutilsPopulaires = () => {
                                         <div className="tool-price">{tool.price}€</div>
                                         <span className="price-unit">/ jour</span>
                                     </div>
-                                    <button className="reserve-btn">Réserver</button>
+                                    <button
+                                        className="reserve-btn"
+                                        onClick={() => handleReservation(tool)}
+                                    >
+                                        Réserver
+                                    </button>
                                 </div>
                             </div>
                         </div>

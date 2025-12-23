@@ -1,0 +1,209 @@
+.paiement-page {
+    min-height: 100vh;
+    background-color: #f8f9fa;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+}
+
+.paiement-container {
+    background-color: white;
+    border-radius: 12px;
+    padding: 40px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 450px;
+    border: 1px solid #e0e0e0;
+}
+
+.paiement-title {
+    color: #1a1a1a;
+    font-size: 25px;
+    font-weight: 600;
+    margin-bottom: 25px;
+    text-align: left;
+}
+
+/* Section logos cartes */
+.card-logos {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.card-logo {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+}
+
+.visa-logo {
+    background-color: #1a1a1a;
+    color: white;
+}
+
+.mastercard-logo {
+    background-color: #eb001b;
+    color: white;
+}
+
+.amex-logo {
+    background-color: #2e77bc;
+    color: white;
+}
+
+.discover-logo {
+    background-color: #ff6000;
+    color: white;
+}
+
+/* Icônes de cartes */
+.card-icons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+    opacity: 0.7;
+}
+
+.card-icon {
+    font-size: 24px;
+    color: #666;
+}
+
+.paiement-form {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.form-group label {
+    color: #4a4a4a;
+    font-weight: 500;
+    font-size: 15px;
+}
+
+.form-group input {
+    padding: 12px 16px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: all 0.2s;
+    background-color: #f8f9fa;
+    color: #333;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #666;
+    background-color: white;
+}
+
+.form-group input::placeholder {
+    color: #999;
+    opacity: 0.8;
+}
+
+.form-row {
+    display: flex;
+    gap: 20px;
+}
+
+.form-row .half {
+    flex: 1;
+}
+
+/* Séparateur */
+.form-separator {
+    height: 1px;
+    background-color: #e0e0e0;
+    margin: 10px 0;
+}
+
+/* Section montant */
+.amount-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 2px solid #e0e0e0;
+}
+
+.amount-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 18px;
+    color: #4a4a4a;
+    margin-bottom: 5px;
+}
+
+.amount {
+    font-weight: 700;
+    color: #1a1a1a;
+    font-size: 24px;
+}
+
+.paiement-button {
+    width: 100%;
+    padding: 16px;
+    background-color: #1a1a1a;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 17px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 25px;
+    letter-spacing: 0.5px;
+}
+
+.paiement-button:hover:not(:disabled) {
+    background-color: #333;
+}
+
+.paiement-button:disabled {
+    background-color: #999;
+    cursor: not-allowed;
+}
+
+/* Indication CVV */
+.cvv-hint {
+    font-size: 12px;
+    color: #666;
+    margin-top: 4px;
+    font-style: italic;
+}
+
+.recap {
+    font-size: 18px;
+}
+/* Responsive */
+@media (max-width: 480px) {
+    .paiement-container {
+        padding: 25px 20px;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .paiement-button {
+        padding: 14px;
+        font-size: 16px;
+    }
+
+    .paiement-title {
+        font-size: 22px;
+    }
+}

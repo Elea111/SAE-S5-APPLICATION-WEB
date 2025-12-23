@@ -6,6 +6,9 @@ const Header = () => {
   const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
     };
+    const handleHome = () => {
+        window.location.href = '/';
+    };
 
     const handleInscription = () => {
         window.location.href = '/inscription';
@@ -17,7 +20,7 @@ const Header = () => {
     return (
         <header className="header">
             <div className="header-container">
-                <div className="logo">
+                <div className="logo" onClick={handleHome} style={{cursor: 'pointer'}}>
                     <h1>Outillio</h1>
                 </div>
                 <div
