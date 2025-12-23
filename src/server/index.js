@@ -87,6 +87,50 @@ app.get('/api/users/:id', async (req, res) => {
     }
 });
 
+// PATCH user update
+app.patch('/api/users/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        const updates = req.body || {};
+        // If repo supports update, call it; otherwise patch in-memory store if available
+        if (di.userRepository && typeof di.userRepository.update === 'function') {
+            const updated = await di.userRepository.update(id, updates);
+            return res.json(updated);
+        }
+        // best-effort for InMemoryUserRepository
+        if (di.userRepository && di.userRepository.store && di.userRepository.store.get(id)) {
+            const raw = di.userRepository.store.get(id);
+            const merged = { ...raw, ...updates, updated_at: new Date() };
+            di.userRepository.store.set(id, merged);
+            const { password_hash, ...publicUser } = merged;
+            return res.json(publicUser);
+        }
+        return res.status(404).json({ message: 'User not found' });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// GET user payments
+app.get('/api/users/:id/payments', async (req, res) => {
+    try {
+        const userId = req.params.id;
+        // If paymentRepository has listForUser
+        if (di.paymentRepository && typeof di.paymentRepository.findByUserId === 'function') {
+            const payments = await di.paymentRepository.findByUserId(userId);
+            return res.json(payments || []);
+        }
+        // Fallback for InMemoryPaymentRepository store
+        if (di.paymentRepository && di.paymentRepository.store) {
+            const list = Array.from(di.paymentRepository.store.values()).filter(p => p.user_id === userId || p.userId === userId);
+            return res.json(list);
+        }
+        return res.json([]);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
 // Get reviews for user
 app.get('/api/users/:id/reviews', async (req, res) => {
     try {

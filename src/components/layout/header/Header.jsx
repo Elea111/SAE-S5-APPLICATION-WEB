@@ -3,16 +3,17 @@ import './Header.css';
 
 const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const toggleMenu = () => {
-        setIsMenuOpen(!isMenuOpen);
-    };
+    const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
-    const handleInscription = () => {
-        window.location.href = '/inscription';
-    };
-    const handleConnexion = () => {
-        window.location.href = '/connexion';
-    };
+    const handleInscription = () => window.location.href = '/inscription';
+    const handleConnexion = () => window.location.href = '/connexion';
+
+    // NEW: read auth to determine logged state
+    const authRaw = typeof window !== 'undefined' ? localStorage.getItem('auth') : null;
+    const auth = authRaw ? JSON.parse(authRaw) : {};
+    const isLogged = !!(auth && (auth.userId || auth.token));
+    const userDisplayName = auth?.userName || null;
+    const userAvatar = auth?.avatarUrl || null;
 
     return (
         <header className="header">
@@ -31,13 +32,29 @@ const Header = () => {
 
                 <div className={`nav-section ${isMenuOpen ? 'active' : ''}`}>
                     <nav className="navigation">
-                        <a href="#" className="nav-link">Découvrir</a>
-                        <a href="#" className="nav-link">Proposer un outil</a>
+                        <a href="/" className="nav-link">Découvrir</a>
+                        <a href="/search" className="nav-link" onClick={(e)=>{e.preventDefault(); window.location.href='/search'}}>Chercher</a>
+                        <a href="/publish" className="nav-link" onClick={(e)=>{e.preventDefault(); window.location.href='/publish'}}>Proposer</a>
                     </nav>
 
                     <div className="auth-buttons">
-                        <button className="connexion-btn" onClick={handleConnexion}>Connexion</button>
-                        <button className="inscription-btn" onClick={handleInscription}>Inscription</button>
+                        {isLogged ? (
+                            <>
+                                <button className="icon-btn" title="Messages" onClick={()=>window.location.href='/messages'}>Messages</button>
+
+                                <button className="profile-btn" onClick={()=>window.location.href='/profil'}>
+                                    {userAvatar ? <img src={userAvatar} alt="avatar" className="header-avatar" /> : <span className="header-initial">{(userDisplayName||'U').charAt(0)}</span>}
+                                    <span className="profile-label">{userDisplayName || 'Mon compte'}</span>
+                                </button>
+
+                                <button className="logout-btn" onClick={() => { localStorage.removeItem('auth'); window.location.reload(); }}>Déconnexion</button>
+                            </>
+                        ) : (
+                            <>
+                                <button className="connexion-btn" onClick={handleConnexion}>Connexion</button>
+                                <button className="inscription-btn" onClick={handleInscription}>Inscription</button>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>
