@@ -1,211 +1,303 @@
+/* Paiement.css */
+
 .paiement-page {
     min-height: 100vh;
-    background-color: #f8f9fa;
+    background: white;
+    padding: 40px 20px;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 20px;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .paiement-container {
-    background-color: white;
+    background: white;
     border-radius: 12px;
-    padding: 40px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     width: 100%;
-    max-width: 450px;
-    border: 1px solid #e0e0e0;
+    max-width: 480px;
+    padding: 40px;
+    border: 1px solid #eaeaea;
 }
 
 .paiement-title {
     color: #1a1a1a;
-    font-size: 25px;
-    font-weight: 600;
-    margin-bottom: 25px;
-    text-align: left;
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 32px;
+    text-align: center;
+    position: relative;
+    padding-bottom: 16px;
 }
 
-/* Section logos cartes */
-.card-logos {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 30px;
-    flex-wrap: wrap;
+.paiement-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: #007bff;
+    border-radius: 2px;
 }
 
-.card-logo {
-    padding: 8px 16px;
-    border-radius: 6px;
-    font-weight: 600;
+/* Réservation summary - Style gardé */
+.reservation-summary {
+    background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 32px;
+    border: 1px solid #e6e9ff;
+    position: relative;
+}
+
+.reservation-summary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(180deg, #667eea, #764ba2);
+    border-radius: 4px 0 0 4px;
+}
+
+.recap {
+    color: #4a5568;
     font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
     letter-spacing: 0.5px;
-}
-
-.visa-logo {
-    background-color: #1a1a1a;
-    color: white;
-}
-
-.mastercard-logo {
-    background-color: #eb001b;
-    color: white;
-}
-
-.amex-logo {
-    background-color: #2e77bc;
-    color: white;
-}
-
-.discover-logo {
-    background-color: #ff6000;
-    color: white;
-}
-
-/* Icônes de cartes */
-.card-icons {
+    margin-bottom: 20px;
     display: flex;
-    gap: 10px;
-    margin-bottom: 30px;
-    opacity: 0.7;
+    align-items: center;
+    gap: 8px;
 }
 
-.card-icon {
-    font-size: 24px;
-    color: #666;
+.recap::before {
+    content: '📋';
+    font-size: 16px;
 }
 
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    color: #4a5568;
+    font-size: 15px;
+}
+
+.summary-item:last-child {
+    border-bottom: none;
+}
+
+.summary-item.total {
+    font-weight: 700;
+    color: #1a1a1a;
+    font-size: 18px;
+    padding-top: 16px;
+    margin-top: 8px;
+    border-top: 2px solid #e2e8f0;
+}
+
+/* Card type badge - Style gardé */
+.card-type {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
+}
+
+.visa-badge {
+    background: linear-gradient(135deg, #1a1f71, #1e5dc9);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 4px 12px rgba(26, 31, 113, 0.2);
+}
+
+.visa-badge::before {
+    content: '💳';
+    font-size: 18px;
+}
+
+/* Form styles - Retour au style original modifié */
 .paiement-form {
     display: flex;
     flex-direction: column;
-    gap: 25px;
+    gap: 24px;
 }
 
 .form-group {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
 }
 
 .form-group label {
-    color: #4a4a4a;
+    color: #333;
+    font-size: 14px;
     font-weight: 500;
-    font-size: 15px;
+    margin-bottom: 4px;
 }
 
 .form-group input {
-    padding: 12px 16px;
+    padding: 10px 9px;
     border: 1px solid #ddd;
     border-radius: 8px;
     font-size: 16px;
-    transition: all 0.2s;
-    background-color: #f8f9fa;
+    transition: all 0.3s ease;
+    background: white;
     color: #333;
 }
 
 .form-group input:focus {
     outline: none;
-    border-color: #666;
-    background-color: white;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
 }
 
 .form-group input::placeholder {
     color: #999;
-    opacity: 0.8;
 }
 
 .form-row {
     display: flex;
-    gap: 10px;
+    gap: 15px;
 }
 
 .form-row .half {
     flex: 1;
-    /* Ajuste la largeur pour tenir compte du gap */
-    width: calc(50% - 5px);
 }
 
-/* Séparateur */
-.form-separator {
-    height: 1px;
-    background-color: #e0e0e0;
-    margin: 10px 0;
-}
-
-/* Section montant */
+/* Amount section - Style simplifié */
 .amount-section {
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 2px solid #e0e0e0;
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 5px;
+    border: 1px solid #e9ecef;
 }
 
 .amount-line {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 18px;
-    color: #4a4a4a;
-    margin-bottom: 5px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
 }
 
 .amount {
-    font-weight: 700;
-    color: #1a1a1a;
     font-size: 24px;
+    font-weight: 700;
 }
 
+/* Button styles - Style simplifié */
 .paiement-button {
-    width: 100%;
-    padding: 16px;
-    background-color: #1a1a1a;
+    background: #007bff;
     color: white;
     border: none;
+    padding: 14px;
     border-radius: 8px;
-    font-size: 17px;
+    font-size: 18px;
     font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.3s;
-    margin-top: 25px;
-    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    margin-top: 10px;
 }
 
 .paiement-button:hover:not(:disabled) {
-    background-color: #333;
+    background: #0056b3;
+    transform: translateY(-1px);
+}
+
+.paiement-button:active:not(:disabled) {
+    transform: translateY(0);
 }
 
 .paiement-button:disabled {
-    background-color: #999;
+    background: #ccc;
     cursor: not-allowed;
+    transform: none;
 }
 
-/* Indication CVV */
-.cvv-hint {
-    font-size: 12px;
-    color: #666;
-    margin-top: 4px;
-    font-style: italic;
+/* Error message styles */
+.error-message {
+    background: #fff5f5;
+    border: 1px solid #fc8181;
+    border-radius: 8px;
+    padding: 24px;
+    text-align: center;
+    color: #c53030;
+    margin-top: 20px;
 }
 
-.recap {
-    font-size: 18px;
+.error-message p {
+    margin: 12px 0;
+    font-size: 16px;
 }
-/* Responsive */
+
+.back-button {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.back-button:hover {
+    background: #0056b3;
+}
+
+/* Responsive design */
 @media (max-width: 480px) {
     .paiement-container {
-        padding: 25px 20px;
+        padding: 24px 16px;
+        margin: 0 16px;
     }
 
     .form-row {
         flex-direction: column;
-        gap: 15px;
+        gap: 16px;
     }
 
-    .paiement-button {
-        padding: 14px;
-        font-size: 16px;
+    .visa-badge {
+        font-size: 13px;
+        padding: 10px 16px;
     }
 
-    .paiement-title {
+    .amount {
         font-size: 22px;
     }
+}
+
+/* Loading spinner */
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 40px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }

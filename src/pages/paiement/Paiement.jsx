@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'; // Ajoutez useEffect
+import React, { useState, useEffect } from 'react';
 import './Paiement.css';
 
 const Paiement = () => {
@@ -6,26 +6,23 @@ const Paiement = () => {
     const [cardNumber, setCardNumber] = useState('');
     const [expiryDate, setExpiryDate] = useState('');
     const [cvv, setCvv] = useState('');
-    const [amount, setAmount] = useState(0); // État pour le montant
+    const [amount, setAmount] = useState(0);
     const [reservationDetails, setReservationDetails] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
 
-    // Récupérer les données de réservation au chargement
     useEffect(() => {
         const getReservationData = () => {
             try {
                 const reservationData = localStorage.getItem('reservationData');
-                console.log("Données brutes depuis localStorage:", reservationData);
-
                 if (reservationData) {
                     const data = JSON.parse(reservationData);
-                    console.log("Données parsées:", data);
                     setReservationDetails(data);
                     setAmount(data.total || 0);
-                } else {
-                    console.log("Aucune donnée de réservation trouvée");
                 }
             } catch (e) {
-                console.error('Erreur lors de la lecture des données de réservation:', e);
+                console.error('Erreur lors de la lecture des données:', e);
+            } finally {
+                setIsLoading(false);
             }
         };
 
@@ -40,9 +37,12 @@ const Paiement = () => {
             return;
         }
 
-        alert(`Paiement de ${amount}€ effectué avec succès !`);
-        // Rediriger vers une page de confirmation
-        window.location.href = '/confirmation';
+        // Simulation de traitement
+        setIsLoading(true);
+        setTimeout(() => {
+            alert(`Paiement de ${amount}€ effectué avec succès !`);
+            window.location.href = '/confirmation';
+        }, 1000);
     };
 
     const formatCardNumber = (value) => {
@@ -57,9 +57,8 @@ const Paiement = () => {
 
         if (parts.length) {
             return parts.join(' ');
-        } else {
-            return value;
         }
+        return value;
     };
 
     const handleCardNumberChange = (e) => {
@@ -80,17 +79,26 @@ const Paiement = () => {
             cardNumber.replace(/\s/g, '').length === 16 &&
             expiryDate.length === 5 &&
             cvv.length === 3 &&
-            amount > 0; // Vérifier que le montant est valide
+            amount > 0;
     };
 
-    // Si pas de données de réservation, afficher un message
+    if (isLoading) {
+        return (
+            <div className="paiement-page">
+                <div className="paiement-container">
+                    <div className="loading-spinner"></div>
+                </div>
+            </div>
+        );
+    }
+
     if (!reservationDetails || amount === 0) {
         return (
             <div className="paiement-page">
                 <div className="paiement-container">
                     <h1 className="paiement-title">Paiement</h1>
                     <div className="error-message">
-                        <p>Aucune réservation trouvée ou montant invalide.</p>
+                        <p>❌ Aucune réservation trouvée ou montant invalide.</p>
                         <p>Veuillez d'abord effectuer une réservation.</p>
                         <button
                             className="back-button"
@@ -107,32 +115,37 @@ const Paiement = () => {
     return (
         <div className="paiement-page">
             <div className="paiement-container">
-                <h1 className="paiement-title">Paiement</h1>
+                <h1 className="paiement-title">Paiement Sécurisé</h1>
 
-                {/* Afficher un résumé de la réservation */}
                 <div className="reservation-summary">
-                    <p className="recap">Récapitulatif</p>
+                    <p className="recap">Récapitulatif de votre commande</p>
                     <div className="summary-item">
-                        <span>{reservationDetails.toolName || "Tondeuse à gazon"}</span><br></br>
+                        <span>{reservationDetails.toolName || "Tondeuse à gazon"}</span>
                         <span>{reservationDetails.days || 0} jour(s)</span>
                     </div>
                     <div className="summary-item">
-                        <span>{reservationDetails.pricePerDay || 40}€ × {reservationDetails.days || 0} jours = </span>
+                        <span>Prix journalier</span>
+                        <span>{reservationDetails.pricePerDay || 40}€</span>
+                    </div>
+                    <div className="summary-item">
+                        <span>Sous-total</span>
                         <span>{reservationDetails.subtotal || 0}€</span>
                     </div>
                     <div className="summary-item">
-                        <span>Frais de service = </span>
+                        <span>Frais de service</span>
                         <span>{reservationDetails.serviceFee || 0}€</span>
                     </div>
                     <div className="summary-item total">
-                        <span>Total = </span>
+                        <span>Total à payer</span>
                         <span>{amount}€</span>
                     </div>
-                </div><br></br>
+                </div>
 
                 <div className="card-type">
-                    <span className="visa-badge">VISA / MASTERCARD / CB / PAYPAL </span>
-                </div><br></br>
+                    <span className="visa-badge">
+                         VISA • MASTERCARD • CB • PAYPAL
+                    </span>
+                </div>
 
                 <form onSubmit={handleSubmit} className="paiement-form">
                     <div className="form-group">
@@ -141,14 +154,14 @@ const Paiement = () => {
                             type="text"
                             id="cardName"
                             value={cardName}
-                            onChange={(e) => setCardName(e.target.value)}
-                            placeholder="Nom"
+                            onChange={(e) => setCardName(e.target.value.toUpperCase())}
+                            placeholder="JEAN DUPONT"
                             required
                         />
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="cardNumber">N° de carte</label>
+                        <label htmlFor="cardNumber">Numéro de carte</label>
                         <input
                             type="text"
                             id="cardNumber"
@@ -175,13 +188,15 @@ const Paiement = () => {
                         </div>
 
                         <div className="form-group half">
-                            <label htmlFor="cvv">Cryptogramme visuel</label>
+                            <label htmlFor="cvv">
+                                Cryptogramme visuel
+                            </label>
                             <input
-                                type="text"
+                                type="password"
                                 id="cvv"
                                 value={cvv}
                                 onChange={(e) => setCvv(e.target.value.replace(/\D/g, ''))}
-                                placeholder="123"
+                                placeholder="•••"
                                 maxLength="3"
                                 required
                             />
@@ -190,7 +205,7 @@ const Paiement = () => {
 
                     <div className="amount-section">
                         <div className="amount-line">
-                            <span>Montant à payer</span>
+                            <span>Montant total</span>
                             <span className="amount">{amount}€</span>
                         </div>
                     </div>
@@ -198,10 +213,23 @@ const Paiement = () => {
                     <button
                         type="submit"
                         className="paiement-button"
-                        disabled={!isFormValid()}
+                        disabled={!isFormValid() || isLoading}
                     >
-                        Payer {amount}€
+                        {isLoading ? (
+                            <span>Validation en cours...</span>
+                        ) : (
+                            <span>Payer {amount}€</span>
+                        )}
                     </button>
+
+                    <div style={{
+                        textAlign: 'center',
+                        fontSize: '12px',
+                        color: '#718096',
+                        marginTop: '16px'
+                    }}>
+                        🔒 Paiement 100% sécurisé • Vos données sont chiffrées
+                    </div>
                 </form>
             </div>
         </div>
