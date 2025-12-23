@@ -230,7 +230,9 @@
     min-width: 200px;
 }
 
-
+.reservation-card .prixinit {
+    color: #b05750;
+}
 
 
 /* Responsive Design */

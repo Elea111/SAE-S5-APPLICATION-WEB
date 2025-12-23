@@ -40,7 +40,6 @@ const Paiement = () => {
             return;
         }
 
-        // Ici, vous ajouterez la logique de traitement du paiement
         alert(`Paiement de ${amount}€ effectué avec succès !`);
         // Rediriger vers une page de confirmation
         window.location.href = '/confirmation';
