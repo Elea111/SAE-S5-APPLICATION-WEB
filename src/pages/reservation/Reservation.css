@@ -184,8 +184,9 @@
 }
 
 .reserve-btn:hover:not(:disabled) {
-    background-color: #333;
+    background: #cc6a62;
 }
+
 
 .reserve-btn:disabled {
     background-color: #999;

@@ -38,7 +38,7 @@
     transform: translateX(-50%);
     width: 60px;
     height: 3px;
-    background: #007bff;
+    background: #989d48;
     border-radius: 2px;
 }
 
@@ -59,7 +59,7 @@
     left: 0;
     width: 4px;
     height: 100%;
-    background: linear-gradient(180deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #658a1a, #989d48);
     border-radius: 4px 0 0 4px;
 }
 
@@ -109,7 +109,7 @@
 }
 
 .visa-badge {
-    background: linear-gradient(135deg, #1a1f71, #1e5dc9);
+    background: linear-gradient(135deg, #658a1a, #989d48);
     color: white;
     padding: 10px 20px;
     border-radius: 12px;
@@ -201,7 +201,7 @@
 
 /* Button styles - Style simplifié */
 .paiement-button {
-    background: #007bff;
+    background: #989d48;
     color: white;
     border: none;
     padding: 14px;
@@ -214,7 +214,7 @@
 }
 
 .paiement-button:hover:not(:disabled) {
-    background: #0056b3;
+    background: #cc6a62;
     transform: translateY(-1px);
 }
 
