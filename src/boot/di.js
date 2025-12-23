@@ -1,12 +1,12 @@
-import InMemoryUserRepository from '../infra/repositories/InMemoryUserRepository';
-import InMemoryEquipmentRepository from '../infra/repositories/InMemoryEquipmentRepository';
-import InMemoryBookingRepository from '../infra/repositories/InMemoryBookingRepository';
-import InMemoryReviewRepository from '../infra/repositories/InMemoryReviewRepository';
-import InMemoryMessageRepository from '../infra/repositories/InMemoryMessageRepository';
+import InMemoryUserRepository from '../infra/repositories/InMemoryUserRepository.js';
+import InMemoryEquipmentRepository from '../infra/repositories/InMemoryEquipmentRepository.js';
+import InMemoryBookingRepository from '../infra/repositories/InMemoryBookingRepository.js';
+import InMemoryReviewRepository from '../infra/repositories/InMemoryReviewRepository.js';
+import InMemoryMessageRepository from '../infra/repositories/InMemoryMessageRepository.js';
 
 // New imports for mock stripe
-import MockStripeService from '../infra/services/MockStripeService';
-import StripePaymentAdapter from '../infra/adapters/StripePaymentAdapter';
+import MockStripeService from '../infra/services/MockStripeService.js';
+import StripePaymentAdapter from '../infra/adapters/StripePaymentAdapter.js';
 
 const userRepository = new InMemoryUserRepository();
 const equipmentRepository = new InMemoryEquipmentRepository();
