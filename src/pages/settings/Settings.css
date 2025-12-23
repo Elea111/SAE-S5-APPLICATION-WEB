@@ -1,0 +1,9 @@
+.settings-page {
+  padding: 2rem;
+  background: #f1f4f2;
+  min-height: 80vh;
+}
+.settings-page h2 { color:#999e48; }
+.settings-page label { display:block; margin-bottom:0.8rem; }
+.settings-page input { width:100%; padding:0.6rem; border-radius:6px; border:1px solid #ddd; }
+.settings-page .btn-primary { margin-top:0.8rem; background:#999e48; color:#fff; border:none; padding:0.6rem 1rem; border-radius:8px; cursor:pointer; }

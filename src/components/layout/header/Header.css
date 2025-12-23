@@ -185,3 +185,20 @@
             transform: rotate(-45deg) translate(6px, -6px);
         }
 }
+
+.header-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 8px;
+}
+
+.profile-settings-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #555;
+  margin-left: 8px;
+  font-size: 0.95rem;
+}

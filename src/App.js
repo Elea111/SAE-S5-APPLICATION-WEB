@@ -9,6 +9,10 @@ import Connexion from "./pages/connexion/Connexion.jsx";
 import EquipmentDetails from './pages/equipment/EquipmentDetails.jsx';
 import Schedule from './pages/schedule/Schedule.jsx';
 import Messages from './pages/messages/Messages.jsx';
+import Publish from './pages/publish/Publish.jsx';
+import SearchResults from './pages/search/SearchResults.jsx';
+import Settings from './pages/settings/Settings.jsx';
+import Payments from './pages/payments/Payments.jsx';
 
 function App() {
     const path = window.location.pathname;
@@ -19,6 +23,10 @@ function App() {
     if (path.startsWith('/equipments/') || path.startsWith('/equipment/')) return <EquipmentDetails />;
     if (path.startsWith('/schedule')) return <Schedule />;
     if (path.startsWith('/messages')) return <Messages />;
+    if (path.startsWith('/publish')) return <Publish />;
+    if (path.startsWith('/search')) return <SearchResults />;
+    if (path.startsWith('/settings')) return <Settings />;
+    if (path.startsWith('/payments')) return <Payments />;
 
     return (
         <div className="App">

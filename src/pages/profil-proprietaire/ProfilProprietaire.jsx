@@ -173,7 +173,6 @@ const ProfilProprietaire = () => {
             />
           </div>
 
-          {/* Avatar upload input */}
           <label className="avatar-upload-label">
             <input type="file" accept="image/*" onChange={handleAvatarChange} style={{display:'none'}} />
             <button className="btn-outline" type="button">{avatarUploading ? 'Upload...' : 'Changer la photo'}</button>
@@ -191,12 +190,13 @@ const ProfilProprietaire = () => {
           <div className="profile-main-info">
             <div className="name-row">
               <h1 className="profile-name">{userData.first_name} {userData.last_name}</h1>
+              {/* Settings quick access on profile header */}
+              <button className="profile-settings-btn" title="Paramètres" onClick={()=>window.location.href='/settings'}>⚙ Paramètres</button>
               <div className="member-meta">
                 <span>Membre depuis {new Date(userData.created_at || Date.now()).getFullYear()}</span>
                 <span className="dot">•</span>
-                {/* Role badge: green for pro, grey for particulier */}
                 <strong className={`role-tag ${userData.is_pro ? 'role-pro' : 'role-part'}`}>
-                  {userData.is_pro ? 'Professionnel' : 'Particulier'}
+                    {userData.is_pro ? 'Professionnel' : 'Particulier'}
                 </strong>
               </div>
             </div>
