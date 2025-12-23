@@ -1,16 +1,40 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import di from '../boot/di.js';
-import { RegisterUser } from '../domain/usecases/RegisterUser';
-import { LoginUser } from '../domain/usecases/LoginUser';
-import { PublishEquipment } from '../domain/usecases/PublishEquipment';
-import { SearchEquipment } from '../domain/usecases/SearchEquipment';
-import { BookEquipment } from '../domain/usecases/BookEquipment';
-import { ProcessPayment } from '../domain/usecases/ProcessPayment';
-import { LeaveReview } from '../domain/usecases/LeaveReview';
+import { RegisterUser } from '../domain/usecases/RegisterUser.js';
+import { LoginUser } from '../domain/usecases/LoginUser.js';
+import { PublishEquipment } from '../domain/usecases/PublishEquipment.js';
+import { SearchEquipment } from '../domain/usecases/SearchEquipment.js';
+import { BookEquipment } from '../domain/usecases/BookEquipment.js';
+import { ProcessPayment } from '../domain/usecases/ProcessPayment.js';
+import { LeaveReview } from '../domain/usecases/LeaveReview.js';
 
 const app = express();
+
+// ----------------- CORS MIDDLEWARE (dev) -----------------
+// Allow frontend dev server to call the mock API without CORS errors.
+// In production replace or restrict origin appropriately.
+app.use((req, res, next) => {
+  const allowedOrigin = 'http://localhost:3000';
+  res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  // Allow credentials if needed:
+  // res.setHeader('Access-Control-Allow-Credentials', 'true');
+
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
+  }
+  next();
+});
+
+// body parser
 app.use(bodyParser.json());
+
+// Simple root endpoint so visiting http://localhost:4000 shows a friendly message
+app.get('/', (req, res) => {
+    res.type('text/plain').send('Mock API server running. Use /api/* endpoints (eg. /api/health).');
+});
 
 // Health
 app.get('/api/health', (_, res) => res.json({ ok: true }));
@@ -142,6 +166,18 @@ app.post('/api/messages', async (req, res) => {
         res.status(201).json(msg);
     } catch (err) {
         res.status(400).json({ message: err.message });
+    }
+});
+
+// Messages (list conversation)
+app.get('/api/messages', async (req, res) => {
+    try {
+        const { userA, userB } = req.query;
+        if (!userA || !userB) return res.status(400).json({ message: 'userA and userB required' });
+        const conv = await di.messageRepository.listForConversation({ userA, userB });
+        res.json(conv || []);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
     }
 });
 

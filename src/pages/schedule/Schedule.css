@@ -1,0 +1,7 @@
+.schedule-page { padding:2rem; background:#f1f4f2; min-height:80vh; }
+.schedule-container { max-width:720px; margin:0 auto; background:#fff; padding:1.5rem; border-radius:10px; box-shadow:0 6px 12px rgba(0,0,0,0.06); }
+.date-row { display:flex; gap:1rem; margin-bottom:1rem; }
+.date-row label { display:flex; flex-direction:column; font-weight:600; color:#333; }
+.summary { margin-bottom:1rem; color:#333; }
+.info { margin-top:1rem; color: #333; font-weight:600; }
+.btn-primary { background:#999e48; color:#fff; border:none; padding:0.6rem 1rem; border-radius:8px; cursor:pointer; }

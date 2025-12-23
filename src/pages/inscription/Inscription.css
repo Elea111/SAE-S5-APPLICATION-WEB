@@ -30,10 +30,13 @@
 }
 
 .inscription-form {
+    max-width: 540px;
+    margin: 0 auto;
     background: #ffffff;
-    padding: 2rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    color: #000000; /* texte du formulaire en noir */
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
 }
 
 .form-description {
@@ -69,20 +72,33 @@
 }
 
 .form-input {
-    width: 92%;
-    padding: 0.75rem 1rem;
-    border: 1px solid #d1d5db;
+    width: 100%;
+    padding: 0.6rem 0.8rem;
     border-radius: 6px;
-    background: #ffffff;
-    font-size: 1rem;
+    border: 1px solid #ddd;
+    margin-bottom: 0.75rem;
+    color: #000;
     transition: border-color 0.3s ease;
-    color: #000000;
     box-sizing: border-box;
 }
 
 .form-input:focus {
     outline: none;
     border-color: #999e48;
+}
+
+.radio-group {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.radio-group label {
+    color: #000000; /* IMPORTANT: rendre le texte noir pour être lisible */
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
 }
 
 .form-actions {
@@ -93,10 +109,8 @@
     background: #999e48;
     color: white;
     border: none;
-    padding: 0.75rem 2rem;
+    padding: 0.75rem 1rem;
     border-radius: 6px;
-    font-size: 1rem;
-    font-weight: 600;
     cursor: pointer;
     transition: background 0.3s ease;
     width: 100%;
@@ -104,11 +118,6 @@
 
 .create-account-btn:hover {
     background: #cc6a62;
-}
-
-.alternative-options {
-    text-align: center;
-    margin-top: 1.5rem;
 }
 
 .google-btn {
@@ -161,6 +170,10 @@
     font-size: 1.1rem;
     transition: color 0.3s ease;
 }
+
+/* Messages */
+.success { color: green; margin-top: 0.75rem; }
+.error { color: red; margin-top: 0.75rem; }
 
 /* Responsive */
 @media (max-width: 768px) {

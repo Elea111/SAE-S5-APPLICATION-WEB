@@ -35,28 +35,22 @@ const Inscription = () => {
         setMessage(''); // reset à chaque submission
 
         try {
+            // Use RegisterUser (will call /api/register fallback if no repo)
             const created = await RegisterUser(
                 formData.firstName,
                 formData.lastName,
                 formData.email,
                 formData.password
             );
-            // Call backend to ensure isPro flag saved (fallback handled server-side)
-            await fetch('/api/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    firstName: formData.firstName,
-                    lastName: formData.lastName,
-                    email: formData.email,
-                    password: formData.password,
-                    isPro
-                })
-            });
-            // store simple auth info for mock flows
-            localStorage.setItem('auth', JSON.stringify({ userId: created.id, isPro }));
+
+            // created should contain the user id from the backend mock
+            const userId = created?.id || null;
+
+            // Store simple auth info for mock flows (isPro comes from form state)
+            localStorage.setItem('auth', JSON.stringify({ userId, isPro }));
+
             setMessage("Inscription réussie !");
-            // redirect to profile page
+            // redirect to profile page (mock)
             window.location.href = '/profil';
         } catch (error) {
             console.error(error.message);
