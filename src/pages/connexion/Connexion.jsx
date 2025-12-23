@@ -31,7 +31,11 @@ const Connexion = () => {
 
         try {
             const result = await LoginUser(formData.email, formData.password);
-            setMessage(result.message || "Connexion réussie");
+            // Store auth in localStorage for mock flows
+            localStorage.setItem('auth', JSON.stringify({ token: result.token, userId: result.user?.id || null }));
+            setMessage("Connexion réussie");
+            // redirect to profile
+            window.location.href = '/profil';
         } catch (err) {
             setError(err.message);
         }
