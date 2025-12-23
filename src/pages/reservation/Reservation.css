@@ -49,15 +49,17 @@
 }
 
 .badge {
+    font-size: 0.9rem;
+    color: #446145;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.5px;
+    border-radius: 10px;
+    padding: 0.25rem 0.5rem;
     display: inline-block;
-    background-color: #f8f9fa;
-    color: #2e7d32;
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 500;
-    margin-bottom: 25px;
-    border: 1px solid #e0e0e0;
+    background-color: #dde4e0;
+    width: fit-content;
+    max-width: 100%;
 }
 .description-section {
     margin-top: 30px;
