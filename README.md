@@ -16,17 +16,14 @@
 
 | Task | Responsible(s) | Notes |
 | :--- | :--- | :--- |
-| **Home Page** (Including Header and Footer) | Leona | Design and initial integration completed. |
-| **Authentification Page** (Register and Login) | Elea |
-| **GitHub Project Setup** | Elea | Repository and basic structure established. |
-| **Trello Setup** (For project advancement tracking) | Emmanuel | Task management and progress monitoring implemented. |
-| **Platform Design (Mockup)** | The entire team | Overall product vision validated. |
-| **Specifications Document (Cahier des charges)** | The entire team | Reference document for project requirements. |
+| **Implementiong the Search Page**  | Leona | allow a user to look for an tool . |
+| **Implementing the auth Page** (Register and Login) | Elea |
+| **Mock test ** | Emmanuel | Verify the flow of registering and login with manual and jest test. |
 
 
 
 
-
+![2C092411-D219-4534-8F67-D7501AA02FCA_4_5005_c](https://github.com/user-attachments/assets/67248353-7728-4910-8586-21d3f075026a)
 
 
 
@@ -47,12 +44,21 @@
 
 
 
+
 ![E7613FB5-FBC1-45A3-9875-BBD823895BD2_1_201_a](https://github.com/user-attachments/assets/5991cc82-834c-400b-90e9-2020abd4986f)
 
 
 
 ## TEST RESULT SCREEN FROM USE CASES 
 ![EEAD04D3-CF94-4897-A7D0-2D9F6D9F5E33_1_201_a](https://github.com/user-attachments/assets/2c26831f-3c87-4978-a185-5822c6531fa2)
+
+
+
+## 🎯 Next Steps
+*check to trello for more info*
+
+* [Done] Implementing the first and the second layer.
+* [ ] Finishing the Infrastructure Layer a.k.a 3 layer. and implement real data base and real stripe api payment gate and adding auth tests and booking process test 
 
 
 
