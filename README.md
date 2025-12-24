@@ -16,7 +16,7 @@
 
 | Task | Responsible(s) | Notes |
 | :--- | :--- | :--- |
-| **Implementiong the Search Page**  | Leona | allow a user to look for an tool . |
+| **Implementiong the Search Page**  | Leona | allow a user to look for a tool . |
 | **Implementing the auth Page** (Register and Login) | Elea | fixing error due with user registration . |
 | **Mock test ** | Emmanuel | Verify the flow of registering and login with manual and jest test. |
 
