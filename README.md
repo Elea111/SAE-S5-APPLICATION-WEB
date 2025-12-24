@@ -34,8 +34,8 @@
 
 | Task | Responsible(s) | Notes |
 | :--- | :--- | :--- |
-| **Définir l'entité Payment avec ses règles métier**  | Elea | this entity serve to manage the payment fonctionality . |
-| **Définir l'entité Review avec ses règles métie** (Register and Login) | Elea | this entity serve to manage the Review fonctionality . |
+| **Définir l'entité Payment avec ses règles métier et reservation**  | Elea | this entity serve to manage the payment fonctionality . |
+| **Définir l'entité Review avec ses règles métie ** (Register and Login) | Elea | this entity serve to manage the Review fonctionality . |
 | **Définir l'entité Equipment avec ses règles métier** | Leona | this entity serve to manage the Equipement fonctionality . |
 | **Créer les value objects (Email, Money, DateRange)** ) | Leona |  These objects  serve to set conditions for each request according to the input of the user . |
 | **User cases , RegisterUser, LoginUser, PublishEqquipement,SearchEquipement| Emmanuel| User case serve to manage the different action a user will perform on the platform. |
