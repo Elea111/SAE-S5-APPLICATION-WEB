@@ -10,30 +10,42 @@
 
 
 
+# Project Progress - Summary of Completed Tasks
+
+## ✅ What Has Been Done So Far By The Team , SPRINT 3 
+
+| Task | Responsible(s) | Notes |
+| :--- | :--- | :--- |
+| **Home Page** (Including Header and Footer) | Leona | Design and initial integration completed. |
+| **Authentification Page** (Register and Login) | Elea |
+| **GitHub Project Setup** | Elea | Repository and basic structure established. |
+| **Trello Setup** (For project advancement tracking) | Emmanuel | Task management and progress monitoring implemented. |
+| **Platform Design (Mockup)** | The entire team | Overall product vision validated. |
+| **Specifications Document (Cahier des charges)** | The entire team | Reference document for project requirements. |
 
 
-##  Couches de l'Application
-
-### 1. Domain Layer (Enterprise Business Rules)
-- **Entities** : User, Equipment, Booking, Payment, Review
-- **Business Rules** : Règles métier pures, indépendantes de la technique
-
-### 2. Application Layer (Application Business Rules)  
-- **Use Cases** : RegisterUser, BookEquipment, ProcessPayment, etc.
-- **Interfaces** : UserRepository, PaymentService, NotificationGateway
-
-### 3. Infrastructure Layer (Frameworks & Drivers)
-- **Repositories** : PostgreSQLUserRepository, StripePaymentService
-- **Controllers** : REST API endpoints
-- **External Services** : Email, SMS, File Storage
-
-### 4. Presentation Layer (UI & Delivery)
-- **React Components** : Pages, Forms, Layouts
-- **PWA Setup** : Service Worker, Manifest
-- **State Management** : Context/Redux
 
 
-## ✅ What Has Been Done So Far By The Team , SPRINT 1 
+
+
+
+
+
+
+
+## ✅ What Has Been Done So Far By The Team , SPRINT 1 AND 2
+
+| Task | Responsible(s) | Notes |
+| :--- | :--- | :--- |
+| **Définir l'entité Payment avec ses règles métier**  | Elea | this entity serve to manage the payment fonctionality . |
+| **Définir l'entité Review avec ses règles métie** (Register and Login) | Elea | this entity serve to manage the Review fonctionality . |
+| **Définir l'entité Equipment avec ses règles métier** | Leona | this entity serve to manage the Equipement fonctionality . |
+| **Créer les value objects (Email, Money, DateRange)** ) | Leona |  These objects  serve to set conditions for each request according to the input of the user . |
+| **User cases , RegisterUser, LoginUser, PublishEqquipement,SearchEquipement| Emmanuel| User case serve to manage the different action a user will perform on the platform. |
+| **Définir les interfaces pour les repositories (UserRepository, EquipmentRepository etc..,)** |Emmanuel | Mnage the different client request to the data base  . |
+
+
+
 
 ![E7613FB5-FBC1-45A3-9875-BBD823895BD2_1_201_a](https://github.com/user-attachments/assets/5991cc82-834c-400b-90e9-2020abd4986f)
 
@@ -63,11 +75,32 @@
 ## 🎯 Next Steps
 *check to trello for more info*
 
-* [ ] Implementing the first and the second layer.
-* [ ] Implementing the  Infrastructure Layer a.k.a 3 layer.
+* [Done] Implementing the first and the second layer.
+* [ ] Finishing the Infrastructure Layer a.k.a 3 layer.
 * [ ] ...
 
 ---
+
+
+##  Couches de l'Application
+
+### 1. Domain Layer (Enterprise Business Rules)
+- **Entities** : User, Equipment, Booking, Payment, Review
+- **Business Rules** : Règles métier pures, indépendantes de la technique
+
+### 2. Application Layer (Application Business Rules)  
+- **Use Cases** : RegisterUser, BookEquipment, ProcessPayment, etc.
+- **Interfaces** : UserRepository, PaymentService, NotificationGateway
+
+### 3. Infrastructure Layer (Frameworks & Drivers)
+- **Repositories** : PostgreSQLUserRepository, StripePaymentService
+- **Controllers** : REST API endpoints
+- **External Services** : Email, SMS, File Storage
+
+### 4. Presentation Layer (UI & Delivery)
+- **React Components** : Pages, Forms, Layouts
+- **PWA Setup** : Service Worker, Manifest
+- **State Management** : Context/Redux
 
 ## 👥 Team Members and Roles
 
@@ -78,82 +111,5 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
-
-## Available Scripts
-
-In the project directory, you can run:
-
-### `npm start`
-
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
-
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
