@@ -21,6 +21,15 @@
     font-size: 1.8rem;
     font-weight: bold;
     margin: 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Effet de brillance au survol */
+.logo h1:hover {
+    color: black;
 }
 
 /* Section de navigation regroupant les liens et boutons */
