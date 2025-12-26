@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import './Inscription.css';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import { RegisterUser } from "../../domain/usecases/RegisterUser";
 
 const Inscription = () => {
     const [message, setMessage] = useState(''); // pour afficher le succès ou l'erreur
@@ -32,28 +31,41 @@ const Inscription = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setMessage(''); // reset à chaque submission
+        setMessage('');
 
         try {
-            // Use RegisterUser (will call /api/register fallback if no repo)
-            const created = await RegisterUser(
-                formData.firstName,
-                formData.lastName,
-                formData.email,
-                formData.password
-            );
+            const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:4000' : '';
+      
+            const res = await fetch(`${API_BASE}/api/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
 
-            // created should contain the user id from the backend mock
-            const userId = created?.id || null;
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.message || 'Erreur lors de l\'inscription');
+            }
 
-            // Store simple auth info for mock flows (isPro comes from form state)
-            localStorage.setItem('auth', JSON.stringify({ userId, isPro }));
+            const created = await res.json();
+            
+            // ✅ SAUVEGARDER EXACTEMENT COMME CONNEXION
+            localStorage.setItem('auth', JSON.stringify({
+                userId: created.id,        // ← Clé canonique
+                id: created.id,            // ← Alias
+                token: created.token,
+                email: created.email,
+                isPro: isPro,
+                first_name: formData.firstName,
+                last_name: formData.lastName
+            }));
 
             setMessage("Inscription réussie !");
-            // redirect to profile page (mock)
-            window.location.href = '/profil';
+            setTimeout(() => {
+                window.location.href = '/profil';
+            }, 1000);
         } catch (error) {
-            console.error(error.message);
+            console.error('Erreur inscription:', error);
             setMessage(`Erreur : ${error.message}`);
         }
     };

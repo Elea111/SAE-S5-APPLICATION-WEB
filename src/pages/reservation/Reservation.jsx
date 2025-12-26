@@ -23,34 +23,36 @@ export default function ReservationPage() {
         daysCount > 0 ? daysCount * pricePerDay + serviceFee : 0;
 
     // Fonction pour gérer la réservation
-    const handleReservation = () => {
-        if (daysCount === 0) return;
+    const handleReservation = async () => {
+        try {
+            const res = await fetch('http://localhost:4000/api/bookings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    item_id: equipmentId,
+                    start_date: startDate,
+                    end_date: endDate
+                })
+            });
 
-        // Créer l'objet avec les données de réservation
-        const reservationData = {
-            total: total, // Total final
-            subtotal: pricePerDay * daysCount, // Prix sans les frais
-            toolName: "Tondeuse à gazon",
-            days: daysCount,
-            pricePerDay: pricePerDay,
-            serviceFee: serviceFee,
-            startDate: startDate,
-            endDate: endDate,
-            // Ajouter le calcul détaillé pour affichage
-            calculation: {
-                dailyPrice: pricePerDay,
-                days: daysCount,
-                dailyTotal: pricePerDay * daysCount,
-                fee: serviceFee
+            const data = await res.json();
+
+            if (res.ok && data.id) {
+                // Sauvegarder les détails de la réservation
+                localStorage.setItem('booking', JSON.stringify({
+                    bookingId: data.id,
+                    total: totalAmount
+                }));
+
+                // ✅ REDIRECT À /paiement
+                window.location.href = '/paiement';
             }
-        };
-
-        // Sauvegarder dans localStorage
-        console.log("Sauvegarde des données:", reservationData);
-        localStorage.setItem('reservationData', JSON.stringify(reservationData));
-
-        // Rediriger vers la page de paiement
-        window.location.href = '/paiement';
+        } catch (err) {
+            console.error('Erreur réservation:', err);
+        }
     };
 
     return (

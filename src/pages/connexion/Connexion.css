@@ -1,214 +1,152 @@
 .connexion-section {
-    background-color: #f1f4f2;
-    color: #ffffff;
-    padding: 3rem 0;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
 }
 
 .connexion-container {
-    max-width: 500px;
-    margin: 0 auto;
-    padding: 0 2rem;
-    width: 100%;
+  max-width: 450px;
+  width: 100%;
 }
 
 .connexion-content {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
-.connexion-title {
-    font-size: 2rem;
-    font-family: "Gill Sans", sans-serif;
-    font-weight: bold;
-    margin-bottom: 0.5rem;
-    text-align: left;
-    color: black;
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
 }
 
 .connexion-form {
-    background: #ffffff;
-    padding: 2rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.connexion-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
 }
 
 .form-description {
-    font-family: "Gill Sans", sans-serif;
-    color: grey;
-    text-align: left;
-    margin-bottom: 1.5rem;
-    font-size: 0.95rem;
-    line-height: 1.4;
+  color: #666;
+  font-size: 14px;
+  margin: 0;
 }
 
 .form-field {
-    margin-bottom: 1.5rem;
-    text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .field-label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 500;
-    font-size: 0.9rem;
-    color: #000000;
-}
-
-.password-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.5rem;
-}
-
-.forgot-password-link {
-    color: #999e48;
-    text-decoration: none;
-    font-size: 0.85rem;
-    font-weight: 500;
-    transition: color 0.3s ease;
-}
-
-.forgot-password-link:hover {
-    color: #cc6a62;
-    text-decoration: underline;
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
 }
 
 .form-input {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    background: #ffffff;
-    font-size: 1rem;
-    transition: border-color 0.3s ease;
-    color: #000000;
-    box-sizing: border-box;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.3s;
 }
 
 .form-input:focus {
-    outline: none;
-    border-color: #999e48;
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .password-input-container {
-    position: relative;
-    width: 100%;
+  position: relative;
+  display: flex;
 }
 
 .password-input {
-    padding-right: 45px !important;
-    width: 100%;
+  flex: 1;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
 }
 
 .password-toggle-btn {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: #666;
-    padding: 5px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.1rem;
-    transition: color 0.3s ease;
-}
-
-.password-toggle-btn:hover {
-    color: #999e48;
-    background: none;
-}
-
-.password-toggle-btn:focus {
-    outline: none;
-    background: none;
-}
-
-.password-toggle-btn svg {
-    width: 20px;
-    height: 20px;
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  font-size: 16px;
 }
 
 .form-actions {
-    margin-top: 1rem;
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
 }
 
 .login-btn {
-    background: #999e48;
-    color: white;
-    border: none;
-    padding: 0.75rem 2rem;
-    border-radius: 6px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.3s ease;
-    width: 100%;
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s;
 }
 
 .login-btn:hover {
-    background: #cc6a62;
+  transform: translateY(-2px);
 }
 
-.alternative-options {
-    text-align: center;
-    margin-top: 1.5rem;
+.login-btn:active {
+  transform: translateY(0);
 }
 
-.google-btn {
-    background: #ffffff;
-    color: #000000;
-    border: 1px solid #d1d5db;
-    padding: 0.75rem 2rem;
-    border-radius: 6px;
-    font-size: 1rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    width: 100%;
-    margin-bottom: 1.5rem;
+.error {
+  color: #dc3545;
+  background: #f8d7da;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  margin-top: 10px;
 }
 
-.google-btn:hover {
-    background: #f9fafb;
-    border-color: #9ca3af;
+.success {
+  color: #155724;
+  background: #d4edda;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  margin-top: 10px;
 }
 
 .signup-redirect {
-    color: black;
-    font-size: 0.9rem;
+  text-align: center;
+  font-size: 14px;
+  color: #666;
+  margin: 0;
 }
 
 .signup-link {
-    color: black;
-    text-decoration: underline;
-    font-weight: 500;
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s;
 }
 
 .signup-link:hover {
-    color: #797676;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .connexion-container {
-        padding: 0 1rem;
-    }
-
-    .connexion-title {
-        font-size: 1.75rem;
-    }
-
-    .connexion-form {
-        padding: 1.5rem;
-    }
-
+  color: #764ba2;
 }

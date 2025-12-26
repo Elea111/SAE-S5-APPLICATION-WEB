@@ -93,6 +93,18 @@ const SearchResults = () => {
     setFilters(INITIAL_FILTERS);
   }, []);
 
+  const handleReserve = (equipmentId) => {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const auth = JSON.parse(localStorage.getItem('auth') || '{}');
+      if (!auth.token) {
+        window.location.href = '/connexion';
+        return;
+      }
+    }
+    // ✅ Redirect à /reservation avec l'ID de l'équipement
+    window.location.href = `/reservation?equipment_id=${equipmentId}`;
+  };
+
   // Filtrage et tri des résultats
   const filteredResults = useMemo(() => {
     return results
@@ -281,6 +293,9 @@ const SearchResults = () => {
               </button>
               <button className="view-owner-btn" onClick={() => handleViewOwner(item.ownerId || item.owner_id)}>
                 Voir profil
+              </button>
+              <button className="reserve-btn" onClick={() => handleReserve(item.id)}>
+                Réserver
               </button>
             </div>
           </div>
