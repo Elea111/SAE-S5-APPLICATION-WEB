@@ -1,23 +1,97 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# dependencies
+# ===== DEPENDENCIES =====
 /node_modules
 /.pnp
 .pnp.js
 
-# testing
+# ===== TESTING =====
 /coverage
 
-# production
+# ===== PRODUCTION =====
 /build
+/dist
 
-# misc
-.DS_Store
+# ===== ENVIRONMENT VARIABLES =====
+.env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
+# ===== LOGS =====
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+lerna-debug.log*
+
+# ===== MISC OS FILES =====
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ===== IDE & EDITOR =====
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# ===== CACHE FILES =====
+.cache/
+.eslintcache
+.next
+.nuxt
+dist
+.cache
+.vuepress/dist
+.serverless/
+.fusebox/
+.dynamodb/
+.tern-port
+
+# ===== LOCALSTORAGE (webpack dev) =====
+.localstorage
+
+# ===== CRACO CONFIG (si tu le réutilises) =====
+craco.config.js
+
+# ===== TEMPORARY FILES =====
+*.tmp
+*.temp
+*.bak
+*.swp
+*~
+.#*
+
+# ===== OPTIONAL npm cache directory =====
+.npm
+
+# ===== OPTIONAL eslint cache =====
+.eslintcache
+
+# ===== OUTPUT OF 'npm pack' =====
+*.tgz
+
+# ===== DOTENV environment variables file =====
+.env.*.local
+
+# ===== TESTING & COVERAGE =====
+/coverage
+/.nyc_output
+
+# ===== NODE VERSION =====
+.nvmrc
+.node-version
