@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import Inscription from "./pages/inscription/Inscription.jsx";
 import Header from './components/layout/header/Header.jsx';
@@ -12,10 +12,15 @@ import Messages from './pages/messages/Messages.jsx';
 import Publish from './pages/publish/Publish.jsx';
 import SearchResults from './pages/search/SearchResults.jsx';
 import Settings from './pages/settings/Settings.jsx';
-import Payments from './pages/payments/Payments.jsx';
+import Payments from './pages/paiement/Paiement.jsx';
 
 function App() {
-    const path = window.location.pathname;
+    const [path, setPath] = useState('/');
+
+    useEffect(() => {
+        // Only run on client side
+        setPath(window.location.pathname);
+    }, []);
 
     if (path.startsWith('/inscription')) return <Inscription />;
     if (path.startsWith('/connexion')) return <Connexion />;
@@ -26,7 +31,7 @@ function App() {
     if (path.startsWith('/publish')) return <Publish />;
     if (path.startsWith('/search')) return <SearchResults />;
     if (path.startsWith('/settings')) return <Settings />;
-    if (path.startsWith('/payments')) return <Payments />;
+    if (path.startsWith('/paiement')) return <Payments />;
 
     return (
         <div className="App">

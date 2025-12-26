@@ -9,6 +9,8 @@ const Paiement = () => {
     const [amount, setAmount] = useState(0);
     const [reservationDetails, setReservationDetails] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [message, setMessage] = useState('');
+    const [paymentStatus, setPaymentStatus] = useState('');
 
     useEffect(() => {
         const getReservationData = () => {
@@ -43,6 +45,45 @@ const Paiement = () => {
             alert(`Paiement de ${amount}€ effectué avec succès !`);
             window.location.href = '/confirmation';
         }, 1000);
+    };
+
+    const submit = async () => {
+        const booking = JSON.parse(localStorage.getItem('booking') || '{}');
+        const token = 'votre_token_ici'; // Remplacez par votre méthode d'obtention de token
+
+        try {
+            const res = await fetch('http://localhost:4000/api/payments', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    booking_id: booking.bookingId,
+                    amount: booking.total,
+                    currency: 'EUR'
+                })
+            });
+
+            const responseData = await res.json();
+
+            if (res.ok) {
+                setMessage('Paiement effectué avec succès !');
+                setPaymentStatus('paid');
+
+                // Nettoyer le localStorage
+                localStorage.removeItem('booking');
+
+                // ✅ AFFICHER CONFIRMATION OU REDIRECT À /profil
+                setTimeout(() => {
+                    window.location.href = '/profil';
+                }, 2000);
+            } else {
+                setMessage(`❌ Erreur : ${responseData.message}`);
+            }
+        } catch (err) {
+            setMessage(`❌ Erreur : ${err.message}`);
+        }
     };
 
     const formatCardNumber = (value) => {
@@ -231,6 +272,12 @@ const Paiement = () => {
                         🔒 Paiement 100% sécurisé • Vos données sont chiffrées
                     </div>
                 </form>
+
+                {message && (
+                    <div className={`payment-message ${paymentStatus}`}>
+                        {message}
+                    </div>
+                )}
             </div>
         </div>
     );

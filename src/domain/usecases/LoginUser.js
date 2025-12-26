@@ -1,52 +1,45 @@
+import JwtService from '../../infra/services/JwtService.js';
+import bcryptjs from 'bcryptjs';
+
+// ❌ PAS d'import jsonwebtoken côté frontend
+// Le token est REÇU du backend via l'API
+
 export async function LoginUser(email, password, userRepository = null) {
     if (!email || !password) {
         throw new Error('Email et mot de passe requis');
     }
 
-    if (userRepository && typeof userRepository.findByCredentials === 'function') {
-        return await userRepository.findByCredentials(email, password);
-    }
-
-    const isLocalDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
-    const API_BASE = isLocalDev ? 'http://localhost:4000' : '';
-    const url = `${API_BASE}/api/login`;
-
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-    });
-
-    // tolerate non-json or empty responses
-    let data = {};
-    if (response && typeof response.text === 'function') {
-        const text = await response.text();
-        if (text && text.trim() !== '') {
-            try {
-                data = JSON.parse(text);
-            } catch (e) {
-                if (typeof response.json === 'function') {
-                    try {
-                        data = await response.json();
-                    } catch (e2) {
-                        throw new Error('Serveur: JSON invalide');
-                    }
-                } else {
-                    throw new Error('Serveur: JSON invalide');
-                }
-            }
+    // Si un repository est injecté (côté serveur)
+    if (userRepository && typeof userRepository.findByEmail === 'function') {
+        const user = await userRepository.findByEmail(email);
+        if (!user) {
+            throw new Error('Utilisateur non trouvé');
         }
-    } else if (response && typeof response.json === 'function') {
-        try {
-            data = await response.json();
-        } catch (e) {
-            throw new Error('Serveur: JSON invalide');
+
+        // Vérifier le mot de passe
+        const isValid = await bcryptjs.compare(password, user.password_hash);
+        if (!isValid) {
+            throw new Error('Mot de passe incorrect');
         }
+
+        // Générer le token
+        const token = JwtService.generateToken({
+            id: user.id,
+            email: user.email,
+            isPro: user.is_pro
+        });
+
+        // ✅ RETOURNER TOUS LES CHAMPS NECESSAIRES
+        return {
+            id: user.id,
+            email: user.email,
+            token,
+            isPro: user.is_pro || false,
+            first_name: user.first_name || '',
+            last_name: user.last_name || ''
+        };
     }
 
-    if (!response.ok) {
-        throw new Error(data.message || 'Erreur de connexion');
-    }
-
-    return data;
+    // Frontend : appeler l'API (ne sera jamais utilisé en production)
+    throw new Error('Repository non fourni');
 }

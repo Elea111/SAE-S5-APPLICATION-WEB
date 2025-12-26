@@ -1,19 +1,20 @@
 export async function PublishEquipment(equipmentData, equipmentRepository = null) {
-    if (!equipmentData || !equipmentData.ownerId || !equipmentData.title) {
-        throw new Error('Données d\'équipement invalides');
+    // Accepter soit ownerId soit user_id
+    const userId = equipmentData.ownerId || equipmentData.user_id;
+    
+    if (!equipmentData || !equipmentData.title || !userId) {
+        throw new Error("Titre et propriétaire requis");
     }
-
+    
+    // Ajout de la date de création si non fournie
+    if (!equipmentData.created_at) {
+        equipmentData.created_at = new Date().toISOString();
+    }
+    
+    const payload = { ...equipmentData, user_id: userId };
+    
     if (equipmentRepository && typeof equipmentRepository.create === 'function') {
-        return await equipmentRepository.create(equipmentData);
+        return await equipmentRepository.create(payload);
     }
-
-    const res = await fetch('/api/equipments', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(equipmentData)
-    });
-
-    const data = await res.json().catch(() => { throw new Error('JSON invalide'); });
-    if (!res.ok) throw new Error(data.message || 'Erreur publication équipement');
-    return data;
+    throw new Error("Aucun repository d'équipement fourni");
 }

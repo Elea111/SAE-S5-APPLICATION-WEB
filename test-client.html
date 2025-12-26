@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Outillio API Tester</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .header { background: #999e48; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+    .test-section { background: white; padding: 20px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .test-section h2 { margin-bottom: 15px; color: #333; }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
+    input, textarea, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit; }
+    button { background: #999e48; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px; margin-top: 10px; }
+    button:hover { background: #7a7a38; }
+    .response { background: #f9f9f9; border-left: 4px solid #999e48; padding: 15px; margin-top: 15px; border-radius: 4px; }
+    .response h3 { margin-bottom: 10px; color: #333; }
+    pre { background: #333; color: #0f0; padding: 10px; border-radius: 4px; overflow-x: auto; }
+    .success { border-left-color: #28a745; }
+    .error { border-left-color: #dc3545; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🔧 Outillio API Tester</h1>
+      <p>Interface de test pour les endpoints de l'API Outillio</p>
+    </div>
+
+    <div class="grid">
+      <!-- AUTH SECTION -->
+      <div class="test-section">
+        <h2>🔐 Authentification</h2>
+        
+        <h3>Inscription</h3>
+        <div class="form-group">
+          <label>Prénom</label>
+          <input type="text" id="reg-firstName" placeholder="John">
+        </div>
+        <div class="form-group">
+          <label>Nom</label>
+          <input type="text" id="reg-lastName" placeholder="Doe">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="reg-email" placeholder="test@example.com">
+        </div>
+        <div class="form-group">
+          <label>Mot de passe</label>
+          <input type="password" id="reg-password" placeholder="SecurePass123">
+        </div>
+        <button onclick="register()">S'inscrire</button>
+
+        <h3 style="margin-top: 20px;">Connexion</h3>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="login-email" placeholder="test@example.com">
+        </div>
+        <div class="form-group">
+          <label>Mot de passe</label>
+          <input type="password" id="login-password" placeholder="SecurePass123">
+        </div>
+        <button onclick="login()">Se connecter</button>
+
+        <div id="auth-response" class="response" style="display:none;">
+          <h3>Réponse</h3>
+          <pre id="auth-response-text"></pre>
+        </div>
+      </div>
+
+      <!-- EQUIPMENT SECTION -->
+      <div class="test-section">
+        <h2>🛠️ Équipements</h2>
+        
+        <h3>Publier un équipement</h3>
+        <div class="form-group">
+          <label>Titre</label>
+          <input type="text" id="eq-title" placeholder="Perceuse électrique 18V">
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="eq-description" placeholder="Description de l'équipement..." rows="3"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Prix / jour</label>
+          <input type="number" id="eq-price" placeholder="25.99" step="0.01">
+        </div>
+        <div class="form-group">
+          <label>Localisation</label>
+          <input type="text" id="eq-location" placeholder="Paris, France">
+        </div>
+        <button onclick="publishEquipment()">Publier</button>
+
+        <h3 style="margin-top: 20px;">Rechercher</h3>
+        <div class="form-group">
+          <label>Titre</label>
+          <input type="text" id="search-title" placeholder="Perceuse">
+        </div>
+        <button onclick="searchEquipment()">Rechercher</button>
+
+        <div id="eq-response" class="response" style="display:none;">
+          <h3>Réponse</h3>
+          <pre id="eq-response-text"></pre>
+        </div>
+      </div>
+
+      <!-- BOOKING SECTION -->
+      <div class="test-section">
+        <h2>📅 Réservations</h2>
+        
+        <div class="form-group">
+          <label>ID Équipement</label>
+          <input type="text" id="booking-item-id" placeholder="UUID">
+        </div>
+        <div class="form-group">
+          <label>Date début</label>
+          <input type="datetime-local" id="booking-start">
+        </div>
+        <div class="form-group">
+          <label>Date fin</label>
+          <input type="datetime-local" id="booking-end">
+        </div>
+        <button onclick="createBooking()">Réserver</button>
+
+        <div id="booking-response" class="response" style="display:none;">
+          <h3>Réponse</h3>
+          <pre id="booking-response-text"></pre>
+        </div>
+      </div>
+
+      <!-- MESSAGE SECTION -->
+      <div class="test-section">
+        <h2>💬 Messages</h2>
+        
+        <div class="form-group">
+          <label>ID Destinataire</label>
+          <input type="text" id="msg-receiver-id" placeholder="UUID">
+        </div>
+        <div class="form-group">
+          <label>Message</label>
+          <textarea id="msg-content" placeholder="Votre message..." rows="3"></textarea>
+        </div>
+        <button onclick="sendMessage()">Envoyer</button>
+
+        <div id="msg-response" class="response" style="display:none;">
+          <h3>Réponse</h3>
+          <pre id="msg-response-text"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = "http://localhost:4000";
+    let token = localStorage.getItem('token');
+    let userId = localStorage.getItem('userId');
+
+    async function apiCall(method, endpoint, data = null) {
+      const options = {
+        method,
+        headers: { 'Content-Type': 'application/json' }
+      };
+      if (token) options.headers['Authorization'] = `Bearer ${token}`;
+      if (data) options.body = JSON.stringify(data);
+
+      try {
+        const res = await fetch(`${API_BASE}${endpoint}`, options);
+        const json = await res.json();
+        return { status: res.status, data: json };
+      } catch (err) {
+        return { status: 0, data: { error: err.message } };
+      }
+    }
+
+    async function register() {
+      const data = {
+        firstName: document.getElementById('reg-firstName').value,
+        lastName: document.getElementById('reg-lastName').value,
+        email: document.getElementById('reg-email').value,
+        password: document.getElementById('reg-password').value
+      };
+      const res = await apiCall('POST', '/api/register', data);
+      if (res.data.token) {
+        token = res.data.token;
+        userId = res.data.id;
+        localStorage.setItem('token', token);
+        localStorage.setItem('userId', userId);
+      }
+      showResponse('auth-response', res);
+    }
+
+    async function login() {
+      const data = {
+        email: document.getElementById('login-email').value,
+        password: document.getElementById('login-password').value
+      };
+      const res = await apiCall('POST', '/api/login', data);
+      if (res.data.token) {
+        token = res.data.token;
+        userId = res.data.id;
+        localStorage.setItem('token', token);
+        localStorage.setItem('userId', userId);
+      }
+      showResponse('auth-response', res);
+    }
+
+    async function publishEquipment() {
+      const data = {
+        title: document.getElementById('eq-title').value,
+        description: document.getElementById('eq-description').value,
+        daily_price: parseFloat(document.getElementById('eq-price').value),
+        location: document.getElementById('eq-location').value
+      };
+      const res = await apiCall('POST', '/api/equipments', data);
+      showResponse('eq-response', res);
+    }
+
+    async function searchEquipment() {
+      const title = document.getElementById('search-title').value;
+      const res = await apiCall('GET', `/api/equipments?title=${title}`);
+      showResponse('eq-response', res);
+    }
+
+    async function createBooking() {
+      const data = {
+        item_id: document.getElementById('booking-item-id').value,
+        start_date: new Date(document.getElementById('booking-start').value).toISOString(),
+        end_date: new Date(document.getElementById('booking-end').value).toISOString()
+      };
+      const res = await apiCall('POST', '/api/bookings', data);
+      showResponse('booking-response', res);
+    }
+
+    async function sendMessage() {
+      const data = {
+        receiver_id: document.getElementById('msg-receiver-id').value,
+        content: document.getElementById('msg-content').value
+      };
+      const res = await apiCall('POST', '/api/messages', data);
+      showResponse('msg-response', res);
+    }
+
+    function showResponse(elementId, res) {
+      const elem = document.getElementById(elementId);
+      const textElem = document.getElementById(elementId + '-text');
+      elem.style.display = 'block';
+      elem.className = 'response ' + (res.status >= 200 && res.status < 300 ? 'success' : 'error');
+      textElem.textContent = JSON.stringify(res.data, null, 2);
+    }
+
+    // Load token from localStorage on page load
+    window.addEventListener('load', () => {
+      if (token) console.log('✅ Token loaded:', token.substring(0, 20) + '...');
+    });
+  </script>
+</body>
+</html>

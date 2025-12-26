@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Publish.css';
 
 const CATEGORIES = ['power_tools','garden','building','measurement','other'];
@@ -6,11 +6,21 @@ const CONDITIONS = ['new','like_new','good','used','broken'];
 
 const Publish = () => {
   const [step, setStep] = useState('form'); // 'form' | 'preview'
+  const [token, setToken] = useState(null);
+  const [msg, setMsg] = useState('');
   const [form, setForm] = useState({
-    title:'', category:CATEGORIES[0], condition:CONDITIONS[2], description:'', dailyPrice:'', deposit:'', images: []
+    title:'', category:CATEGORIES[0], condition:CONDITIONS[2], description:'', dailyPrice:'', deposit:'', location:'', images: []
   });
   const [previewData, setPreviewData] = useState(null);
-  const [msg, setMsg] = useState('');
+
+  useEffect(() => {
+    const auth = JSON.parse(localStorage.getItem('auth') || '{}');
+    if (!auth.token) {
+      window.location.href = '/connexion';
+      return;
+    }
+    setToken(auth.token);
+  }, []);
 
   const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -33,28 +43,39 @@ const Publish = () => {
   };
 
   const publish = async () => {
+    if (!token) return;
+
     try {
       const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:4000' : '';
-      const ownerId = JSON.parse(localStorage.getItem('auth')||'{}').userId || null;
+      
       const res = await fetch(`${API_BASE}/api/equipments`, {
         method: 'POST',
-        headers:{ 'Content-Type':'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({
-          ownerId,
           title: form.title,
           description: form.description,
-          category: form.category,
-          condition: form.condition,
-          dailyPrice: Number(form.dailyPrice),
-          deposit: form.deposit ? Number(form.deposit) : null,
-          images: form.images
+          daily_price: parseFloat(form.dailyPrice),
+          caution_deposit: form.deposit ? parseFloat(form.deposit) : null,
+          location: form.location,
+          condition: form.condition
         })
       });
-      if (!res.ok) throw new Error('Erreur publication');
+
       const data = await res.json();
-      window.location.href = `/equipments/${data.id}`;
+
+      if (res.ok && data.id) {
+        setMsg('✅ Équipement publié avec succès !');
+        setTimeout(() => {
+          window.location.href = `/equipments/${data.id}`;
+        }, 2000);
+      } else {
+        setMsg(`❌ Erreur : ${data.message}`);
+      }
     } catch (err) {
-      setMsg(err.message || 'Erreur');
+      setMsg(`❌ Erreur : ${err.message}`);
     }
   };
 
@@ -108,6 +129,8 @@ const Publish = () => {
 
           <label>Caution (€)<input name="deposit" type="number" value={form.deposit} onChange={handleChange} /></label>
 
+          <label>Localisation<input name="location" value={form.location} onChange={handleChange} /></label>
+
           <label>Images<input type="file" accept="image/*" onChange={handleImage} /></label>
           <div className="thumbs">
             {form.images.map((s,i)=> <img key={i} src={s} alt="" />)}
@@ -115,7 +138,7 @@ const Publish = () => {
 
           <div className="form-actions">
             <button className="btn-primary" type="submit">Aperçu</button>
-            <button className="btn-outline" type="button" onClick={()=>setForm({ title:'', category:CATEGORIES[0], condition:CONDITIONS[2], description:'', dailyPrice:'', deposit:'', images:[] })}>Réinitialiser</button>
+            <button className="btn-outline" type="button" onClick={()=>setForm({ title:'', category:CATEGORIES[0], condition:CONDITIONS[2], description:'', dailyPrice:'', deposit:'', location:'', images:[] })}>Réinitialiser</button>
           </div>
           {msg && <p className="info">{msg}</p>}
         </form>

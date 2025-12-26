@@ -2,16 +2,24 @@ import React, { useEffect, useState } from 'react';
 import './Settings.css';
 
 const Settings = () => {
-  const auth = JSON.parse(localStorage.getItem('auth') || '{}');
+  const [auth, setAuth] = useState({});
   const userId = auth.userId;
-  const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:4000' : '';
+  const API_BASE = typeof window !== 'undefined' && window.location.hostname === 'localhost' ? 'http://localhost:4000' : '';
   const [form, setForm] = useState({ email:'', phone:'' });
   const [msg, setMsg] = useState('');
 
   useEffect(() => {
-    if (!userId) return;
-    fetch(`${API_BASE}/api/users/${userId}`).then(r=>r.ok?r.json():null).then(u=>u && setForm({ email:u.email || '', phone:u.phone || '' }));
+    // Load auth from localStorage only on client
+    const authData = JSON.parse(localStorage.getItem('auth') || '{}');
+    setAuth(authData);
   }, []);
+
+  useEffect(() => {
+    if (!userId) return;
+    fetch(`${API_BASE}/api/users/${userId}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(u => u && setForm({ email: u.email || '', phone: u.phone || '' }));
+  }, [userId, API_BASE]);
 
   const save = async () => {
     try {

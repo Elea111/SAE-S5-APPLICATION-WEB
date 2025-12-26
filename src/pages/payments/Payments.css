@@ -1,9 +1,0 @@
-.payments-page {
-  padding: 2rem;
-  background: #f1f4f2;
-  min-height: 80vh;
-  color: #111;
-}
-.payments-page h2 { color: #999e48; margin-bottom: 1rem; }
-.payments-page ul { list-style: none; padding: 0; }
-.payments-page li { background: #fff; padding: 0.8rem; border-radius: 8px; margin-bottom: 0.6rem; box-shadow: 0 4px 10px rgba(0,0,0,0.04); }

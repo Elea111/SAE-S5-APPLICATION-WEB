@@ -44,9 +44,9 @@ const Footer = () => {
                         <div className="footer-column">
                             <h3 className="column-title">INFORMATIONS</h3>
                             <ul className="footer-links">
-                                <li><a href="#">A propos de nous</a></li>
-                                <li><a href="#">Information de livraison</a></li>
-                                <li><a href="#">Conditions d'utilisation</a></li>
+                                <li><a href="/a-propos">A propos de nous</a></li>
+                                <li><a href="/livraison">Information de livraison</a></li>
+                                <li><a href="/conditions">Conditions d'utilisation</a></li>
                             </ul>
                         </div>
 
@@ -54,8 +54,8 @@ const Footer = () => {
                         <div className="footer-column">
                             <h3 className="column-title">AIDE</h3>
                             <ul className="footer-links">
-                                <li><a href="#">FAQ</a></li>
-                                <li><a href="#">Contact</a></li>
+                                <li><a href="/faq">FAQ</a></li>
+                                <li><a href="/contact">Contact</a></li>
                             </ul>
                         </div>
 
@@ -63,8 +63,8 @@ const Footer = () => {
                         <div className="footer-column">
                             <h3 className="column-title">MON COMPTE</h3>
                             <ul className="footer-links">
-                                <li><a href="#">Mon compte</a></li>
-                                <li><a href="#">Favoris</a></li>
+                                <li><a href="/mon-compte">Mon compte</a></li>
+                                <li><a href="/favoris">Favoris</a></li>
                             </ul>
                         </div>
 
@@ -72,8 +72,8 @@ const Footer = () => {
                         <div className="footer-column">
                             <h3 className="column-title">NAVIGATION</h3>
                             <ul className="footer-links">
-                                <li><a href="#">Découvrir</a></li>
-                                <li><a href="#">Proposer un outil</a></li>
+                                <li><a href="/decouvrir">Découvrir</a></li>
+                                <li><a href="/proposer-outil">Proposer un outil</a></li>
                             </ul>
                         </div>
 
