@@ -10,30 +10,40 @@
 
 
 
+# Project Progress - Summary of Completed Tasks
+
+## ✅ What Has Been Done So Far By The Team , SPRINT 3 
+
+| Task | Responsible(s) | Notes |
+| :--- | :--- | :--- |
+| **Implementiong the Search Page**  | Leona | allow a user to look for a tool . |
+| **Implementing the auth Page** (Register and Login) | Elea | fixing error due with user registration . |
+| **Mock test ** | Emmanuel | Verify the flow of registering and login with manual and jest test. |
 
 
-##  Couches de l'Application
-
-### 1. Domain Layer (Enterprise Business Rules)
-- **Entities** : User, Equipment, Booking, Payment, Review
-- **Business Rules** : Règles métier pures, indépendantes de la technique
-
-### 2. Application Layer (Application Business Rules)  
-- **Use Cases** : RegisterUser, BookEquipment, ProcessPayment, etc.
-- **Interfaces** : UserRepository, PaymentService, NotificationGateway
-
-### 3. Infrastructure Layer (Frameworks & Drivers)
-- **Repositories** : PostgreSQLUserRepository, StripePaymentService
-- **Controllers** : REST API endpoints
-- **External Services** : Email, SMS, File Storage
-
-### 4. Presentation Layer (UI & Delivery)
-- **React Components** : Pages, Forms, Layouts
-- **PWA Setup** : Service Worker, Manifest
-- **State Management** : Context/Redux
 
 
-## ✅ What Has Been Done So Far By The Team , SPRINT 1 
+![2C092411-D219-4534-8F67-D7501AA02FCA_4_5005_c](https://github.com/user-attachments/assets/67248353-7728-4910-8586-21d3f075026a)
+
+
+
+
+
+
+## ✅ What Has Been Done So Far By The Team , SPRINT 1 AND 2
+
+| Task | Responsible(s) | Notes |
+| :--- | :--- | :--- |
+| **Définir l'entité Payment avec ses règles métier et reservation**  | Elea | this entity serve to manage the payment fonctionality . |
+| **Définir l'entité Review avec ses règles métier** (Register and Login) | Elea | this entity serve to manage the Review fonctionality . |
+| **Définir l'entité Equipment avec ses règles métier** | Leona | this entity serve to manage the Equipement fonctionality . |
+| **Créer les value objects (Email, Money, DateRange)** ) | Leona |  These objects  serve to set conditions for each request according to the input of the user . |
+| **Uses cases , RegisterUser, LoginUser, PublishEquipement,SearchEquipement| Emmanuel| Use case serve to manage the different action a user will perform on the platform. |
+| **Définir les interfaces pour les repositories (UserRepository, EquipmentRepository etc..,)** |Emmanuel | Mnage the different client request to the data base  . |
+
+
+
+
 
 ![E7613FB5-FBC1-45A3-9875-BBD823895BD2_1_201_a](https://github.com/user-attachments/assets/5991cc82-834c-400b-90e9-2020abd4986f)
 
@@ -41,6 +51,14 @@
 
 ## TEST RESULT SCREEN FROM USE CASES 
 ![EEAD04D3-CF94-4897-A7D0-2D9F6D9F5E33_1_201_a](https://github.com/user-attachments/assets/2c26831f-3c87-4978-a185-5822c6531fa2)
+
+
+
+## 🎯 Next Steps
+*check to trello for more info*
+
+* [Done] Implementing the first and the second layer.
+* [ ] Finishing the Infrastructure Layer a.k.a 3 layer. and implement real data base and real stripe api payment gate and adding auth tests and booking process test 
 
 
 
@@ -63,11 +81,32 @@
 ## 🎯 Next Steps
 *check to trello for more info*
 
-* [ ] Implementing the first and the second layer.
-* [ ] Implementing the  Infrastructure Layer a.k.a 3 layer.
+* [Done] Implementing the first and the second layer.
+* [ ] Finishing the Infrastructure Layer a.k.a 3 layer.
 * [ ] ...
 
 ---
+
+
+##  Couches de l'Application
+
+### 1. Domain Layer (Enterprise Business Rules)
+- **Entities** : User, Equipment, Booking, Payment, Review
+- **Business Rules** : Règles métier pures, indépendantes de la technique
+
+### 2. Application Layer (Application Business Rules)  
+- **Use Cases** : RegisterUser, BookEquipment, ProcessPayment, etc.
+- **Interfaces** : UserRepository, PaymentService, NotificationGateway
+
+### 3. Infrastructure Layer (Frameworks & Drivers)
+- **Repositories** : PostgreSQLUserRepository, StripePaymentService
+- **Controllers** : REST API endpoints
+- **External Services** : Email, SMS, File Storage
+
+### 4. Presentation Layer (UI & Delivery)
+- **React Components** : Pages, Forms, Layouts
+- **PWA Setup** : Service Worker, Manifest
+- **State Management** : Context/Redux
 
 ## 👥 Team Members and Roles
 
@@ -78,82 +117,5 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
-
-## Available Scripts
-
-In the project directory, you can run:
-
-### `npm start`
-
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
-
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)

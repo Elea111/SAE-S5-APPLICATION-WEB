@@ -6,6 +6,7 @@ import { RegisterUser } from "../../domain/usecases/RegisterUser";
 const Inscription = () => {
     const [message, setMessage] = useState(''); // pour afficher le succès ou l'erreur
     const [showPassword, setShowPassword] = useState(false);
+    const [isPro, setIsPro] = useState(false);
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -25,26 +26,37 @@ const Inscription = () => {
         }));
     };
 
+    const handleRoleChange = (e) => {
+        setIsPro(e.target.value === 'pro');
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setMessage(''); // reset à chaque submission
 
         try {
-            await RegisterUser(
+            // Use RegisterUser (will call /api/register fallback if no repo)
+            const created = await RegisterUser(
                 formData.firstName,
                 formData.lastName,
                 formData.email,
                 formData.password
             );
-            console.log("Utilisateur inscrit avec succès");
-            setMessage("Inscription réussie !"); // ✅ ici on met le message visible
+
+            // created should contain the user id from the backend mock
+            const userId = created?.id || null;
+
+            // Store simple auth info for mock flows (isPro comes from form state)
+            localStorage.setItem('auth', JSON.stringify({ userId, isPro }));
+
+            setMessage("Inscription réussie !");
+            // redirect to profile page (mock)
+            window.location.href = '/profil';
         } catch (error) {
             console.error(error.message);
-            setMessage(`Erreur : ${error.message}`); // ✅ message d'erreur
+            setMessage(`Erreur : ${error.message}`);
         }
     };
-
-
 
     return (
         <section className="inscription-section">
@@ -95,6 +107,20 @@ const Inscription = () => {
                                 onChange={handleInputChange}
                                 required
                             />
+                        </div>
+
+                        <div className="form-field">
+                            <label className="field-label">Je suis</label>
+                            <div className="radio-group">
+                                <label>
+                                    <input type="radio" name="role" value="part" checked={!isPro} onChange={handleRoleChange} />
+                                    Particulier
+                                </label>
+                                <label>
+                                    <input type="radio" name="role" value="pro" checked={isPro} onChange={handleRoleChange} />
+                                    Professionnel
+                                </label>
+                            </div>
                         </div>
 
                         <div className="form-field">

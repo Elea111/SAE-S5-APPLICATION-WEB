@@ -1,0 +1,9 @@
+.messages-page { padding:2rem; background:#f1f4f2; min-height:80vh; }
+.messages-container { max-width:800px; margin:0 auto; background:#fff; padding:1rem; border-radius:10px; box-shadow:0 6px 12px rgba(0,0,0,0.06); }
+.messages-list { max-height:400px; overflow:auto; margin-bottom:1rem; display:flex; flex-direction:column; gap:0.5rem; }
+.message { padding:0.6rem; border-radius:8px; max-width:70%; }
+.message.in { background:#eef2ea; align-self:flex-start; }
+.message.out { background:#dfe8ff; align-self:flex-end; }
+.composer { display:flex; gap:1rem; }
+.composer textarea { flex:1; min-height:80px; padding:0.5rem; }
+.btn-primary { background:#999e48; color:#fff; border:none; padding:0.6rem 1rem; border-radius:8px; cursor:pointer; }

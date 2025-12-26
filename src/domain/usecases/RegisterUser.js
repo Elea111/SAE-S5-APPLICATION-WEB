@@ -17,23 +17,49 @@ export async function RegisterUser(firstName, lastName, email, password, userRep
         return await userRepository.create({ firstName, lastName, email, password });
     }
 
-    // Fallback: appel HTTP (compatibilité avec le code frontend actuel)
-    const response = await fetch("/api/register", {
+    // If running frontend dev server on localhost:3000, target the mock backend at port 4000
+    const isLocalDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+    const API_BASE = isLocalDev ? 'http://localhost:4000' : '';
+
+    const url = `${API_BASE}/api/register`;
+
+    const response = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ firstName, lastName, email, password })
     });
 
-    let data;
-    try {
-        data = await response.json(); // on lit le JSON **une seule fois**
-    } catch (e) {
-        throw new Error("Le serveur n'a pas renvoyé un JSON valide");
+    // Robust parsing: prefer text() when available, otherwise try json()
+    let data = {};
+    if (response && typeof response.text === 'function') {
+        const text = await response.text();
+        if (text && text.trim() !== '') {
+            try {
+                data = JSON.parse(text);
+            } catch (e) {
+                // fallback to response.json() if available
+                if (typeof response.json === 'function') {
+                    try {
+                        data = await response.json();
+                    } catch (e2) {
+                        throw new Error("Le serveur n'a pas renvoyé un JSON valide");
+                    }
+                } else {
+                    throw new Error("Le serveur n'a pas renvoyé un JSON valide");
+                }
+            }
+        }
+    } else if (response && typeof response.json === 'function') {
+        try {
+            data = await response.json();
+        } catch (e) {
+            throw new Error("Le serveur n'a pas renvoyé un JSON valide");
+        }
     }
 
     if (!response.ok) {
-        throw new Error(data.message || "Erreur lors de l'inscription");
+        throw new Error((data && data.message) ? data.message : "Erreur lors de l'inscription");
     }
 
-    return data; // ✅ retourne le JSON déjà parsé
+    return data; // retourne le JSON (ou {} si body vide)
 }

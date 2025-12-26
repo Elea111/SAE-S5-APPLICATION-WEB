@@ -1,30 +1,39 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
-import Inscription from "./pages/inscription/Inscription";
-import Header from './components/layout/header/Header';
-import Accueil from './pages/accueil/Accueil';
-import Footer from './components/layout/footer/Footer';
-import ProfilProprietaire from './pages/profil-proprietaire/ProfilProprietaire';
-import Connexion from "./pages/connexion/Connexion";
-import Reservation from "./pages/reservation/Reservation";
-import Paiement from "./pages/paiement/Paiement"
+import Inscription from "./pages/inscription/Inscription.jsx";
+import Header from './components/layout/header/Header.jsx';
+import Accueil from './pages/accueil/Accueil.js';
+import Footer from './components/layout/footer/Footer.jsx';
+import ProfilPropietaire from './pages/profil-proprietaire/ProfilProprietaire.jsx';
+import Connexion from "./pages/connexion/Connexion.jsx";
+import EquipmentDetails from './pages/equipment/EquipmentDetails.jsx';
+import Schedule from './pages/schedule/Schedule.jsx';
+import Messages from './pages/messages/Messages.jsx';
+import Publish from './pages/publish/Publish.jsx';
+import SearchResults from './pages/search/SearchResults.jsx';
+import Settings from './pages/settings/Settings.jsx';
+import Payments from './pages/payments/Payments.jsx';
+
 function App() {
+    const path = window.location.pathname;
+
+    if (path.startsWith('/inscription')) return <Inscription />;
+    if (path.startsWith('/connexion')) return <Connexion />;
+    if (path.startsWith('/profil')) return <ProfilPropietaire />;
+    if (path.startsWith('/equipments/') || path.startsWith('/equipment/')) return <EquipmentDetails />;
+    if (path.startsWith('/schedule')) return <Schedule />;
+    if (path.startsWith('/messages')) return <Messages />;
+    if (path.startsWith('/publish')) return <Publish />;
+    if (path.startsWith('/search')) return <SearchResults />;
+    if (path.startsWith('/settings')) return <Settings />;
+    if (path.startsWith('/payments')) return <Payments />;
+
     return (
-        <Router>
-            <div className="App">
-                <Header />
-                <Routes>
-                    <Route path="/" element={<Accueil />} />
-                    <Route path="/inscription" element={<Inscription />} />
-                    <Route path="/connexion" element={<Connexion />} />
-                    <Route path="/reservation" element={<Reservation />} />
-                    <Route path="/profil-proprietaire" element={<ProfilProprietaire />} />
-                    <Route path="/paiement" element={<Paiement />} />
-                </Routes>
-                <Footer />
-            </div>
-        </Router>
+        <div className="App">
+            <Header />
+            <Accueil />
+            <Footer />
+        </div>
     );
 }
 
