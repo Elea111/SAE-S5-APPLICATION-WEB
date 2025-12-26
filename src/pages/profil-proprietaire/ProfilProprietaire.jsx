@@ -10,39 +10,57 @@ const ProfilProprietaire = () => {
   const [message, setMessage] = useState('');
   const [avatarUploading, setAvatarUploading] = useState(false);
 
-  const API_BASE = typeof window !== 'undefined' && window.location.hostname === 'localhost' ? 'http://localhost:4000' : '';
+  const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:4000' : '';
 
   useEffect(() => {
     const authRaw = localStorage.getItem('auth');
-    if (!authRaw) return;
+    // ✅ SI PAS D'AUTH -> PAGE DEMO
+    if (!authRaw) {
+      setUserData(null);
+      return;
+    }
+    
     const auth = JSON.parse(authRaw);
-    const userId = auth.userId;
-    if (!userId) return;
+    const userId = auth.userId || auth.id; // ← Accepte les deux formats
+    if (!userId) {
+      setUserData(null);
+      return;
+    }
 
     // fetch user
     fetch(`${API_BASE}/api/users/${userId}`)
-      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(r => r.ok ? r.json() : Promise.reject(new Error('Not found')))
       .then(u => {
         setUserData(u);
         setForm({
-          first_name: u.first_name || '',
-          last_name: u.last_name || '',
+          first_name: u.first_name || auth.first_name || '',
+          last_name: u.last_name || auth.last_name || '',
           phone: u.phone || '',
           address: u.address || '',
         });
       })
-      .catch(() => {
-        // fallback: try load from localStorage if previously saved
-        const localUser = auth.user || null;
-        if (localUser) {
-          setUserData(localUser);
-          setForm({
-            first_name: localUser.first_name || '',
-            last_name: localUser.last_name || '',
-            phone: localUser.phone || '',
-            address: localUser.address || '',
-          });
-        }
+      .catch((err) => {
+        // ✅ FALLBACK: utiliser les données de localStorage
+        console.warn('Erreur fetch user, utilisation localStorage:', err);
+        setUserData({
+          id: userId,
+          email: auth.email,
+          first_name: auth.first_name || 'Utilisateur',
+          last_name: auth.last_name || '',
+          is_pro: auth.isPro || false,
+          avatar_url: auth.avatarUrl || '/favicon.ico',
+          created_at: new Date().toISOString(),
+          rating: 0,
+          review_count: 0,
+          listings_count: 0,
+          rental_count: 0
+        });
+        setForm({
+          first_name: auth.first_name || '',
+          last_name: auth.last_name || '',
+          phone: auth.phone || '',
+          address: auth.address || ''
+        });
       });
 
     // fetch reviews
@@ -50,15 +68,23 @@ const ProfilProprietaire = () => {
       .then(r => r.ok ? r.json() : [])
       .then(rs => setReviews(rs || []))
       .catch(() => setReviews([]));
-  }, []);
+  }, [API_BASE]);
 
   const handleLogout = () => {
     localStorage.removeItem('auth');
     window.location.href = '/';
   };
 
-  const goToSearch = () => window.location.href = '/';
-  const goToPublish = () => window.location.href = '/publish';
+  const goToSearch = () => {
+    // ✅ REDIRECT À /search
+    window.location.href = '/search';
+  };
+
+  const goToPublish = () => {
+    // ✅ REDIRECT À /publish
+    window.location.href = '/publish';
+  };
+
   const goToMessages = () => {
     // open messages page; frontend expects query param "other" for conversations
     const other = userData?.id || '';
@@ -147,7 +173,9 @@ const ProfilProprietaire = () => {
     reader.readAsDataURL(file);
   };
 
-  if (!userData) {
+  // ✅ SI userData EST NULL -> PAGE DEMO (DECONNECTE)
+  // ✅ SINON -> PAGE PROFIL COMPLETE
+  if (userData === null) {
     return (
       <div className="profil-proprietaire-page">
         <div className="profile-empty">

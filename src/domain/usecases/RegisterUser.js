@@ -1,3 +1,6 @@
+import bcrypt from 'bcryptjs';
+import JwtService from '../../infra/services/JwtService.js';
+
 export async function RegisterUser(firstName, lastName, email, password, userRepository = null) {
 
     if (!firstName || !lastName) {
@@ -12,9 +15,30 @@ export async function RegisterUser(firstName, lastName, email, password, userRep
         throw new Error("Mot de passe trop court");
     }
 
+    // Hash password avant enregistrement (Supabase ou autre)
+    const password_hash = await bcrypt.hash(password, 10);
+
     // Si un repository est injecté (architecture hexagonale), l'utiliser
     if (userRepository && typeof userRepository.create === 'function') {
-        return await userRepository.create({ firstName, lastName, email, password });
+        const user = await userRepository.create({ 
+            first_name: firstName, 
+            last_name: lastName, 
+            email, 
+            password_hash 
+        });
+        
+        // Générer un JWT après création
+        const token = JwtService.generateToken({
+            id: user.id,
+            email: user.email,
+            isPro: user.is_pro || false
+        });
+        
+        return { 
+            ...user, 
+            token,
+            isPro: user.is_pro || false
+        };
     }
 
     // If running frontend dev server on localhost:3000, target the mock backend at port 4000

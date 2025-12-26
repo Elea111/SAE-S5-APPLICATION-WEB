@@ -1,19 +1,12 @@
 export async function ProcessPayment(paymentData, paymentRepository = null) {
-    if (!paymentData || !paymentData.amount || !paymentData.currency || !paymentData.source) {
-        throw new Error('Données de paiement invalides');
+    if (!paymentData || !paymentData.bookingId || !paymentData.userId || !paymentData.amount) {
+        throw new Error("Données de paiement incomplètes");
     }
-
-    if (paymentRepository && typeof paymentRepository.charge === 'function') {
-        return await paymentRepository.charge(paymentData);
+    if (!paymentData.created_at) {
+        paymentData.created_at = new Date().toISOString();
     }
-
-    const res = await fetch('/api/payments', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(paymentData)
-    });
-
-    const data = await res.json().catch(() => { throw new Error('JSON invalide'); });
-    if (!res.ok) throw new Error(data.message || 'Erreur paiement');
-    return data;
+    if (paymentRepository && typeof paymentRepository.create === 'function') {
+        return await paymentRepository.create(paymentData);
+    }
+    throw new Error("Aucun repository de paiement fourni");
 }
