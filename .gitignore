@@ -12,7 +12,7 @@
 /build
 /dist
 
-# ===== ENVIRONMENT VARIABLES =====
+# ===== ENVIRONMENT VARIABLES FILES =====
 .env
 .env.local
 .env.development.local
