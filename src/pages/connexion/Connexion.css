@@ -150,3 +150,76 @@
 .signup-link:hover {
   color: #764ba2;
 }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .connexion-page {
+    padding: 1rem;
+  }
+
+  .connexion-container {
+    padding: 1.5rem;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .connexion-container h1 {
+    font-size: 1.5rem;
+  }
+
+  .connexion-form {
+    gap: 1rem;
+  }
+
+  .form-group input,
+  .form-group textarea {
+    padding: 0.6rem;
+    font-size: 16px; /* Prévenir zoom sur iOS */
+  }
+
+  .btn-connexion {
+    padding: 0.7rem 1.2rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .connexion-page {
+    padding: 0.5rem;
+  }
+
+  .connexion-container {
+    padding: 1rem;
+    border-radius: 8px;
+  }
+
+  .connexion-container h1 {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+  }
+
+  .form-group label {
+    font-size: 0.9rem;
+  }
+
+  .form-group input {
+    padding: 0.7rem;
+    font-size: 16px;
+  }
+
+  .btn-connexion {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+  }
+
+  .connexion-links {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .connexion-links a {
+    width: 100%;
+    text-align: center;
+  }
+}

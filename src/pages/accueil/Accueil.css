@@ -31,18 +31,580 @@ body {
   text-align: center;
 }
 
-/* Version mobile */
+/* ===== HERO SECTION ===== */
+.hero-section {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    padding: 3rem 2rem;
+    text-align: center;
+    min-height: 60vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.hero-title {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #333;
+    margin: 0 0 0.75rem 0;
+    line-height: 1.2;
+}
+
+.hero-subtitle {
+    font-size: 1.1rem;
+    color: #666;
+    margin: 0 0 2rem 0;
+    line-height: 1.5;
+}
+
+.search-bar-hero {
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.search-bar-hero input {
+    flex: 1;
+    padding: 1rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 6px;
+    background: white;
+}
+
+.search-bar-hero input:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(153, 158, 72, 0.2);
+}
+
+.search-bar-hero button {
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    background: #999e48;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.search-bar-hero button:hover {
+    background: #7a8040;
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.hero-buttons button {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.hero-buttons .btn-primary {
+    background: #999e48;
+    color: white;
+}
+
+.hero-buttons .btn-primary:hover {
+    background: #7a8040;
+}
+
+.hero-buttons .btn-secondary {
+    background: white;
+    color: #333;
+    border: 2px solid #333;
+}
+
+.hero-buttons .btn-secondary:hover {
+    background: #f0f0f0;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 1024px) {
+  .hero-section {
+    padding: 2.5rem 1.5rem;
+    min-height: 50vh;
+  }
+
+  .hero-title {
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .search-bar-hero {
+    max-width: 100%;
+    gap: 0.5rem;
+  }
+
+  .search-bar-hero input {
+    padding: 0.85rem;
+    font-size: 0.95rem;
+  }
+
+  .search-bar-hero button {
+    padding: 0.85rem 1.5rem;
+    font-size: 0.95rem;
+  }
+
+  .hero-buttons button {
+    padding: 0.7rem 1.2rem;
+    font-size: 0.95rem;
+  }
+}
+
 @media (max-width: 768px) {
-  .section {
-         padding: 3rem 0;
-     }
+  .accueil-page {
+    padding: 0;
+  }
 
-     .section-container {
-         padding: 0 1rem;
-     }
+  .hero-section {
+    padding: 1.5rem 1rem;
+    min-height: 45vh;
+  }
 
-     .section-title {
-         font-size: 2rem;
-         margin-bottom: 0;
-     }
+  .hero-title {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+  }
+
+  .hero-subtitle {
+    font-size: 0.95rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .search-bar-hero {
+    width: 100%;
+    max-width: 100%;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .search-bar-hero input {
+    width: 100%;
+    padding: 0.7rem;
+    font-size: 1rem; /* Important pour éviter zoom iOS */
+    border-radius: 6px;
+  }
+
+  .search-bar-hero button {
+    width: 100%;
+    padding: 0.7rem;
+    font-size: 0.95rem;
+    border-radius: 6px;
+  }
+
+  .hero-buttons {
+    gap: 0.75rem;
+    flex-direction: column;
+  }
+
+  .hero-buttons button {
+    width: 100%;
+    padding: 0.7rem;
+    font-size: 0.95rem;
+  }
+
+  /* Section Container */
+  .section-container {
+    padding: 1.5rem;
+  }
+
+  .section-title {
+    font-size: 1.4rem;
+    margin-bottom: 1.2rem;
+  }
+
+  /* Outils populaires */
+  .tools-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 0.8rem;
+  }
+
+  .tool-card {
+    padding: 0.6rem;
+  }
+
+  .tool-image {
+    height: 120px;
+  }
+
+  .tool-name {
+    font-size: 0.95rem;
+  }
+
+  .tool-price {
+    font-size: 1.1rem;
+  }
+
+  .reserve-btn {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.85rem;
+  }
+
+  /* Categories Grid */
+  .categories-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 1rem;
+  }
+
+  .category-card {
+    padding: 1rem;
+  }
+
+  .category-icon {
+    font-size: 2rem;
+  }
+
+  .category-name {
+    font-size: 0.95rem;
+  }
+
+  /* Testimonials */
+  .testimonials-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .testimonial-card {
+    padding: 1rem;
+  }
+
+  .testimonial-text {
+    font-size: 0.9rem;
+  }
+
+  .testimonial-author {
+    margin-top: 0.75rem;
+  }
+
+  /* CTA Section */
+  .cta-content {
+    padding: 1.5rem;
+  }
+
+  .cta-content h2 {
+    font-size: 1.5rem;
+  }
+
+  .cta-content p {
+    font-size: 0.95rem;
+  }
+
+  .cta-buttons {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .cta-buttons button {
+    width: 100%;
+  }
+
+  /* Stats */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .stat-item {
+    padding: 1rem;
+  }
+
+  .stat-number {
+    font-size: 1.8rem;
+  }
+
+  .stat-label {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .accueil-page {
+    padding: 0;
+  }
+
+  .hero-section {
+    padding: 1rem 0.75rem;
+    min-height: 40vh;
+  }
+
+  .hero-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.35rem;
+    line-height: 1.25;
+    font-weight: 700;
+  }
+
+  .hero-subtitle {
+    font-size: 0.85rem;
+    margin-bottom: 0.9rem;
+    line-height: 1.3;
+  }
+
+  .search-bar-hero {
+    width: 100%;
+    max-width: 100%;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .search-bar-hero input {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    font-size: 16px; /* CRUCIAL : 16px pour éviter zoom iOS */
+    border-radius: 4px;
+    border: 1px solid #ddd;
+  }
+
+  .search-bar-hero button {
+    width: 100%;
+    padding: 0.6rem;
+    font-size: 0.9rem;
+    border-radius: 4px;
+  }
+
+  .hero-buttons {
+    gap: 0.5rem;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .hero-buttons button {
+    width: 100%;
+    padding: 0.65rem;
+    font-size: 0.9rem;
+  }
+
+  /* Section Container */
+  .section-container {
+    padding: 1rem 0.75rem;
+  }
+
+  .section-title {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+  }
+
+  .section-outils-populaires-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .voir-tout-link {
+    font-size: 0.85rem;
+    align-self: flex-start;
+  }
+
+  /* Outils populaires */
+  .tools-grid {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+  }
+
+  .tool-card {
+    display: flex;
+    gap: 0.6rem;
+    padding: 0.5rem;
+  }
+
+  .tool-image {
+    width: 100px;
+    height: 80px;
+    flex-shrink: 0;
+    border-radius: 4px;
+  }
+
+  .tool-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .tool-name {
+    font-size: 0.9rem;
+  }
+
+  .tool-description {
+    font-size: 0.8rem;
+    display: none; /* Cacher description sur petit écran */
+  }
+
+  .tool-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .tool-price {
+    font-size: 1rem;
+  }
+
+  .reserve-btn {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.8rem;
+  }
+
+  /* Categories Grid */
+  .categories-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.8rem;
+  }
+
+  .category-card {
+    padding: 0.8rem;
+  }
+
+  .category-icon {
+    font-size: 1.5rem;
+  }
+
+  .category-name {
+    font-size: 0.8rem;
+  }
+
+  /* Features */
+  .features-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .feature-item {
+    padding: 1rem;
+  }
+
+  .feature-icon {
+    font-size: 2rem;
+  }
+
+  /* Testimonials */
+  .testimonials-grid {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+
+  .testimonial-card {
+    padding: 0.75rem;
+  }
+
+  .testimonial-avatar {
+    width: 40px;
+    height: 40px;
+  }
+
+  .testimonial-text {
+    font-size: 0.85rem;
+  }
+
+  .testimonial-author {
+    font-size: 0.8rem;
+  }
+
+  /* CTA Section */
+  .cta-content {
+    padding: 1rem;
+  }
+
+  .cta-content h2 {
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .cta-content p {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+
+  .cta-buttons {
+    width: 100%;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .cta-buttons button {
+    width: 100%;
+    padding: 0.6rem;
+    font-size: 0.9rem;
+  }
+
+  /* Stats */
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+
+  .stat-item {
+    padding: 0.8rem;
+  }
+
+  .stat-number {
+    font-size: 1.5rem;
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+  }
+
+  /* Header Responsive */
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .header-actions {
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+
+  .header-actions button {
+    width: 100%;
+    padding: 0.5rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Très petits écrans (< 360px) */
+@media (max-width: 360px) {
+  .hero-title {
+    font-size: 1.2rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .hero-subtitle {
+    font-size: 0.8rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .search-bar-hero input,
+  .search-bar-hero button {
+    padding: 0.5rem;
+    font-size: 14px;
+  }
+
+  .hero-buttons button {
+    padding: 0.6rem;
+    font-size: 0.85rem;
+  }
 }

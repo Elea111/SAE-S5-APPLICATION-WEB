@@ -81,4 +81,4 @@ class SupabasePaymentRepository {
   }
 }
 
-export default new SupabasePaymentRepository();
+export default SupabasePaymentRepository;

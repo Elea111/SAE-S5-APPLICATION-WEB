@@ -265,18 +265,130 @@
 .role-tag.role-pro { background:#2a9d8f; color:#fff; padding:0.2rem 0.5rem; border-radius:6px; }
 .role-tag.role-part { background:#777; color:#fff; padding:0.2rem 0.5rem; border-radius:6px; }
 
-/* Ensure profile is fully responsive - small tweaks */
-@media (max-width: 640px) {
-  .profile-left { width: 100%; flex-direction: row; align-items: center; justify-content: space-between; }
-  .owner-actions { flex-direction: row; gap:0.4rem; }
-  .profile-image-container { width:80px; height:80px; }
-  .profile-name { font-size:1.2rem; }
+/* ===== RESPONSIVE ===== */
+@media (max-width: 992px) {
+  .profile-header-section {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .profile-left {
+    width: 100%;
+    max-width: 500px;
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+
+  .profile-right {
+    width: 100%;
+    max-width: 500px;
+  }
+
+  .owner-actions {
+    flex-direction: column;
+  }
+
+  .owner-actions button {
+    width: 100%;
+  }
 }
 
-/* Responsive Design */
-@media (max-width: 900px) {
-  .profile-header-section { flex-direction:column; align-items:center; }
-  .profile-left { width:100%; flex-direction:row; gap:1rem; justify-content:center; }
-  .profile-right { width:100%; }
-  .info-grid { flex-direction:column; }
+@media (max-width: 768px) {
+  .profil-proprietaire-page {
+    padding: 1rem;
+  }
+
+  .profile-header-section {
+    padding: 1rem;
+  }
+
+  .profile-image {
+    width: 150px;
+    height: 150px;
+  }
+
+  .profile-name {
+    font-size: 1.5rem;
+  }
+
+  .profile-details {
+    grid-template-columns: 1fr;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tools-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .header-actions {
+    width: 100%;
+    margin-top: 1rem;
+  }
+
+  .header-actions button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .profil-proprietaire-page {
+    padding: 0.75rem;
+  }
+
+  .profile-header-section {
+    padding: 0.75rem;
+  }
+
+  .profile-image {
+    width: 120px;
+    height: 120px;
+  }
+
+  .profile-name {
+    font-size: 1.3rem;
+  }
+
+  .profile-details {
+    padding: 1rem;
+  }
+
+  .info-item h4 {
+    font-size: 0.9rem;
+  }
+
+  .info-item p {
+    font-size: 0.85rem;
+  }
+
+  .tools-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tool-card {
+    width: 100%;
+  }
+
+  .edit-form {
+    flex-direction: column;
+  }
+
+  .edit-form label {
+    width: 100%;
+  }
+
+  .edit-actions {
+    flex-direction: column;
+  }
+
+  .edit-actions button {
+    width: 100%;
+  }
 }

@@ -31,7 +31,9 @@
     "build": "cross-env NODE_OPTIONS='--openssl-legacy-provider' react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "server": "NODE_ENV=development node src/server/index.js"
+    "server": "NODE_ENV=development node src/server/index.js",
+    "test:publish": "node tests/publish.test.js",
+    "seed": "node scripts/seed-data.js"
   },
   "eslintConfig": {
     "extends": [

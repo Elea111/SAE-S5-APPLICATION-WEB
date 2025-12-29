@@ -65,4 +65,4 @@ class SupabaseMessageRepository {
   }
 }
 
-export default new SupabaseMessageRepository();
+export default SupabaseMessageRepository;

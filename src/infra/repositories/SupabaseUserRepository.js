@@ -91,4 +91,4 @@ class SupabaseUserRepository {
   }
 }
 
-export default new SupabaseUserRepository();
+export default SupabaseUserRepository;
