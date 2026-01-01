@@ -95,4 +95,4 @@ class SupabaseBookingRepository {
   }
 }
 
-export default new SupabaseBookingRepository();
+export default SupabaseBookingRepository;

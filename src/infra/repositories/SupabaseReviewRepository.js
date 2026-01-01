@@ -48,4 +48,4 @@ class SupabaseReviewRepository {
   }
 }
 
-export default new SupabaseReviewRepository();
+export default SupabaseReviewRepository;

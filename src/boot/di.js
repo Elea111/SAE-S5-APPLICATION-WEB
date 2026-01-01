@@ -4,20 +4,16 @@ import SupabaseBookingRepository from '../infra/repositories/SupabaseBookingRepo
 import SupabasePaymentRepository from '../infra/repositories/SupabasePaymentRepository.js';
 import SupabaseReviewRepository from '../infra/repositories/SupabaseReviewRepository.js';
 import SupabaseMessageRepository from '../infra/repositories/SupabaseMessageRepository.js';
+import SupabasePhotosRepository from '../infra/repositories/SupabasePhotosRepository.js';
 
-// Mock Stripe
-import MockStripeService from '../infra/services/MockStripeService.js';
-import StripePaymentAdapter from '../infra/adapters/StripePaymentAdapter.js';
-
-const mockStripe = new MockStripeService();
-const stripeAdapter = new StripePaymentAdapter(mockStripe);
-
-export default {
-  userRepository: SupabaseUserRepository,
-  equipmentRepository: SupabaseEquipmentRepository,
-  bookingRepository: SupabaseBookingRepository,
-  paymentRepository: SupabasePaymentRepository,
-  reviewRepository: SupabaseReviewRepository,
-  messageRepository: SupabaseMessageRepository,
-  stripeAdapter,
+const di = {
+  userRepository: new SupabaseUserRepository(),
+  equipmentRepository: new SupabaseEquipmentRepository(),
+  bookingRepository: new SupabaseBookingRepository(),
+  paymentRepository: new SupabasePaymentRepository(),
+  reviewRepository: new SupabaseReviewRepository(),
+  messageRepository: new SupabaseMessageRepository(),
+  photosRepository: new SupabasePhotosRepository()
 };
+
+export default di;

@@ -30,11 +30,8 @@ import {
 
 const app = express();
 
-// ----------------- CORS MIDDLEWARE (dev) -----------------
-// Allow frontend dev server to call the mock API without CORS errors.
-// In production replace or restrict origin appropriately.
+// ========== CORS MIDDLEWARE ==========
 app.use((req, res, next) => {
-  // ✅ Vérifier que CORS est activé
   const allowedOrigin = 'http://localhost:3000';
   res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
@@ -47,260 +44,346 @@ app.use((req, res, next) => {
   next();
 });
 
-// body parser
 app.use(bodyParser.json());
 
-// Simple root endpoint so visiting http://localhost:4000 shows a friendly message
 app.get('/', (req, res) => {
-    res.type('text/plain').send('Mock API server running. Use /api/* endpoints (eg. /api/health).');
+  res.type('text/plain').send('Mock API server running. Use /api/* endpoints (eg. /api/health).');
 });
 
-// Appliquer optionalAuthMiddleware à toutes les routes
 app.use(optionalAuthMiddleware);
 
 // ========== PUBLIC ENDPOINTS ==========
 app.get('/api/health', (_, res) => res.json({ ok: true }));
 
-// Login with validation
+// POST /api/login
 app.post('/api/login', validateBody(LoginSchema), async (req, res) => {
-    try {
-        const { email, password } = req.validated;
-        
-        // ✅ Utiliser le repository pour récupérer l'utilisateur
-        const user = await di.userRepository.findByEmail(email);
-        if (!user) {
-            return res.status(401).json({ message: 'Email ou mot de passe incorrect' });
-        }
-
-        // ✅ Vérifier le mot de passe (déjà fait par LoginUser)
-        const result = await LoginUser(email, password, di.userRepository);
-        
-        // ✅ RETOURNER TOUS LES CHAMPS NECESSAIRES
-        res.json({
-            id: result.id,
-            email: result.email,
-            token: result.token,
-            isPro: result.isPro || false,
-            first_name: user.first_name || '',
-            last_name: user.last_name || '',
-            avatar_url: user.avatar_url || null
-        });
-    } catch (err) {
-        console.error('Login error:', err);
-        res.status(401).json({ message: 'Email ou mot de passe incorrect' });
+  try {
+    const { email, password } = req.validated;
+    const user = await di.userRepository.findByEmail(email);
+    if (!user) {
+      return res.status(401).json({ message: 'Email ou mot de passe incorrect' });
     }
+
+    const result = await LoginUser(email, password, di.userRepository);
+    res.json({
+      id: result.id,
+      email: result.email,
+      token: result.token,
+      isPro: result.isPro || false,
+      first_name: user.first_name || '',
+      last_name: user.last_name || '',
+      avatar_url: user.avatar_url || null
+    });
+  } catch (err) {
+    console.error('Login error:', err);
+    res.status(401).json({ message: 'Email ou mot de passe incorrect' });
+  }
 });
 
-// Register with validation
+// POST /api/register
 app.post('/api/register', validateBody(RegisterSchema), async (req, res) => {
-    try {
-        const { firstName, lastName, email, password, isPro = false } = req.validated;
-        
-        // ✅ Créer l'utilisateur
-        const user = await RegisterUser(firstName, lastName, email, password, di.userRepository);
-        
-        // ✅ Mettre à jour le statut pro si nécessaire
-        if (typeof di.userRepository.update === 'function' && user && user.id) {
-            await di.userRepository.update(user.id, { is_pro: !!isPro });
-        }
-        
-        // ✅ RETOURNER TOUS LES CHAMPS NECESSAIRES
-        res.status(201).json({ 
-            id: user.id, 
-            email: user.email,
-            token: user.token,
-            isPro: !!isPro,
-            first_name: firstName,
-            last_name: lastName,
-            avatar_url: user.avatar_url || null
-        });
-    } catch (err) {
-        console.error('Register error:', err);
-        res.status(400).json({ message: err.message || 'Erreur lors de l\'inscription' });
+  try {
+    const { firstName, lastName, email, password, isPro = false } = req.validated;
+    const user = await RegisterUser(firstName, lastName, email, password, di.userRepository);
+
+    if (typeof di.userRepository.update === 'function' && user && user.id) {
+      await di.userRepository.update(user.id, { is_pro: !!isPro });
     }
+
+    res.status(201).json({
+      id: user.id,
+      email: user.email,
+      token: user.token,
+      isPro: !!isPro,
+      first_name: firstName,
+      last_name: lastName,
+      avatar_url: user.avatar_url || null
+    });
+  } catch (err) {
+    console.error('Register error:', err);
+    res.status(400).json({ message: err.message || 'Erreur lors de l\'inscription' });
+  }
 });
 
 // ========== PROTECTED USER ENDPOINTS ==========
 app.get('/api/users/:id', authMiddleware, async (req, res) => {
-    try {
-        if (req.user.id !== req.params.id) {
-            return res.status(403).json({ message: 'Accès non autorisé' });
-        }
-        
-        const user = await di.userRepository.findById(req.params.id);
-        if (!user) return res.status(404).json({ message: 'User not found' });
-        res.json(user);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
+  try {
+    if (req.user.id !== req.params.id) {
+      return res.status(403).json({ message: 'Accès non autorisé' });
     }
+    const user = await di.userRepository.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
 app.patch('/api/users/:id', authMiddleware, validateBody(UpdateUserSchema), async (req, res) => {
-    try {
-        if (req.user.id !== req.params.id) {
-            return res.status(403).json({ message: 'Accès non autorisé' });
-        }
-
-        const updates = req.validated;
-        if (di.userRepository && typeof di.userRepository.update === 'function') {
-            const updated = await di.userRepository.update(req.params.id, updates);
-            return res.json(updated);
-        }
-        
-        return res.status(404).json({ message: 'User not found' });
-    } catch (err) {
-        res.status(500).json({ message: err.message });
+  try {
+    if (req.user.id !== req.params.id) {
+      return res.status(403).json({ message: 'Accès non autorisé' });
     }
+    const updates = req.validated;
+    if (di.userRepository && typeof di.userRepository.update === 'function') {
+      const updated = await di.userRepository.update(req.params.id, updates);
+      return res.json(updated);
+    }
+    return res.status(404).json({ message: 'User not found' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
 app.get('/api/users/:id/payments', authMiddleware, async (req, res) => {
-    try {
-        if (req.user.id !== req.params.id) {
-            return res.status(403).json({ message: 'Accès non autorisé' });
-        }
-
-        const userId = req.params.id;
-        if (di.paymentRepository && typeof di.paymentRepository.findByUserId === 'function') {
-            const payments = await di.paymentRepository.findByUserId(userId);
-            return res.json(payments || []);
-        }
-        return res.json([]);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
+  try {
+    if (req.user.id !== req.params.id) {
+      return res.status(403).json({ message: 'Accès non autorisé' });
     }
+    const payments = di.paymentRepository && typeof di.paymentRepository.findByUserId === 'function'
+      ? await di.paymentRepository.findByUserId(req.params.id)
+      : [];
+    res.json(payments || []);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
 app.get('/api/users/:id/reviews', authMiddleware, async (req, res) => {
-    try {
-        const reviews = await di.reviewRepository.findByTargetUserId(req.params.id);
-        res.json(reviews || []);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
+  try {
+    const reviews = await di.reviewRepository.findByTargetUserId(req.params.id);
+    res.json(reviews || []);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
 // ========== EQUIPMENT ENDPOINTS ==========
 app.post('/api/equipments', authMiddleware, validateBody(PublishEquipmentSchema), async (req, res) => {
-    try {
-        const equipmentData = { ...req.validated, user_id: req.user.id };
-        const equipment = await PublishEquipment(equipmentData, di.equipmentRepository);
-        res.status(201).json(equipment);
-    } catch (err) {
-        res.status(400).json({ message: err.message });
-    }
+  try {
+    const equipmentData = {
+      ...req.validated,
+      user_id: req.user.id,
+      images: req.validated.images || []
+    };
+
+    console.log('📦 Publishing equipment with', equipmentData.images?.length || 0, 'images');
+
+    const equipment = await PublishEquipment(
+      equipmentData,
+      di.equipmentRepository,
+      di.photosRepository
+    );
+
+    console.log('✅ Equipment published:', equipment.id);
+    res.status(201).json(equipment);
+  } catch (err) {
+    console.error('❌ Publish error:', err);
+    res.status(400).json({ message: err.message || 'Erreur lors de la publication' });
+  }
 });
 
 app.get('/api/equipments/:id', async (req, res) => {
-    try {
-        const eq = await di.equipmentRepository.findById(req.params.id);
-        if (!eq) return res.status(404).json({ message: 'Equipment not found' });
-        res.json(eq);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
+  try {
+    const eq = await di.equipmentRepository.findById(req.params.id);
+    if (!eq) return res.status(404).json({ message: 'Equipment not found' });
+    res.json(eq);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
+app.get('/api/equipments/:id/photos', async (req, res) => {
+  try {
+    const photos = await di.photosRepository.findByItemId(req.params.id);
+    res.json(photos);
+  } catch (err) {
+    console.error('Photos fetch error:', err);
+    res.status(400).json({ message: err.message });
+  }
+});
+
+// GET /api/equipments - Recherche avec données du propriétaire
 app.get('/api/equipments', validateQuery(SearchEquipmentSchema), async (req, res) => {
     try {
-        const results = await SearchEquipment(req.validated, di.equipmentRepository);
+        console.log('🔍 Requête /api/equipments reçue');
+
+        // ✅ CHERCHER LES EQUIPEMENTS AVEC LES DONNEES DU PROPRIETAIRE (JOIN users)
+        let query = di.equipmentRepository
+            .supabase
+            .from('items')
+            .select(`
+                id,
+                user_id,
+                title,
+                description,
+                daily_price,
+                caution_deposit,
+                location,
+                condition,
+                is_available,
+                created_at,
+                users:user_id (
+                    id,
+                    first_name,
+                    last_name,
+                    avatar_url,
+                    rating,
+                    review_count
+                )
+            `);
+
+        // ✅ LIMITER ET TRIER
+        const { data, error } = await query
+            .order('created_at', { ascending: false })
+            .limit(50);
+
+        if (error) {
+            console.error('❌ Supabase error:', error);
+            throw error;
+        }
+
+        console.log(`✅ ${data?.length || 0} équipements trouvés`);
+
+        // ✅ MAPPER LES DONNEES POUR LE FRONTEND
+        const results = (data || []).map(item => ({
+            id: item.id,
+            title: item.title,
+            description: item.description,
+            daily_price: item.daily_price,
+            caution_deposit: item.caution_deposit,
+            location: item.location,
+            condition: item.condition,
+            is_available: item.is_available,
+            created_at: item.created_at,
+            
+            // ✅ DONNEES DU PROPRIETAIRE
+            ownerId: item.user_id,
+            owner_id: item.user_id,
+            owner_name: item.users 
+                ? `${item.users.first_name} ${item.users.last_name}` 
+                : 'Propriétaire inconnu',
+            ownerName: item.users 
+                ? `${item.users.first_name} ${item.users.last_name}` 
+                : 'Propriétaire inconnu',
+            owner_avatar: item.users?.avatar_url,
+            ownerAvatar: item.users?.avatar_url,
+            owner_rating: item.users?.rating,
+            ownerRating: item.users?.rating,
+            owner_reviews: item.users?.review_count
+        }));
+
         res.json(results);
     } catch (err) {
-        res.status(400).json({ message: err.message });
+        console.error('❌ Search error:', err.message);
+        res.status(400).json({ message: 'Erreur de recherche' });
     }
 });
 
 // ========== BOOKING ENDPOINTS ==========
 app.post('/api/bookings', authMiddleware, validateBody(BookEquipmentSchema), async (req, res) => {
-    try {
-        const bookingData = { ...req.validated, borrower_id: req.user.id };
-        const booking = await BookEquipment(bookingData, di.bookingRepository);
-        res.status(201).json(booking);
-    } catch (err) {
-        res.status(400).json({ message: err.message });
-    }
+  try {
+    const { item_id, start_date, end_date } = req.validated;
+    const borrower_id = req.user.id;
+
+    const booking = await BookEquipment(
+      {
+        item_id,
+        borrower_id,
+        start_date,
+        end_date
+      },
+      di.bookingRepository
+    );
+
+    res.status(201).json(booking);
+  } catch (err) {
+    console.error('Booking error:', err);
+    res.status(400).json({ message: err.message });
+  }
 });
 
 app.patch('/api/bookings/:id', authMiddleware, validateBody(UpdateBookingSchema), async (req, res) => {
-    try {
-        const bookingId = req.params.id;
-        const booking = await di.bookingRepository.findById(bookingId);
-        
-        if (!booking) return res.status(404).json({ message: 'Booking not found' });
-        if (booking.borrower_id !== req.user.id) {
-            return res.status(403).json({ message: 'Accès non autorisé' });
-        }
+  try {
+    const bookingId = req.params.id;
+    const booking = await di.bookingRepository.findById(bookingId);
 
-        const updated = await di.bookingRepository.update(bookingId, req.validated);
-        res.json(updated);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
+    if (!booking) return res.status(404).json({ message: 'Booking not found' });
+    if (booking.borrower_id !== req.user.id) {
+      return res.status(403).json({ message: 'Accès non autorisé' });
     }
+
+    const updated = await di.bookingRepository.update(bookingId, req.validated);
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
 // ========== PAYMENT ENDPOINTS ==========
 app.post('/api/payments', authMiddleware, validateBody(ProcessPaymentSchema), async (req, res) => {
-    try {
-        const paymentData = { ...req.validated, user_id: req.user.id };
-        const payment = await ProcessPayment(paymentData, di.paymentRepository);
-        res.status(201).json(payment);
-    } catch (err) {
-        res.status(400).json({ message: err.message });
-    }
+  try {
+    const paymentData = { ...req.validated, user_id: req.user.id };
+    const payment = await ProcessPayment(paymentData, di.paymentRepository);
+    res.status(201).json(payment);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
 });
 
 // ========== REVIEW ENDPOINTS ==========
 app.post('/api/reviews', authMiddleware, validateBody(LeaveReviewSchema), async (req, res) => {
-    try {
-        const reviewData = { ...req.validated, author_id: req.user.id };
-        const review = await LeaveReview(reviewData, di.reviewRepository);
-        res.status(201).json(review);
-    } catch (err) {
-        res.status(400).json({ message: err.message });
-    }
+  try {
+    const reviewData = { ...req.validated, author_id: req.user.id };
+    const review = await LeaveReview(reviewData, di.reviewRepository);
+    res.status(201).json(review);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
 });
 
 // ========== MESSAGE ENDPOINTS ==========
 app.post('/api/messages', authMiddleware, validateBody(SendMessageSchema), async (req, res) => {
-    try {
-        const { receiver_id, content, booking_id = null } = req.validated;
-        const msg = await di.messageRepository.create({ 
-            sender_id: req.user.id,
-            receiver_id, 
-            content,
-            booking_id
-        });
-        res.status(201).json(msg);
-    } catch (err) {
-        res.status(400).json({ message: err.message });
-    }
+  try {
+    const { receiver_id, content, booking_id = null } = req.validated;
+    const msg = await di.messageRepository.create({
+      sender_id: req.user.id,
+      receiver_id,
+      content,
+      booking_id
+    });
+    res.status(201).json(msg);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
 });
 
 app.get('/api/messages', authMiddleware, validateQuery(GetMessagesSchema), async (req, res) => {
-    try {
-        const { otherUser } = req.validated;
-        const conv = await di.messageRepository.findByConversation(req.user.id, otherUser);
-        res.json(conv || []);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
+  try {
+    const { otherUser } = req.validated;
+    const conv = await di.messageRepository.findByConversation(req.user.id, otherUser);
+    res.json(conv || []);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
-// ========== ERROR HANDLER (À LA FIN) ==========
+// ========== ERROR HANDLER ==========
 app.use((err, req, res, next) => {
-    console.error('❌ Erreur serveur:', err);
-    res.status(500).json({ 
-        message: 'Erreur serveur', 
-        error: err.message 
-    });
+  console.error('❌ Erreur serveur:', err);
+  res.status(500).json({
+    message: 'Erreur serveur',
+    error: err.message
+  });
 });
 
-// Start server if run directly
+// ========== START SERVER ==========
 if (process.env.NODE_ENV !== 'test') {
-    const port = process.env.PORT || 4000;
-    app.listen(port, () => {
-        // eslint-disable-next-line no-console
-        console.log(`Mock API server running on http://localhost:${port}`);
-    });
+  const port = process.env.PORT || 4000;
+  app.listen(port, () => {
+    // eslint-disable-next-line no-console
+    console.log(`Mock API server running on http://localhost:${port}`);
+  });
 }
 
 export default app;

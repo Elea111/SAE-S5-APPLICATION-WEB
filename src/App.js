@@ -13,6 +13,7 @@ import Publish from './pages/publish/Publish.jsx';
 import SearchResults from './pages/search/SearchResults.jsx';
 import Settings from './pages/settings/Settings.jsx';
 import Payments from './pages/paiement/Paiement.jsx';
+import Reservation from './pages/reservation/Reservation.jsx';
 
 function App() {
     const [path, setPath] = useState('/');
@@ -32,6 +33,7 @@ function App() {
     if (path.startsWith('/search')) return <SearchResults />;
     if (path.startsWith('/settings')) return <Settings />;
     if (path.startsWith('/paiement')) return <Payments />;
+    if (path.startsWith('/reservation')) return <Reservation />;
 
     return (
         <div className="App">

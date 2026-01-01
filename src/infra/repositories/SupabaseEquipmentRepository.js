@@ -1,112 +1,96 @@
 import supabase from '../database/supabaseClient.js';
 
 class SupabaseEquipmentRepository {
-  async create(equipmentData) {
-    try {
-      const { data, error } = await supabase
-        .from('items')
-        .insert([equipmentData])
-        .select();
+  constructor() {
+    this.supabase = supabase; // ✅ Ajouter cette ligne pour accéder à supabase depuis le repository
+  }
 
-      if (error) throw new Error(error.message);
-      return data?.[0] || null;
-    } catch (err) {
-      console.error('SupabaseEquipmentRepository.create error:', err.message);
-      throw err;
-    }
+  async create(equipmentData) {
+    const { user_id, title, description, daily_price, caution_deposit, location, condition, category, is_available } = equipmentData;
+
+    const { data, error } = await supabase
+      .from('items')
+      .insert([{
+        user_id,
+        title,
+        description,
+        daily_price,
+        caution_deposit,
+        location,
+        condition,
+        category,
+        is_available: is_available !== false,
+        is_approved: true,
+        created_at: new Date().toISOString()
+      }])
+      .select();
+
+    if (error) throw new Error(`Equipment création : ${error.message}`);
+    return data?.[0] || null;
   }
 
   async findById(id) {
-    try {
-      const { data, error } = await supabase
-        .from('items')
-        .select('*')
-        .eq('id', id)
-        .single();
+    const { data, error } = await supabase
+      .from('items')
+      .select(`
+        *,
+        users:user_id (
+          id,
+          first_name,
+          last_name,
+          avatar_url,
+          rating,
+          review_count
+        )
+      `)
+      .eq('id', id)
+      .single();
 
-      if (error && error.code !== 'PGRST116') throw error;
-      return data || null;
-    } catch (err) {
-      console.error('SupabaseEquipmentRepository.findById error:', err.message);
-      return null;
+    if (error) throw new Error(`Equipment fetch : ${error.message}`);
+    
+    // ✅ Mapper les données avec le nom du propriétaire
+    if (data) {
+      return {
+        ...data,
+        owner_name: data.users 
+          ? `${data.users.first_name} ${data.users.last_name}`
+          : 'Propriétaire inconnu',
+        owner_avatar: data.users?.avatar_url
+      };
     }
+    return null;
   }
 
   async findByUserId(userId) {
-    try {
-      const { data, error } = await supabase
-        .from('items')
-        .select('*')
-        .eq('user_id', userId);
+    const { data, error } = await supabase
+      .from('items')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      return data || [];
-    } catch (err) {
-      console.error('SupabaseEquipmentRepository.findByUserId error:', err.message);
-      return [];
-    }
+    if (error) throw new Error(`Equipment fetch : ${error.message}`);
+    return data || [];
   }
 
-  async search(filters = {}) {
-    try {
-      let query = supabase.from('items').select('*');
+  async update(id, updates) {
+    const { data, error } = await supabase
+      .from('items')
+      .update(updates)
+      .eq('id', id)
+      .select();
 
-      if (filters.category_id) {
-        query = query.eq('category_id', filters.category_id);
-      }
-      if (filters.title) {
-        query = query.ilike('title', `%${filters.title}%`);
-      }
-      if (filters.is_available !== undefined) {
-        query = query.eq('is_available', filters.is_available);
-      }
-      if (filters.min_price) {
-        query = query.gte('daily_price', filters.min_price);
-      }
-      if (filters.max_price) {
-        query = query.lte('daily_price', filters.max_price);
-      }
-
-      const { data, error } = await query.limit(50);
-
-      if (error) throw error;
-      return data || [];
-    } catch (err) {
-      console.error('SupabaseEquipmentRepository.search error:', err.message);
-      return [];
-    }
-  }
-
-  async update(id, equipmentData) {
-    try {
-      const { data, error } = await supabase
-        .from('items')
-        .update(equipmentData)
-        .eq('id', id)
-        .select();
-
-      if (error) throw error;
-      return data?.[0] || null;
-    } catch (err) {
-      console.error('SupabaseEquipmentRepository.update error:', err.message);
-      throw err;
-    }
+    if (error) throw new Error(`Equipment update : ${error.message}`);
+    return data?.[0] || null;
   }
 
   async delete(id) {
-    try {
-      const { error } = await supabase
-        .from('items')
-        .delete()
-        .eq('id', id);
+    const { error } = await supabase
+      .from('items')
+      .delete()
+      .eq('id', id);
 
-      if (error) throw error;
-      return true;
-    } catch (err) {
-      console.error('SupabaseEquipmentRepository.delete error:', err.message);
-      return false;
-    }
+    if (error) throw new Error(`Equipment delete : ${error.message}`);
   }
 }
 
-export default new SupabaseEquipmentRepository();
+export default SupabaseEquipmentRepository;
