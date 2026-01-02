@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import './Inscription.css';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import Header from '../../components/layout/header/Header.jsx';
+import Footer from '../../components/layout/footer/Footer.jsx';
 
 const Inscription = () => {
     const [message, setMessage] = useState(''); // pour afficher le succès ou l'erreur
@@ -71,7 +73,9 @@ const Inscription = () => {
     };
 
     return (
-        <section className="inscription-section">
+        <>
+            <Header />
+            <section className="inscription-section">
             <div className="inscription-container">
                 <div className="inscription-content">
                     <form className="inscription-form" onSubmit={handleSubmit}>
@@ -178,6 +182,8 @@ const Inscription = () => {
                 </div>
             </div>
         </section>
+            <Footer />
+        </>
     );
 };
 

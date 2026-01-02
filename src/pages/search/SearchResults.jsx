@@ -1,4 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import Header from '../../components/layout/header/Header';
+import Footer from '../../components/layout/footer/Footer';
 import './SearchResults.css';
 
 const CATEGORIES = [
@@ -36,8 +38,23 @@ const SearchResults = () => {
         const res = await fetch(`${API_BASE}/api/equipments${queryParam}`);
         if (res.ok) {
           const data = await res.json();
-          console.log('✅ Equipments loaded:', data.length);
-          setResults(Array.isArray(data) ? data : (data.items || []));
+          
+          // ✅ FILTRER LES ITEMS PERSONNELS (MASQUER SES PROPRES ITEMS)
+          const auth = JSON.parse(localStorage.getItem('auth') || '{}');
+          const currentUserId = auth.userId || auth.id;
+          
+          console.log('🔍 Current User ID:', currentUserId, 'Auth:', auth);
+          
+          const rawData = Array.isArray(data) ? data : (data.items || []);
+          
+          const filteredData = rawData.filter(item => {
+            const itemOwnerId = item.ownerId || item.owner_id || item.user_id;
+            console.log('📦 Item:', item.id, 'Owner:', itemOwnerId, 'Current User:', currentUserId, 'Filter:', itemOwnerId !== currentUserId);
+            return itemOwnerId !== currentUserId;
+          });
+          
+          console.log('✅ Equipments loaded:', filteredData.length, 'Total:', rawData.length, '(filtered out:', rawData.length - filteredData.length, ')');
+          setResults(filteredData);
         } else {
           console.error('❌ API error:', res.status);
           setResults([]);
@@ -247,7 +264,7 @@ const SearchResults = () => {
   );
 
   const ResultCard = ({ item }) => {
-    const imageUrl = item.image || item.thumbnail || '/default-tool.jpg';
+    const imageUrl = item.image_url || item.image || item.thumbnail || '/default-tool.jpg';
     const ownerName = item.owner_name || item.ownerName || 'Propriétaire inconnu';
     const ownerAvatar = item.owner_avatar || item.ownerAvatar || '/favicon.ico';
     const ownerId = item.ownerId || item.owner_id || item.user_id;
@@ -353,9 +370,11 @@ const SearchResults = () => {
   );
 
   return (
-    <div className="search-results-page">
-      {/* Hero Section */}
-      <div className="search-hero">
+    <>
+      <Header />
+      <div className="search-results-page">
+        {/* Hero Section */}
+        <div className="search-hero">
         <h1 className="hero-title">Trouvez l'outil pour votre projet</h1>
         <p className="hero-subtitle">Des milliers d'outils disponibles près de chez vous</p>
         <SearchBar />
@@ -439,7 +458,9 @@ const SearchResults = () => {
           )}
         </div>
       </div>
-    </div>
+      </div>
+      <Footer />
+    </>
   );
 };
 

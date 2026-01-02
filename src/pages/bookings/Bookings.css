@@ -1,0 +1,271 @@
+.bookings-page {
+  min-height: calc(100vh - 200px);
+  background: linear-gradient(135deg, #f1f4f2 0%, #e8f0ec 100%);
+  padding: 60px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.bookings-container {
+  max-width: 600px;
+  background: white;
+  border-radius: 12px;
+  padding: 40px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ✅ ICÔNE DE SUCCÈS */
+.success-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-color: #999e48;
+  color: white;
+  font-size: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  animation: scaleIn 0.6s ease-out;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+/* ✅ TITRE */
+.success-title {
+  font-size: 32px;
+  color: #333;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.success-subtitle {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+/* ✅ DÉTAILS */
+.booking-details {
+  background: #f9faf8;
+  border-radius: 8px;
+  padding: 30px;
+  margin-bottom: 30px;
+  text-align: left;
+}
+
+.booking-details h2 {
+  font-size: 20px;
+  color: #333;
+  margin-bottom: 20px;
+  text-align: center;
+  border-bottom: 2px solid #999e48;
+  padding-bottom: 10px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.detail-row:last-of-type {
+  border-bottom: none;
+}
+
+.detail-row .label {
+  font-weight: 600;
+  color: #666;
+  font-size: 14px;
+}
+
+.detail-row .value {
+  color: #333;
+  font-weight: 500;
+}
+
+.status-confirmed {
+  color: #27ae60;
+  font-weight: bold;
+}
+
+.status-pending {
+  color: #f39c12;
+  font-weight: bold;
+}
+
+/* ✅ PROCHAINES ÉTAPES */
+.next-steps {
+  margin-top: 30px;
+  text-align: left;
+}
+
+.next-steps h3 {
+  font-size: 18px;
+  color: #333;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.steps-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.steps-list li {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: white;
+  border-radius: 8px;
+  border-left: 4px solid #999e48;
+}
+
+.step-number {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #999e48;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.step-content {
+  flex: 1;
+}
+
+.step-content strong {
+  display: block;
+  color: #333;
+  margin-bottom: 5px;
+  font-size: 15px;
+}
+
+.step-content p {
+  color: #666;
+  font-size: 13px;
+  margin: 0;
+}
+
+/* ✅ ACTIONS */
+.success-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-primary {
+  background-color: #999e48;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: #cc6a62;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(153, 158, 72, 0.3);
+}
+
+.btn-outline {
+  background-color: white;
+  color: #999e48;
+  border: 2px solid #999e48;
+  padding: 10px 22px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-outline:hover {
+  background-color: #f1f4f2;
+  transform: translateY(-2px);
+}
+
+/* ✅ ERREUR */
+.error {
+  color: #e74c3c;
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+.generic-message {
+  background: #f9faf8;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+}
+
+.generic-message p {
+  color: #666;
+  font-size: 15px;
+  margin: 0;
+}
+
+/* ✅ RESPONSIVE */
+@media (max-width: 600px) {
+  .bookings-container {
+    padding: 20px;
+  }
+
+  .success-title {
+    font-size: 24px;
+  }
+
+  .success-actions {
+    flex-direction: column;
+  }
+
+  .btn-primary,
+  .btn-outline {
+    width: 100%;
+  }
+
+  .steps-list li {
+    flex-direction: column;
+  }
+
+  .step-number {
+    width: 35px;
+    height: 35px;
+    font-size: 14px;
+  }
+}

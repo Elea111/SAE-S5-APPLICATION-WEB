@@ -14,8 +14,21 @@ const OutilsPopulaires = () => {
         const res = await fetch(`${API_BASE}/api/equipments`);
         if (res.ok) {
           const data = await res.json();
-          // Prendre les 6 premiers équipements
-          setTools(data.slice(0, 6));
+          
+          // ✅ FILTRER LES ITEMS PERSONNELS (MASQUER SES PROPRES ITEMS)
+          const auth = JSON.parse(localStorage.getItem('auth') || '{}');
+          const currentUserId = auth.userId || auth.id;
+          
+          console.log('🔍 Outils Populaires - Current User ID:', currentUserId);
+          
+          const filteredData = data.filter(item => {
+            const itemOwnerId = item.ownerId || item.owner_id || item.user_id;
+            return itemOwnerId !== currentUserId;
+          });
+          
+          // Prendre les 6 premiers équipements après filtrage
+          console.log('✅ Outils chargés:', filteredData.length, 'Affichés:', Math.min(filteredData.length, 6));
+          setTools(filteredData.slice(0, 6));
         }
       } catch (error) {
         console.error('Error fetching tools:', error);
@@ -64,7 +77,7 @@ const OutilsPopulaires = () => {
             <div key={tool.id} className="tool-card">
               <div className="tool-image">
                 <img
-                  src={tool.image || tool.thumbnail || '/default-tool.jpg'}
+                  src={tool.image_url || tool.image || tool.thumbnail || '/default-tool.jpg'}
                   alt={tool.title || tool.name}
                   onError={(e) => { e.target.src = '/default-tool.jpg'; }}
                 />

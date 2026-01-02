@@ -3,7 +3,17 @@ export async function PublishEquipment(equipmentData, equipmentRepository = null
         throw new Error("Données d'équipement requises");
     }
 
-    const { title, description, daily_price, caution_deposit, location, condition, user_id, images = [] } = equipmentData;
+    const { 
+      title, 
+      description, 
+      daily_price, 
+      caution_deposit, 
+      location, 
+      condition, 
+      user_id, 
+      category, // ✅ Recevoir 'category'
+      images = [] 
+    } = equipmentData;
 
     // ✅ VALIDATION
     if (!title || !title.trim()) {
@@ -13,7 +23,7 @@ export async function PublishEquipment(equipmentData, equipmentRepository = null
         throw new Error("Le prix journalier est requis et doit être positif");
     }
 
-    // ✅ CONSTRUCTION PAYLOAD
+    // ✅ CONSTRUCTION PAYLOAD - MAPPER category → category_id
     const payload = {
         user_id,
         title: title.trim(),
@@ -22,9 +32,12 @@ export async function PublishEquipment(equipmentData, equipmentRepository = null
         caution_deposit: caution_deposit ? parseFloat(caution_deposit) : null,
         location: location || '',
         condition: condition || 'bon',
+        category_id: category || null, // ✅ Mapper à category_id
         is_available: true,
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
     };
+
+    console.log('📦 PublishEquipment payload:', payload);
 
     // ✅ UTILISER LE REPOSITORY
     if (equipmentRepository && typeof equipmentRepository.create === 'function') {
