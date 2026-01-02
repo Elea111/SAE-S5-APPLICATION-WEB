@@ -1,4 +1,4 @@
-export async function BookEquipment(bookingData, bookingRepository = null) {
+export async function BookEquipment(bookingData, bookingRepository = null, equipmentRepository = null) {
     if (!bookingData) {
         throw new Error("Données de réservation requises");
     }
@@ -24,12 +24,34 @@ export async function BookEquipment(bookingData, bookingRepository = null) {
         throw new Error("La location doit être d'au moins 1 jour");
     }
 
+    // ✅ RÉCUPÉRER LE PRIX DE L'ÉQUIPEMENT SI DISPONIBLE
+    let totalAmount = 0;
+    let cautionAmount = 0;
+
+    if (equipmentRepository && typeof equipmentRepository.findById === 'function') {
+        try {
+            const equipment = await equipmentRepository.findById(item_id);
+            if (equipment) {
+                // Calculer le montant total (prix journalier × nombre de jours)
+                const dailyPrice = equipment.daily_price || 0;
+                totalAmount = dailyPrice * totalDays;
+                cautionAmount = equipment.caution_deposit || 0;
+                
+                console.log(`💰 Calcul montants: ${dailyPrice}€/jour × ${totalDays}j = ${totalAmount}€ + ${cautionAmount}€ caution`);
+            }
+        } catch (err) {
+            console.warn('⚠️ Impossible de récupérer l\'équipement pour calculer le prix:', err.message);
+        }
+    }
+
     const payload = {
         item_id,
         borrower_id,
         start_date: startDate.toISOString(),
         end_date: endDate.toISOString(),
         total_days: totalDays,
+        total_amount: totalAmount,
+        caution_amount: cautionAmount,
         status: 'pending',
         created_at: new Date().toISOString()
     };
@@ -40,7 +62,9 @@ export async function BookEquipment(bookingData, bookingRepository = null) {
         return {
             id: booking.id,
             ...booking,
-            total_days: totalDays
+            total_days: totalDays,
+            total_amount: totalAmount,
+            caution_amount: cautionAmount
         };
     }
 

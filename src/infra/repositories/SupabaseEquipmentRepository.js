@@ -6,27 +6,42 @@ class SupabaseEquipmentRepository {
   }
 
   async create(equipmentData) {
-    const { user_id, title, description, daily_price, caution_deposit, location, condition, category, is_available } = equipmentData;
+    try {
+      // ✅ S'assurer que tous les champs sont correctement mappés
+      const payload = {
+        user_id: equipmentData.user_id,
+        title: equipmentData.title,
+        description: equipmentData.description,
+        daily_price: equipmentData.daily_price,
+        caution_deposit: equipmentData.caution_deposit,
+        location: equipmentData.location,
+        condition: equipmentData.condition,
+        category_id: equipmentData.category_id, // ✅ Utiliser category_id, PAS category
+        is_available: equipmentData.is_available !== false
+      };
 
-    const { data, error } = await supabase
-      .from('items')
-      .insert([{
-        user_id,
-        title,
-        description,
-        daily_price,
-        caution_deposit,
-        location,
-        condition,
-        category,
-        is_available: is_available !== false,
-        is_approved: true,
-        created_at: new Date().toISOString()
-      }])
-      .select();
+      console.log('📦 SupabaseEquipmentRepository.create payload:', payload);
 
-    if (error) throw new Error(`Equipment création : ${error.message}`);
-    return data?.[0] || null;
+      const { data, error } = await supabase
+        .from('items')
+        .insert([payload])
+        .select();
+
+      if (error) {
+        console.error('❌ Supabase insert error:', error);
+        throw new Error(`Supabase: ${error.message}`);
+      }
+
+      if (!data || data.length === 0) {
+        throw new Error('No data returned from insert');
+      }
+
+      console.log('✅ Equipment created:', data[0].id);
+      return data[0];
+    } catch (err) {
+      console.error('❌ Equipment create error:', err.message);
+      throw err;
+    }
   }
 
   async findById(id) {

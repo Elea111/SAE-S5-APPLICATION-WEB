@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import Header from '../../components/layout/header/Header';
+import Footer from '../../components/layout/footer/Footer';
 import './EquipmentDetails.css';
 
 const EquipmentDetails = () => {
@@ -6,6 +8,7 @@ const EquipmentDetails = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [images, setImages] = useState([]);
+  const [owner, setOwner] = useState(null);
 
   // ✅ DEFINIR API_BASE AU DEBUT DU COMPOSANT
   const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:4000' : '';
@@ -34,9 +37,9 @@ const EquipmentDetails = () => {
         console.log('✅ Equipment loaded:', data);
         setEquipment(data);
         
-        // ✅ Charger aussi les images si l'endpoint existe
-        if (data?.photosRepository) {
-          fetchImages(id);
+        // ✅ Les images sont déjà dans data.photos
+        if (data.photos && data.photos.length > 0) {
+          setImages(data.photos);
         }
       })
       .catch(err => {
@@ -45,19 +48,6 @@ const EquipmentDetails = () => {
       })
       .finally(() => setLoading(false));
   }, [API_BASE]);
-
-  const fetchImages = async (itemId) => {
-    try {
-      const response = await fetch(`${API_BASE}/api/equipments/${itemId}/photos`);
-      if (response.ok) {
-        const photos = await response.json();
-        console.log('📸 Photos loaded:', photos);
-        setImages(photos);
-      }
-    } catch (err) {
-      console.warn('Photos fetch failed:', err);
-    }
-  };
 
   if (loading) {
     return (
@@ -89,11 +79,13 @@ const EquipmentDetails = () => {
   const ownerLink = `/profil?userId=${equipment.user_id || equipment.owner_id || ''}`;
 
   return (
-    <div className="equipment-page">
-      <div className="equipment-card">
+    <>
+      <Header />
+      <div className="equipment-page">
+        <div className="equipment-card">
         <div className="equipment-left">
           <img 
-            src={equipment.image || '/favicon.ico'} 
+            src={equipment.image_url || equipment.image || '/favicon.ico'} 
             alt={equipment.title || equipment.name} 
             className="equipment-image" 
           />
@@ -101,7 +93,7 @@ const EquipmentDetails = () => {
         
         <div className="equipment-right">
           <h1 className="equipment-title">{equipment.title || equipment.name}</h1>
-          <p className="equipment-category">📁 {equipment.category || 'Catégorie non spécifiée'}</p>
+          <p className="equipment-category">📁 {equipment.category_icon || '📦'} {equipment.category_name || 'Catégorie non spécifiée'}</p>
           <p className="equipment-desc">{equipment.description}</p>
 
           <div className="equipment-meta">
@@ -124,7 +116,7 @@ const EquipmentDetails = () => {
           <div className="owner-info">
             <span>Proposé par : </span>
             <a href={ownerLink} onClick={(e) => { e.preventDefault(); window.location.href = ownerLink; }}>
-              {equipment.owner_name || equipment.user_id || 'Propriétaire'}
+              {equipment.owner_name || 'Propriétaire'}
             </a>
           </div>
 
@@ -158,7 +150,9 @@ const EquipmentDetails = () => {
           </div>
         </div>
       )}
-    </div>
+      </div>
+      <Footer />
+    </>
   );
 };
 

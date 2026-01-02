@@ -1,286 +1,305 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useStripe, useElements, CardElement, Elements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
 import './Paiement.css';
 
-const Paiement = () => {
-    const [cardName, setCardName] = useState('');
-    const [cardNumber, setCardNumber] = useState('');
-    const [expiryDate, setExpiryDate] = useState('');
-    const [cvv, setCvv] = useState('');
-    const [amount, setAmount] = useState(0);
-    const [reservationDetails, setReservationDetails] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [message, setMessage] = useState('');
-    const [paymentStatus, setPaymentStatus] = useState('');
+// ✅ Charger Stripe dans le composant
+const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
-    useEffect(() => {
-        const getReservationData = () => {
-            try {
-                const reservationData = localStorage.getItem('reservationData');
-                if (reservationData) {
-                    const data = JSON.parse(reservationData);
-                    setReservationDetails(data);
-                    setAmount(data.total || 0);
-                }
-            } catch (e) {
-                console.error('Erreur lors de la lecture des données:', e);
-            } finally {
-                setIsLoading(false);
-            }
-        };
+// ✅ Composant interne qui utilise useStripe()
+const PaiementInterne = () => {
+  const stripe = useStripe();
+  const elements = useElements();
 
-        getReservationData();
-    }, []);
+  const [booking, setBooking] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [processing, setProcessing] = useState(false);
+  const [success, setSuccess] = useState(false);
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
+  const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:4000' : '';
 
-        if (amount === 0) {
-            alert('Montant invalide. Veuillez revenir à la page de réservation.');
-            return;
-        }
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const bookingId = params.get('bookingId');
+    const sessionId = params.get('session_id'); // Après success Stripe
 
-        // Simulation de traitement
-        setIsLoading(true);
-        setTimeout(() => {
-            alert(`Paiement de ${amount}€ effectué avec succès !`);
-            window.location.href = '/confirmation';
-        }, 1000);
-    };
-
-    const submit = async () => {
-        const booking = JSON.parse(localStorage.getItem('booking') || '{}');
-        const token = 'votre_token_ici'; // Remplacez par votre méthode d'obtention de token
-
-        try {
-            const res = await fetch('http://localhost:4000/api/payments', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    booking_id: booking.bookingId,
-                    amount: booking.total,
-                    currency: 'EUR'
-                })
-            });
-
-            const responseData = await res.json();
-
-            if (res.ok) {
-                setMessage('Paiement effectué avec succès !');
-                setPaymentStatus('paid');
-
-                // Nettoyer le localStorage
-                localStorage.removeItem('booking');
-
-                // ✅ AFFICHER CONFIRMATION OU REDIRECT À /profil
-                setTimeout(() => {
-                    window.location.href = '/profil';
-                }, 2000);
-            } else {
-                setMessage(`❌ Erreur : ${responseData.message}`);
-            }
-        } catch (err) {
-            setMessage(`❌ Erreur : ${err.message}`);
-        }
-    };
-
-    const formatCardNumber = (value) => {
-        const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
-        const matches = v.match(/\d{4,16}/g);
-        const match = (matches && matches[0]) || '';
-        const parts = [];
-
-        for (let i = 0, len = match.length; i < len; i += 4) {
-            parts.push(match.substring(i, i + 4));
-        }
-
-        if (parts.length) {
-            return parts.join(' ');
-        }
-        return value;
-    };
-
-    const handleCardNumberChange = (e) => {
-        const formatted = formatCardNumber(e.target.value);
-        setCardNumber(formatted);
-    };
-
-    const handleExpiryDateChange = (e) => {
-        let value = e.target.value.replace(/\D/g, '');
-        if (value.length >= 2) {
-            value = value.substring(0, 2) + '/' + value.substring(2, 4);
-        }
-        setExpiryDate(value);
-    };
-
-    const isFormValid = () => {
-        return cardName.trim() !== '' &&
-            cardNumber.replace(/\s/g, '').length === 16 &&
-            expiryDate.length === 5 &&
-            cvv.length === 3 &&
-            amount > 0;
-    };
-
-    if (isLoading) {
-        return (
-            <div className="paiement-page">
-                <div className="paiement-container">
-                    <div className="loading-spinner"></div>
-                </div>
-            </div>
-        );
+    if (sessionId) {
+      // ✅ RETOUR DU PAIEMENT STRIPE (Success page)
+      handleStripeSuccess(sessionId);
+      return;
     }
 
-    if (!reservationDetails || amount === 0) {
-        return (
-            <div className="paiement-page">
-                <div className="paiement-container">
-                    <h1 className="paiement-title">Paiement</h1>
-                    <div className="error-message">
-                        <p>❌ Aucune réservation trouvée ou montant invalide.</p>
-                        <p>Veuillez d'abord effectuer une réservation.</p>
-                        <button
-                            className="back-button"
-                            onClick={() => window.location.href = '/reservation'}
-                        >
-                            ← Retour à la réservation
-                        </button>
-                    </div>
-                </div>
-            </div>
-        );
+    if (!bookingId) {
+      setError('ID réservation manquant');
+      setLoading(false);
+      return;
     }
 
+    // ✅ CHARGER LES VRAIES DETAILS DE LA RESERVATION DEPUIS L'API
+    const loadBooking = async () => {
+      try {
+        const auth = JSON.parse(localStorage.getItem('auth') || '{}');
+        const res = await fetch(`${API_BASE}/api/bookings/${bookingId}`, {
+          headers: {
+            'Authorization': `Bearer ${auth.token}`
+          }
+        });
+
+        if (!res.ok) {
+          // Si l'API ne retourne pas la réservation, utiliser les données du mock
+          console.log('⚠️ Impossible de charger la réservation, utilisant données simulées');
+          setBooking({
+            id: bookingId,
+            item_id: '123e4567-e89b-12d3-a456-426614174000',
+            item_title: 'Perceuse 18V',
+            item_price: 25.99,
+            total_days: 3,
+            amount: 77.97,
+            caution: 80,
+            total: 157.97,
+            start_date: new Date().toLocaleDateString('fr-FR'),
+            end_date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toLocaleDateString('fr-FR')
+          });
+          setLoading(false);
+          return;
+        }
+
+        const bookingData = await res.json();
+        console.log('✅ Réservation chargée:', bookingData);
+        console.log('📌 Vérification prix: rental_amount =', bookingData.rental_amount, ', deposit_amount =', bookingData.deposit_amount);
+
+        // Formater les données reçues
+        const rentalAmount = bookingData.rental_amount || 0;
+        const depositAmount = bookingData.deposit_amount || 0;
+        const totalAmount = rentalAmount + depositAmount;
+        
+        console.log('📊 Données de réservation:', {
+          daily_rate: bookingData.daily_rate,
+          total_days: bookingData.total_days,
+          rental_amount: rentalAmount,
+          deposit_amount: depositAmount,
+          total: totalAmount
+        });
+        
+        setBooking({
+          id: bookingData.id,
+          item_id: bookingData.equipment_id,
+          item_title: bookingData.equipment_name || 'Équipement',
+          item_price: bookingData.daily_rate || 0,
+          total_days: bookingData.total_days || 1,
+          amount: rentalAmount,
+          caution: depositAmount,
+          total: totalAmount,
+          start_date: new Date(bookingData.start_date).toLocaleDateString('fr-FR'),
+          end_date: new Date(bookingData.end_date).toLocaleDateString('fr-FR')
+        });
+      } catch (err) {
+        console.error('❌ Erreur chargement réservation:', err);
+        setError('Impossible de charger la réservation');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadBooking();
+  }, [API_BASE]);
+
+  const handleStripeSuccess = async (sessionId) => {
+    setSuccess(true);
+    
+    // ✅ Récupérer les détails de la session
+    try {
+      const res = await fetch(`${API_BASE}/api/stripe/session/${sessionId}`);
+      const data = await res.json();
+      
+      console.log('✅ Session confirmée:', data);
+      
+      // ✅ Redirection vers la page de confirmation
+      setTimeout(() => {
+        window.location.href = `/bookings?booking=${data.metadata?.bookingId}`;
+      }, 3000);
+    } catch (err) {
+      console.error('Erreur récupération session:', err);
+      setTimeout(() => {
+        window.location.href = '/bookings';
+      }, 2000);
+    }
+  };
+
+  const handlePayment = async (e) => {
+    e.preventDefault();
+    setError('');
+
+    if (!stripe || !elements) {
+      setError('Stripe non chargé');
+      return;
+    }
+
+    setProcessing(true);
+
+    const auth = JSON.parse(localStorage.getItem('auth') || '{}');
+    if (!auth.token) {
+      window.location.href = '/connexion';
+      return;
+    }
+
+    try {
+      // 1️⃣ CREER LA SESSION STRIPE
+      console.log('💳 Créant session Stripe...');
+      
+      const checkoutRes = await fetch(`${API_BASE}/api/stripe/checkout-session`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${auth.token}`
+        },
+        body: JSON.stringify({
+          bookingId: booking.id,
+          amount: booking.total,
+          itemTitle: booking.item_title,
+          itemId: booking.item_id,
+          days: booking.total_days
+        })
+      });
+
+      if (!checkoutRes.ok) {
+        const errorData = await checkoutRes.json();
+        throw new Error(errorData.message || 'Erreur création session');
+      }
+
+      const { sessionUrl } = await checkoutRes.json();
+
+      console.log('✅ Session créée, redirection vers Stripe...');
+
+      // 2️⃣ REDIRIGER VERS STRIPE CHECKOUT
+      if (sessionUrl) {
+        window.location.href = sessionUrl;
+      } else {
+        throw new Error('Pas d\'URL de session');
+      }
+    } catch (err) {
+      console.error('❌ Erreur paiement:', err);
+      setError(`Erreur: ${err.message}`);
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  if (loading) {
+    return <div className="paiement-page"><p>⏳ Chargement...</p></div>;
+  }
+
+  if (error && !booking) {
     return (
-        <div className="paiement-page">
-            <div className="paiement-container">
-                <h1 className="paiement-title">Paiement Sécurisé</h1>
-
-                <div className="reservation-summary">
-                    <p className="recap">Récapitulatif de votre commande</p>
-                    <div className="summary-item">
-                        <span>{reservationDetails.toolName || "Tondeuse à gazon"}</span>
-                        <span>{reservationDetails.days || 0} jour(s)</span>
-                    </div>
-                    <div className="summary-item">
-                        <span>Prix journalier</span>
-                        <span>{reservationDetails.pricePerDay || 40}€</span>
-                    </div>
-                    <div className="summary-item">
-                        <span>Sous-total</span>
-                        <span>{reservationDetails.subtotal || 0}€</span>
-                    </div>
-                    <div className="summary-item">
-                        <span>Frais de service</span>
-                        <span>{reservationDetails.serviceFee || 0}€</span>
-                    </div>
-                    <div className="summary-item total">
-                        <span>Total à payer</span>
-                        <span>{amount}€</span>
-                    </div>
-                </div>
-
-                <div className="card-type">
-                    <span className="visa-badge">
-                         VISA • MASTERCARD • CB • PAYPAL
-                    </span>
-                </div>
-
-                <form onSubmit={handleSubmit} className="paiement-form">
-                    <div className="form-group">
-                        <label htmlFor="cardName">Nom sur la carte</label>
-                        <input
-                            type="text"
-                            id="cardName"
-                            value={cardName}
-                            onChange={(e) => setCardName(e.target.value.toUpperCase())}
-                            placeholder="JEAN DUPONT"
-                            required
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label htmlFor="cardNumber">Numéro de carte</label>
-                        <input
-                            type="text"
-                            id="cardNumber"
-                            value={cardNumber}
-                            onChange={handleCardNumberChange}
-                            placeholder="1234 5678 9012 3456"
-                            maxLength="19"
-                            required
-                        />
-                    </div>
-
-                    <div className="form-row">
-                        <div className="form-group half">
-                            <label htmlFor="expiryDate">Date d'expiration</label>
-                            <input
-                                type="text"
-                                id="expiryDate"
-                                value={expiryDate}
-                                onChange={handleExpiryDateChange}
-                                placeholder="MM/AA"
-                                maxLength="5"
-                                required
-                            />
-                        </div>
-
-                        <div className="form-group half">
-                            <label htmlFor="cvv">
-                                Cryptogramme visuel
-                            </label>
-                            <input
-                                type="password"
-                                id="cvv"
-                                value={cvv}
-                                onChange={(e) => setCvv(e.target.value.replace(/\D/g, ''))}
-                                placeholder="•••"
-                                maxLength="3"
-                                required
-                            />
-                        </div>
-                    </div>
-
-                    <div className="amount-section">
-                        <div className="amount-line">
-                            <span>Montant total</span>
-                            <span className="amount">{amount}€</span>
-                        </div>
-                    </div>
-
-                    <button
-                        type="submit"
-                        className="paiement-button"
-                        disabled={!isFormValid() || isLoading}
-                    >
-                        {isLoading ? (
-                            <span>Validation en cours...</span>
-                        ) : (
-                            <span>Payer {amount}€</span>
-                        )}
-                    </button>
-
-                    <div style={{
-                        textAlign: 'center',
-                        fontSize: '12px',
-                        color: '#718096',
-                        marginTop: '16px'
-                    }}>
-                        🔒 Paiement 100% sécurisé • Vos données sont chiffrées
-                    </div>
-                </form>
-
-                {message && (
-                    <div className={`payment-message ${paymentStatus}`}>
-                        {message}
-                    </div>
-                )}
-            </div>
-        </div>
+      <div className="paiement-page">
+        <p className="error">❌ {error}</p>
+      </div>
     );
+  }
+
+  if (success) {
+    return (
+      <div className="paiement-page">
+        <div className="paiement-container">
+          <div className="success-state">
+            <div className="success-icon">✅</div>
+            <h1>Paiement réussi!</h1>
+            <p>Votre réservation a été confirmée.</p>
+            <p className="muted">Redirection vers vos réservations...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="paiement-page">
+      <div className="paiement-container">
+        <h1>💳 Paiement de la réservation</h1>
+
+        <div className="paiement-content">
+          {/* Résumé */}
+          <div className="paiement-summary">
+            <h2>{booking.item_title}</h2>
+            <div className="dates">
+              <span>📅 {booking.start_date}</span>
+              <span>→</span>
+              <span>{booking.end_date}</span>
+            </div>
+
+            <div className="summary-details">
+              <div className="detail-line">
+                <span>{booking.total_days} jour(s) × {booking.item_price}€</span>
+                <span>{booking.amount.toFixed(2)}€</span>
+              </div>
+              <div className="detail-line">
+                <span>Caution</span>
+                <span>{booking.caution.toFixed(2)}€</span>
+              </div>
+              <div className="detail-line total">
+                <span>Total TTC</span>
+                <span>{booking.total.toFixed(2)}€</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Formulaire Stripe */}
+          <form onSubmit={handlePayment} className="paiement-form">
+            <h3>Paiement sécurisé</h3>
+
+            <div className="stripe-container">
+              <CardElement
+                options={{
+                  style: {
+                    base: {
+                      fontSize: '16px',
+                      color: '#333',
+                      '::placeholder': {
+                        color: '#aaa'
+                      }
+                    },
+                    invalid: {
+                      color: '#dc3545'
+                    }
+                  }
+                }}
+              />
+            </div>
+
+            {error && <p className="error">{error}</p>}
+
+            <button
+              type="submit"
+              className="btn-pay"
+              disabled={processing || !stripe || !elements}
+            >
+              {processing ? '⏳ Traitement...' : `Payer ${booking.total.toFixed(2)}€`}
+            </button>
+
+            <p className="paiement-note">
+              🔒 Paiement sécurisé avec Stripe
+            </p>
+          </form>
+        </div>
+
+        <div className="paiement-footer">
+          <p>✅ Paiement sécurisé</p>
+          <p>🔒 Données chiffrées</p>
+          <p>💳 Cartes acceptées</p>
+        </div>
+      </div>
+    </div>
+  );
 };
 
-export default Paiement;
+// ✅ Composant externe qui enveloppe dans <Elements>
+const PaiementWrapper = () => {
+  return (
+    <Elements stripe={stripePromise}>
+      <PaiementInterne />
+    </Elements>
+  );
+};
+
+export default PaiementWrapper;

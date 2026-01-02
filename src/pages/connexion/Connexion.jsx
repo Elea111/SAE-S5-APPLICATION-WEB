@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import './Connexion.css';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import Header from '../../components/layout/header/Header.jsx';
+import Footer from '../../components/layout/footer/Footer.jsx';
 
 const Connexion = () => {
   const [formData, setFormData] = useState({
@@ -59,10 +61,12 @@ const Connexion = () => {
   };
 
   return (
-    <section className="connexion-section">
-      <div className="connexion-container">
-        <div className="connexion-content">
-          <form className="connexion-form" onSubmit={handleSubmit}>
+    <>
+      <Header />
+      <section className="connexion-section">
+        <div className="connexion-container">
+          <div className="connexion-content">
+            <form className="connexion-form" onSubmit={handleSubmit}>
             <h1 className="connexion-title">Connexion</h1>
             <p className="form-description">
               Connectez-vous à votre compte pour accéder à tous les outils disponibles.
@@ -121,7 +125,9 @@ const Connexion = () => {
           </form>
         </div>
       </div>
-    </section>
+      </section>
+      <Footer />
+    </>
   );
 };
 

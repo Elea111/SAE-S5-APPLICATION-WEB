@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import Header from '../../components/layout/header/Header';
+import Footer from '../../components/layout/footer/Footer';
 import './Schedule.css';
 
 const parseQuery = () => {
@@ -74,7 +76,9 @@ const Schedule = () => {
   if (!equipment) return <div className="schedule-page"><p>Chargement équipement...</p></div>;
 
   return (
-    <div className="schedule-page">
+    <>
+      <Header />
+      <div className="schedule-page">
       <div className="schedule-container">
         <h2>Programmer la location : {equipment.title || equipment.name}</h2>
         <div className="date-row">
@@ -92,6 +96,8 @@ const Schedule = () => {
         {message && <p className="info">{message}</p>}
       </div>
     </div>
+      <Footer />
+    </>
   );
 };
 

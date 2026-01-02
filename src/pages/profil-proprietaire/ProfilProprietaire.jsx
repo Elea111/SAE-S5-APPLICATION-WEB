@@ -1,9 +1,12 @@
 // ProfilProprietaire.jsx
 import React, { useEffect, useState } from 'react';
+import Header from '../../components/layout/header/Header';
+import Footer from '../../components/layout/footer/Footer';
 import './ProfilProprietaire.css';
 
 const ProfilProprietaire = () => {
   const [userData, setUserData] = useState(null);
+  const [listings, setListings] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({});
@@ -13,22 +16,54 @@ const ProfilProprietaire = () => {
   const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:4000' : '';
 
   useEffect(() => {
+    // ✅ VÉRIFIER D'ABORD LE QUERY PARAM ?userId=...
+    const params = new URLSearchParams(window.location.search);
+    const queryUserId = params.get('userId');
+    
     const authRaw = localStorage.getItem('auth');
-    // ✅ SI PAS D'AUTH -> PAGE DEMO
-    if (!authRaw) {
-      setUserData(null);
-      return;
+    const auth = authRaw ? JSON.parse(authRaw) : {};
+    
+    // ✅ UTILISER SOIT LE QUERY PARAM (profil d'un autre), SOIT L'UTILISATEUR ACTUEL
+    let targetUserId;
+    if (queryUserId) {
+      // Visite du profil d'un autre utilisateur
+      targetUserId = queryUserId;
+      console.log('📍 Affichage du profil d\'un autre utilisateur:', targetUserId);
+    } else {
+      // Profil de l'utilisateur actuel
+      targetUserId = auth.userId || auth.id;
+      console.log('📍 Affichage du profil de l\'utilisateur actuel:', targetUserId);
     }
     
-    const auth = JSON.parse(authRaw);
-    const userId = auth.userId || auth.id; // ← Accepte les deux formats
-    if (!userId) {
+    // ✅ SI PAS DE USER -> PAGE DEMO
+    if (!targetUserId) {
+      console.warn('❌ Pas de userId');
       setUserData(null);
       return;
     }
 
+    console.log('🔄 Chargement des données pour:', targetUserId);
+
+    // ✅ RÉINITIALISER LES STATES AVANT DE CHARGER DE NOUVELLES DONNÉES
+    setUserData(null);
+    setListings([]);
+    setReviews([]);
+    setEditing(false);
+
+    // ✅ UTILISER /public SI C'EST UN AUTRE UTILISATEUR, SINON /api/users/:id
+    const isOtherUser = queryUserId && queryUserId !== (auth.userId || auth.id);
+    const userEndpoint = isOtherUser 
+      ? `${API_BASE}/api/users/${targetUserId}/public`
+      : `${API_BASE}/api/users/${targetUserId}`;
+    
+    console.log('📡 Endpoint utilisé:', userEndpoint, '(autre utilisateur:', isOtherUser, ')');
+
     // fetch user
-    fetch(`${API_BASE}/api/users/${userId}`)
+    fetch(userEndpoint, {
+      headers: {
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
       .then(r => r.ok ? r.json() : Promise.reject(new Error('Not found')))
       .then(u => {
         setUserData(u);
@@ -40,15 +75,15 @@ const ProfilProprietaire = () => {
         });
       })
       .catch((err) => {
-        // ✅ FALLBACK: utiliser les données de localStorage
-        console.warn('Erreur fetch user, utilisation localStorage:', err);
+        // ✅ FALLBACK: créer profil minimal, SANS avatar de localStorage (force refresh depuis Supabase)
+        console.warn('Erreur fetch user, création fallback:', err);
         setUserData({
-          id: userId,
+          id: targetUserId,
           email: auth.email,
           first_name: auth.first_name || 'Utilisateur',
           last_name: auth.last_name || '',
           is_pro: auth.isPro || false,
-          avatar_url: auth.avatarUrl || '/favicon.ico',
+          avatar_url: null, // ← Forcer à vide, sera rafraîchi au prochain chargement
           created_at: new Date().toISOString(),
           rating: 0,
           review_count: 0,
@@ -64,11 +99,41 @@ const ProfilProprietaire = () => {
       });
 
     // fetch reviews
-    fetch(`${API_BASE}/api/users/${userId}/reviews`)
+    fetch(`${API_BASE}/api/users/${targetUserId}/reviews`, {
+      headers: {
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
       .then(r => r.ok ? r.json() : [])
       .then(rs => setReviews(rs || []))
       .catch(() => setReviews([]));
-  }, [API_BASE]);
+
+    // ✅ FETCH LISTINGS DE L'UTILISATEUR
+    fetch(`${API_BASE}/api/users/${targetUserId}/equipments`)
+      .then(r => {
+        if (!r.ok) throw new Error('Not found');
+        return r.json();
+      })
+      .then(items => {
+        console.log('📦 Listings chargés:', items);
+        const listingsArray = Array.isArray(items) ? items : [];
+        setListings(listingsArray);
+        
+        // ✅ METTRE À JOUR LE COMPTEUR DANS USERDATA
+        setUserData(prev => ({
+          ...prev,
+          listings_count: listingsArray.length
+        }));
+      })
+      .catch(err => {
+        console.warn('Erreur fetch listings:', err);
+        setListings([]);
+        setUserData(prev => ({
+          ...prev,
+          listings_count: 0
+        }));
+      });
+  }, [API_BASE, window.location.search]);
 
   const handleLogout = () => {
     localStorage.removeItem('auth');
@@ -85,10 +150,16 @@ const ProfilProprietaire = () => {
     window.location.href = '/publish';
   };
 
-  const goToMessages = () => {
+  const goToMessages = (other) => {
     // open messages page; frontend expects query param "other" for conversations
-    const other = userData?.id || '';
     window.location.href = `/messages?other=${other}`;
+  };
+
+  // ✅ VÉRIFIER SI C'EST LE PROPRE PROFIL DE L'UTILISATEUR
+  const isOwnProfile = () => {
+    const auth = JSON.parse(localStorage.getItem('auth') || '{}');
+    const currentUserId = auth.userId || auth.id;
+    return userData?.id === currentUserId;
   };
 
   const toggleEdit = () => {
@@ -134,43 +205,62 @@ const ProfilProprietaire = () => {
     }
   };
 
-  const handleAvatarChange = (e) => {
+  // ✅ UPLOAD AVATAR VERS SUPABASE
+  const handleAvatarChange = async (e) => {
     const file = e.target.files && e.target.files[0];
     if (!file || !userData) return;
-    const reader = new FileReader();
-    reader.onload = async (ev) => {
-      const dataUrl = ev.target.result;
-      // immediate preview
-      setUserData(prev => ({ ...prev, avatar_url: dataUrl }));
-      // save to backend (mock) via PATCH
-      setAvatarUploading(true);
-      try {
-        const res = await fetch(`${API_BASE}/api/users/${userData.id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ avatar_url: dataUrl })
-        });
-        if (res.ok) {
-          const updated = await res.json();
-          setUserData(updated);
-          // persist simple auth avatar for header
-          const authRaw = localStorage.getItem('auth');
-          if (authRaw) {
-            const auth = JSON.parse(authRaw);
-            auth.avatarUrl = updated.avatar_url;
-            localStorage.setItem('auth', JSON.stringify(auth));
-          }
-        } else {
-          // fallback: keep dataUrl locally
-          setMessage('Avatar mis à jour localement (mock)');
+
+    // ✅ VERIFIER QUE L'ID EXISTE
+    if (!userData.id) {
+      setMessage('Erreur : ID utilisateur manquant');
+      return;
+    }
+
+    setAvatarUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('avatar', file);
+
+      console.log(`📸 Upload avatar pour user: ${userData.id}`);
+
+      const res = await fetch(`${API_BASE}/api/users/${userData.id}/avatar`, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (res.ok) {
+        const result = await res.json();
+        
+        // Mettre à jour l'UI
+        setUserData(prev => ({
+          ...prev,
+          avatar_url: result.data.avatar_url
+        }));
+
+        // Sauvegarder en localStorage
+        const authRaw = localStorage.getItem('auth');
+        if (authRaw) {
+          const auth = JSON.parse(authRaw);
+          auth.avatarUrl = result.data.avatar_url;
+          localStorage.setItem('auth', JSON.stringify(auth));
         }
-      } catch (err) {
-        setMessage('Erreur upload avatar (mock): sauvegarde locale');
-      } finally {
-        setAvatarUploading(false);
+
+        setMessage('Avatar mis à jour ! 🎉');
+        
+        // ✅ FORCER REFRESH de tous les éléments pour que la photo s'affiche partout
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      } else {
+        const error = await res.json();
+        setMessage(`Erreur : ${error.error || 'Impossible d\'uploader l\'avatar'}`);
       }
-    };
-    reader.readAsDataURL(file);
+    } catch (err) {
+      setMessage(`Erreur réseau : ${err.message}`);
+    } finally {
+      setAvatarUploading(false);
+    }
   };
 
   // ✅ SI userData EST NULL -> PAGE DEMO (DECONNECTE)
@@ -190,7 +280,9 @@ const ProfilProprietaire = () => {
   }
 
   return (
-    <div className="profil-proprietaire-page">
+    <>
+      <Header />
+      <div className="profil-proprietaire-page">
       <div className="profile-header-section">
         <div className="profile-left">
           <div className="profile-image-container">
@@ -201,15 +293,36 @@ const ProfilProprietaire = () => {
             />
           </div>
 
-          <label className="avatar-upload-label">
-            <input type="file" accept="image/*" onChange={handleAvatarChange} style={{display:'none'}} />
-            <button className="btn-outline" type="button">{avatarUploading ? 'Upload...' : 'Changer la photo'}</button>
-          </label>
+          {/* ✅ UPLOAD AVATAR INPUT - IMPORTANT: utiliser useRef pour accéder au input */}
+          <div className="avatar-upload-container">
+            <input 
+              ref={(input) => { window.avatarInput = input; }}
+              type="file" 
+              accept="image/*" 
+              onChange={handleAvatarChange}
+              disabled={avatarUploading}
+              style={{display:'none'}} 
+              id="avatar-input"
+            />
+            <button 
+              className="btn-outline" 
+              type="button"
+              disabled={avatarUploading}
+              onClick={() => {
+                const input = document.getElementById('avatar-input');
+                if (input) input.click();
+              }}
+            >
+              {avatarUploading ? 'Upload en cours...' : 'Changer la photo'}
+            </button>
+          </div>
 
           <div className="owner-actions">
             <button className="btn-primary full" onClick={goToSearch}>Chercher un outil</button>
             <button className="btn-outline full" onClick={goToPublish}>Proposer un outil</button>
-            <button className="btn-secondary full" onClick={goToMessages}>Messagerie</button>
+            {!isOwnProfile() && (
+              <button className="btn-secondary full" onClick={() => goToMessages(userData?.id)}>Messagerie</button>
+            )}
             <button className="btn-logout full" onClick={handleLogout}>Se déconnecter</button>
           </div>
         </div>
@@ -218,7 +331,6 @@ const ProfilProprietaire = () => {
           <div className="profile-main-info">
             <div className="name-row">
               <h1 className="profile-name">{userData.first_name} {userData.last_name}</h1>
-              {/* Settings quick access on profile header */}
               <button className="profile-settings-btn" title="Paramètres" onClick={()=>window.location.href='/settings'}>⚙ Paramètres</button>
               <div className="member-meta">
                 <span>Membre depuis {new Date(userData.created_at || Date.now()).getFullYear()}</span>
@@ -295,14 +407,13 @@ const ProfilProprietaire = () => {
         </div>
 
         <div className="tools-grid">
-          {/* If API provided listings, render them; otherwise show CTA */}
-          {userData.listings && userData.listings.length > 0 ? (
-            userData.listings.map(tool => (
+          {listings && listings.length > 0 ? (
+            listings.map(tool => (
               <div key={tool.id} className="tool-card small">
-                <img src={tool.image || '/favicon.ico'} alt={tool.title} className="tool-thumb" />
+                <img src={tool.image_url || tool.image || '/favicon.ico'} alt={tool.title} className="tool-thumb" />
                 <div className="tool-body">
                   <h4>{tool.title}</h4>
-                  <p className="muted">{tool.dailyPrice ? `${tool.dailyPrice} € / jour` : 'Prix non défini'}</p>
+                  <p className="muted">{tool.daily_price ? `${tool.daily_price} € / jour` : 'Prix non défini'}</p>
                   <div className="tool-actions">
                     <button className="btn-link" onClick={() => window.location.href = `/equipments/${tool.id}`}>Voir</button>
                     <button className="btn-link" onClick={() => window.location.href = `/edit-listing?item=${tool.id}`}>Éditer</button>
@@ -332,6 +443,8 @@ const ProfilProprietaire = () => {
         </div>
       </div>
     </div>
+      <Footer />
+    </>
   );
 };
 
