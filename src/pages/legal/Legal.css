@@ -1,0 +1,261 @@
+.legal-page {
+  padding: 2rem;
+  background: #f1f4f2;
+  min-height: 90vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #111;
+}
+
+.legal-container {
+  max-width: 900px;
+  margin: 0 auto;
+  background: #fff;
+  padding: 3rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+}
+
+.legal-page h1 {
+  color: #999e48;
+  font-size: 2.2rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 3px solid #999e48;
+  padding-bottom: 1rem;
+}
+
+.last-updated {
+  color: #999;
+  font-size: 0.9rem;
+  margin-bottom: 2rem;
+  font-style: italic;
+}
+
+section {
+  margin-bottom: 2.5rem;
+}
+
+section h2 {
+  color: #999e48;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  margin-top: 2rem;
+  border-bottom: 2px solid #e6e6e6;
+  padding-bottom: 0.5rem;
+}
+
+section h3 {
+  color: #333;
+  font-size: 1.1rem;
+  margin-bottom: 0.8rem;
+  margin-top: 1rem;
+}
+
+section p {
+  line-height: 1.7;
+  margin-bottom: 1rem;
+  color: #555;
+}
+
+section ul {
+  margin-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+section ul li {
+  margin-bottom: 0.6rem;
+  line-height: 1.6;
+  color: #555;
+}
+
+section a {
+  color: #999e48;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+section a:hover {
+  text-decoration: underline;
+  color: #cc6a62;
+}
+
+/* ===== CARDS FOR RGPD PAGE ===== */
+.right-card {
+  background: #f9f9f9;
+  border-left: 4px solid #999e48;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.right-card:hover {
+  box-shadow: 0 4px 12px rgba(153, 158, 72, 0.1);
+  transform: translateX(5px);
+}
+
+.right-card h3 {
+  color: #999e48;
+  margin-top: 0;
+  margin-bottom: 0.8rem;
+}
+
+.right-card p {
+  margin-bottom: 0.6rem;
+  color: #555;
+}
+
+.how-to {
+  background: #fff;
+  padding: 0.8rem;
+  border-radius: 4px;
+  margin-top: 0.8rem;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+/* ===== TABLE ===== */
+.retention-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.5rem;
+  background: #fff;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.retention-table thead {
+  background: #999e48;
+  color: #fff;
+}
+
+.retention-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+}
+
+.retention-table td {
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid #e6e6e6;
+}
+
+.retention-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.retention-table tbody tr:nth-child(even) {
+  background: #f9f9f9;
+}
+
+.retention-table tbody tr:hover {
+  background: #f0f0f0;
+}
+
+/* ===== FAQ ===== */
+.faq-item {
+  background: #f9f9f9;
+  border-left: 4px solid #22c55e;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  border-radius: 6px;
+}
+
+.faq-item h3 {
+  color: #333;
+  margin-top: 0;
+  margin-bottom: 0.8rem;
+}
+
+.faq-item p {
+  margin-bottom: 0;
+  color: #555;
+}
+
+/* ===== FOOTER ===== */
+.legal-footer {
+  text-align: center;
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 2px solid #e6e6e6;
+  color: #999;
+  font-size: 0.9rem;
+}
+
+.legal-footer p {
+  margin-bottom: 0.5rem;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .legal-container {
+    padding: 1.5rem;
+  }
+
+  .legal-page h1 {
+    font-size: 1.6rem;
+  }
+
+  section h2 {
+    font-size: 1.3rem;
+  }
+
+  section h3 {
+    font-size: 1rem;
+  }
+
+  .legal-container {
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .legal-page {
+    padding: 1rem;
+  }
+
+  .right-card {
+    padding: 1rem;
+  }
+
+  .retention-table {
+    font-size: 0.85rem;
+  }
+
+  .retention-table th,
+  .retention-table td {
+    padding: 0.6rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .legal-container {
+    padding: 1rem;
+  }
+
+  .legal-page h1 {
+    font-size: 1.3rem;
+    padding-bottom: 0.5rem;
+  }
+
+  section {
+    margin-bottom: 1.5rem;
+  }
+
+  section h2 {
+    font-size: 1.1rem;
+    margin-top: 1rem;
+  }
+
+  section h3 {
+    font-size: 0.95rem;
+  }
+
+  section ul {
+    margin-left: 1rem;
+  }
+
+  .retention-table {
+    display: block;
+    overflow-x: auto;
+  }
+}

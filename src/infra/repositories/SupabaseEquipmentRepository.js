@@ -1,112 +1,111 @@
 import supabase from '../database/supabaseClient.js';
 
 class SupabaseEquipmentRepository {
+  constructor() {
+    this.supabase = supabase; // ✅ Ajouter cette ligne pour accéder à supabase depuis le repository
+  }
+
   async create(equipmentData) {
     try {
+      // ✅ S'assurer que tous les champs sont correctement mappés
+      const payload = {
+        user_id: equipmentData.user_id,
+        title: equipmentData.title,
+        description: equipmentData.description,
+        daily_price: equipmentData.daily_price,
+        caution_deposit: equipmentData.caution_deposit,
+        location: equipmentData.location,
+        condition: equipmentData.condition,
+        category_id: equipmentData.category_id, // ✅ Utiliser category_id, PAS category
+        is_available: equipmentData.is_available !== false
+      };
+
+      console.log('📦 SupabaseEquipmentRepository.create payload:', payload);
+
       const { data, error } = await supabase
         .from('items')
-        .insert([equipmentData])
+        .insert([payload])
         .select();
 
-      if (error) throw new Error(error.message);
-      return data?.[0] || null;
+      if (error) {
+        console.error('❌ Supabase insert error:', error);
+        throw new Error(`Supabase: ${error.message}`);
+      }
+
+      if (!data || data.length === 0) {
+        throw new Error('No data returned from insert');
+      }
+
+      console.log('✅ Equipment created:', data[0].id);
+      return data[0];
     } catch (err) {
-      console.error('SupabaseEquipmentRepository.create error:', err.message);
+      console.error('❌ Equipment create error:', err.message);
       throw err;
     }
   }
 
   async findById(id) {
-    try {
-      const { data, error } = await supabase
-        .from('items')
-        .select('*')
-        .eq('id', id)
-        .single();
+    const { data, error } = await supabase
+      .from('items')
+      .select(`
+        *,
+        users:user_id (
+          id,
+          first_name,
+          last_name,
+          avatar_url,
+          rating,
+          review_count
+        )
+      `)
+      .eq('id', id)
+      .single();
 
-      if (error && error.code !== 'PGRST116') throw error;
-      return data || null;
-    } catch (err) {
-      console.error('SupabaseEquipmentRepository.findById error:', err.message);
-      return null;
+    if (error) throw new Error(`Equipment fetch : ${error.message}`);
+    
+    // ✅ Mapper les données avec le nom du propriétaire
+    if (data) {
+      return {
+        ...data,
+        owner_name: data.users 
+          ? `${data.users.first_name} ${data.users.last_name}`
+          : 'Propriétaire inconnu',
+        owner_avatar: data.users?.avatar_url
+      };
     }
+    return null;
   }
 
   async findByUserId(userId) {
-    try {
-      const { data, error } = await supabase
-        .from('items')
-        .select('*')
-        .eq('user_id', userId);
+    const { data, error } = await supabase
+      .from('items')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      return data || [];
-    } catch (err) {
-      console.error('SupabaseEquipmentRepository.findByUserId error:', err.message);
-      return [];
-    }
+    if (error) throw new Error(`Equipment fetch : ${error.message}`);
+    return data || [];
   }
 
-  async search(filters = {}) {
-    try {
-      let query = supabase.from('items').select('*');
+  async update(id, updates) {
+    const { data, error } = await supabase
+      .from('items')
+      .update(updates)
+      .eq('id', id)
+      .select();
 
-      if (filters.category_id) {
-        query = query.eq('category_id', filters.category_id);
-      }
-      if (filters.title) {
-        query = query.ilike('title', `%${filters.title}%`);
-      }
-      if (filters.is_available !== undefined) {
-        query = query.eq('is_available', filters.is_available);
-      }
-      if (filters.min_price) {
-        query = query.gte('daily_price', filters.min_price);
-      }
-      if (filters.max_price) {
-        query = query.lte('daily_price', filters.max_price);
-      }
-
-      const { data, error } = await query.limit(50);
-
-      if (error) throw error;
-      return data || [];
-    } catch (err) {
-      console.error('SupabaseEquipmentRepository.search error:', err.message);
-      return [];
-    }
-  }
-
-  async update(id, equipmentData) {
-    try {
-      const { data, error } = await supabase
-        .from('items')
-        .update(equipmentData)
-        .eq('id', id)
-        .select();
-
-      if (error) throw error;
-      return data?.[0] || null;
-    } catch (err) {
-      console.error('SupabaseEquipmentRepository.update error:', err.message);
-      throw err;
-    }
+    if (error) throw new Error(`Equipment update : ${error.message}`);
+    return data?.[0] || null;
   }
 
   async delete(id) {
-    try {
-      const { error } = await supabase
-        .from('items')
-        .delete()
-        .eq('id', id);
+    const { error } = await supabase
+      .from('items')
+      .delete()
+      .eq('id', id);
 
-      if (error) throw error;
-      return true;
-    } catch (err) {
-      console.error('SupabaseEquipmentRepository.delete error:', err.message);
-      return false;
-    }
+    if (error) throw new Error(`Equipment delete : ${error.message}`);
   }
 }
 
-export default new SupabaseEquipmentRepository();
+export default SupabaseEquipmentRepository;

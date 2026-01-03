@@ -20,7 +20,7 @@ class SupabaseReviewRepository {
     try {
       const { data, error } = await supabase
         .from('reviews')
-        .select('*')
+        .select('*, users!author_id(id, first_name, last_name, avatar_url)')
         .eq('target_user_id', userId)
         .order('created_at', { ascending: false });
 
@@ -48,4 +48,4 @@ class SupabaseReviewRepository {
   }
 }
 
-export default new SupabaseReviewRepository();
+export default SupabaseReviewRepository;

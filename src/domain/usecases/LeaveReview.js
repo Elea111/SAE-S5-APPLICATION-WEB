@@ -1,5 +1,6 @@
 export async function LeaveReview(reviewData, reviewRepository = null) {
-    if (!reviewData || !reviewData.bookingId || !reviewData.authorId || !reviewData.targetUserId || !reviewData.rating) {
+    // Valider les champs requis (snake_case du schéma de validation)
+    if (!reviewData || !reviewData.booking_id || !reviewData.author_id || !reviewData.target_user_id || !reviewData.rating) {
         throw new Error("Données d'avis incomplètes");
     }
     if (!reviewData.created_at) {

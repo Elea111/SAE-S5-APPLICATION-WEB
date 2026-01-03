@@ -1,0 +1,12 @@
+{
+  "name": "outillio-backend",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Backend Node.js/Express pour Outillio",
+  "main": "src/server/index.js",
+  "scripts": {
+    "start": "NODE_ENV=development node src/server/index.js",
+    "seed": "node scripts/seed-data.js",
+    "test": "node tests/publish.test.js"
+  }
+}

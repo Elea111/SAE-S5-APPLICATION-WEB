@@ -63,6 +63,27 @@ class SupabaseBookingRepository {
     }
   }
 
+  // ✅ NOUVELLE MÉTHODE: Vérifier les réservations chevauchantes
+  async findConflictingBookings(itemId, startDate, endDate) {
+    try {
+      const { data, error } = await supabase
+        .from('bookings')
+        .select('*')
+        .eq('item_id', itemId)
+        // Statut "cancelled" ne compte pas comme un conflit
+        .neq('status', 'cancelled')
+        // Les dates se chevauchent si: start < endDate ET end > startDate
+        .lt('start_date', endDate)
+        .gt('end_date', startDate);
+
+      if (error) throw error;
+      return data || [];
+    } catch (err) {
+      console.error('SupabaseBookingRepository.findConflictingBookings error:', err.message);
+      return [];
+    }
+  }
+
   async update(id, bookingData) {
     try {
       const { data, error } = await supabase
@@ -95,4 +116,4 @@ class SupabaseBookingRepository {
   }
 }
 
-export default new SupabaseBookingRepository();
+export default SupabaseBookingRepository;

@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Header.css';
 
 const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [unreadCount, setUnreadCount] = useState(0);
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
     const handleInscription = () => { window.location.href = '/inscription'; };
@@ -18,10 +19,40 @@ const Header = () => {
       : auth?.email || null;
     const userAvatar = auth?.avatarUrl || auth?.user?.avatar_url || null;
 
+    // ✅ CHARGER LE NOMBRE DE MESSAGES NON LUS
+    useEffect(() => {
+      if (!isLogged) return;
+      
+      const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:4000' : '';
+      
+      const fetchUnreadCount = async () => {
+        try {
+          const res = await fetch(`${API_BASE}/api/messages/unread-count`, {
+            headers: {
+              'Authorization': `Bearer ${auth.token}`
+            }
+          });
+          if (res.ok) {
+            const data = await res.json();
+            setUnreadCount(data.unreadCount);
+          }
+        } catch (err) {
+          console.error('❌ Erreur récupération messages non lus:', err);
+        }
+      };
+      
+      // Charger une première fois
+      fetchUnreadCount();
+      
+      // Vérifier toutes les 10 secondes
+      const interval = setInterval(fetchUnreadCount, 10000);
+      return () => clearInterval(interval);
+    }, [isLogged, auth.token]);
+
     return (
         <header className="header">
             <div className="header-container">
-                <div className="logo"><h1>Outillio</h1></div>
+                <div className="logo" onClick={() => window.location.href = '/'} style={{ cursor: 'pointer' }}><h1>Outillio</h1></div>
 
                 <div
                     className={`hamburger-menu ${isMenuOpen ? 'active' : ''}`}
@@ -54,7 +85,10 @@ const Header = () => {
                     <div className="auth-buttons">
                         {isLogged ? (
                             <>
-                                <button className="icon-btn" title="Messages" onClick={() => window.location.href = '/messages'}>💬</button>
+                                <button className="icon-btn message-btn" title="Messages" onClick={() => window.location.href = '/messages'}>
+                                    💬
+                                    {unreadCount > 0 && <span className="badge">{unreadCount}</span>}
+                                </button>
                                 <button className="icon-btn" title="Paramètres" onClick={() => window.location.href = '/settings'}>⚙️</button>
                                 <button className="profile-btn" onClick={() => window.location.href = '/profil'}>
                                     {userAvatar ? <img src={userAvatar} alt="avatar" className="header-avatar" /> : <span className="header-initial">{(userDisplayName || 'U').charAt(0)}</span>}

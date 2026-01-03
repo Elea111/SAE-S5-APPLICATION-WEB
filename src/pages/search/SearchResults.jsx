@@ -1,19 +1,22 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import Header from '../../components/layout/header/Header';
+import Footer from '../../components/layout/footer/Footer';
 import './SearchResults.css';
 
-const SAMPLE_SUGGESTIONS = [
-  'perceuse', 'ponceuse', 'scie', 'marteau', 'ponceuse à bande',
-  'visseuse', 'meuleuse', 'rabot', 'scie circulaire', 'nettoyeur haute pression'
-];
-
 const CATEGORIES = [
-  'Electroportatif', 'Outillage à main', 'Jardinage',
-  'Nettoyage', 'Soudure', 'Mesure', 'Peinture'
+  { slug: 'electroportatif', name: 'Électroportatif', icon: '🔌' },
+  { slug: 'jardinage', name: 'Jardinage', icon: '🌱' },
+  { slug: 'construction', name: 'Construction', icon: '🔨' },
+  { slug: 'nettoyage', name: 'Nettoyage', icon: '🧹' },
+  { slug: 'soudure', name: 'Soudure', icon: '⚡' },
+  { slug: 'mesure', name: 'Mesure', icon: '📏' },
+  { slug: 'peinture', name: 'Peinture', icon: '🎨' },
+  { slug: 'autre', name: 'Autre', icon: '📦' }
 ];
 
 const INITIAL_FILTERS = {
   categories: [],
-  priceRange: { min: 0, max: 100 },
+  priceRange: { min: 0, max: 500 },
   rating: 0,
   availability: 'all'
 };
@@ -27,29 +30,44 @@ const SearchResults = () => {
   const [filters, setFilters] = useState(INITIAL_FILTERS);
   const [sortBy, setSortBy] = useState('relevance');
 
-  // Suggestions filtrées
-  const filteredSuggestions = useMemo(() => 
-    SAMPLE_SUGGESTIONS.filter(s => 
-      s.toLowerCase().includes(q.toLowerCase())
-    ), [q]
-  );
+  const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:4000' : '';
 
-  // Recherche initiale
+  // ✅ CHARGER TOUS LES EQUIPEMENTS PAR DEFAUT
   useEffect(() => {
-    const searchQuery = new URLSearchParams(window.location.search).get('q') || '';
-    if (!searchQuery) return;
-    
     const doSearch = async () => {
       setLoading(true);
       try {
-        const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:4000' : '';
-        const res = await fetch(`${API_BASE}/api/equipments?q=${encodeURIComponent(searchQuery)}`);
+        const searchQuery = new URLSearchParams(window.location.search).get('q') || '';
+        const queryParam = searchQuery ? `?q=${encodeURIComponent(searchQuery)}` : '';
+        
+        console.log('📥 Fetching from:', `${API_BASE}/api/equipments${queryParam}`);
+
+        const res = await fetch(`${API_BASE}/api/equipments${queryParam}`);
         if (res.ok) {
           const data = await res.json();
-          setResults(Array.isArray(data) ? data : (data.items || []));
+          
+          // ✅ FILTRER LES ITEMS PERSONNELS (MASQUER SES PROPRES ITEMS)
+          const auth = JSON.parse(localStorage.getItem('auth') || '{}');
+          const currentUserId = auth.userId || auth.id;
+          
+          console.log('🔍 Current User ID:', currentUserId, 'Auth:', auth);
+          
+          const rawData = Array.isArray(data) ? data : (data.items || []);
+          
+          const filteredData = rawData.filter(item => {
+            const itemOwnerId = item.ownerId || item.owner_id || item.user_id;
+            console.log('📦 Item:', item.id, 'Owner:', itemOwnerId, 'Current User:', currentUserId, 'Filter:', itemOwnerId !== currentUserId);
+            return itemOwnerId !== currentUserId;
+          });
+          
+          console.log('✅ Equipments loaded:', filteredData.length, 'Total:', rawData.length, '(filtered out:', rawData.length - filteredData.length, ')');
+          setResults(filteredData);
+        } else {
+          console.error('❌ API error:', res.status);
+          setResults([]);
         }
       } catch (error) {
-        console.error('Search error:', error);
+        console.error('❌ Search error:', error);
         setResults([]);
       } finally {
         setLoading(false);
@@ -57,9 +75,9 @@ const SearchResults = () => {
     };
     
     doSearch();
-  }, []);
+  }, [API_BASE]);
 
-  // Recherche via formulaire
+  // ✅ RECHERCHE VIA FORMULAIRE
   const handleSearch = useCallback((e) => {
     e.preventDefault();
     if (!q.trim()) return;
@@ -70,17 +88,51 @@ const SearchResults = () => {
     }
   }, [q]);
 
-  // Gestionnaires d'événements
-  const handleSelectSuggestion = useCallback((suggestion) => {
-    window.location.search = `?q=${encodeURIComponent(suggestion)}`;
-  }, []);
-
   const handleViewDetails = useCallback((id) => {
     window.location.href = `/equipments/${id}`;
   }, []);
 
+  // ✅ REDIRECTION VERS LE PROFIL DU PROPRIETAIRE
+  const handleViewProfile = useCallback((ownerId, ownerName) => {
+    if (!ownerId) {
+      console.error('❌ Pas de propriétaire trouvé');
+      return;
+    }
+    window.location.href = `/profil-proprietaire?userId=${ownerId}`;
+  }, []);
+
+  // ✅ OUVRIR LES MESSAGES
+  const handleSendMessage = useCallback((ownerId, ownerName, itemId) => {
+    const auth = JSON.parse(localStorage.getItem('auth') || '{}');
+    if (!auth.token) {
+      window.location.href = '/connexion';
+      return;
+    }
+    // Rediriger vers la page de messages avec le propriétaire et l'item
+    window.location.href = `/messages?userId=${ownerId}&itemId=${itemId}`;
+  }, []);
+
+  // ✅ CORRIGER : Redirection vers le profil du propriétaire
   const handleViewOwner = useCallback((ownerId) => {
+    if (!ownerId) {
+      console.error('❌ Pas de propriétaire trouvé');
+      return;
+    }
+    console.log('📍 Redirection vers profil:', ownerId);
     window.location.href = `/profil?userId=${ownerId}`;
+  }, []);
+
+  // ✅ CORRIGER : Redirection vers la page de réservation
+  const handleReserve = useCallback((equipmentId) => {
+    const auth = JSON.parse(localStorage.getItem('auth') || '{}');
+    if (!auth.token) {
+      console.log('❌ Pas connecté, redirection vers connexion');
+      window.location.href = '/connexion';
+      return;
+    }
+    console.log('📅 Redirection vers réservation:', equipmentId);
+    // ✅ VERIFIER QUE C'EST BIEN /reservation (pas /booking, /reserve, etc.)
+    window.location.href = `/reservation?equipmentId=${equipmentId}`;
   }, []);
 
   const handleResetSearch = useCallback(() => {
@@ -93,40 +145,57 @@ const SearchResults = () => {
     setFilters(INITIAL_FILTERS);
   }, []);
 
-  const handleReserve = (equipmentId) => {
-    if (typeof window !== 'undefined' && window.localStorage) {
-      const auth = JSON.parse(localStorage.getItem('auth') || '{}');
-      if (!auth.token) {
-        window.location.href = '/connexion';
-        return;
-      }
-    }
-    // ✅ Redirect à /reservation avec l'ID de l'équipement
-    window.location.href = `/reservation?equipment_id=${equipmentId}`;
-  };
-
-  // Filtrage et tri des résultats
+  // ✅ FILTRAGE ET TRI DES RESULTATS
   const filteredResults = useMemo(() => {
     return results
       .filter(item => {
-        if (filters.categories.length > 0 && !filters.categories.includes(item.category)) {
+        // Filtre catégorie - comparer avec category_slug du backend
+        if (filters.categories.length > 0) {
+          const itemCategorySlug = item.category_slug || item.category_id; // Slug de la catégorie
+          if (!filters.categories.includes(itemCategorySlug)) {
+            return false;
+          }
+        }
+        
+        // Filtre prix
+        const price = item.daily_price || 0;
+        if (price < filters.priceRange.min || price > filters.priceRange.max) {
           return false;
         }
-        if (item.price < filters.priceRange.min || item.price > filters.priceRange.max) return false;
-        if (filters.rating > 0 && item.rating < filters.rating) return false;
+        
+        // Filtre rating
+        const rating = item.owner_rating || item.ownerRating || 0;
+        if (filters.rating > 0 && rating < filters.rating) {
+          return false;
+        }
+        
+        // Filtre disponibilité
+        if (filters.availability === 'available' && !item.is_available) {
+          return false;
+        }
+        
         return true;
       })
       .sort((a, b) => {
+        const priceA = a.daily_price || 0;
+        const priceB = b.daily_price || 0;
+        
         switch (sortBy) {
-          case 'price_asc': return a.price - b.price;
-          case 'price_desc': return b.price - a.price;
-          case 'rating': return b.rating - a.rating;
-          default: return 0;
+          case 'price_asc':
+            return priceA - priceB;
+          case 'price_desc':
+            return priceB - priceA;
+          case 'rating':
+            return (b.owner_rating || 0) - (a.owner_rating || 0);
+          case 'recent':
+            return new Date(b.created_at) - new Date(a.created_at);
+          default:
+            return 0;
         }
       });
   }, [results, filters, sortBy]);
 
-  // Composants internes pour mieux organiser le JSX
+  // ✅ COMPOSANTS INTERNES
   const SearchBar = () => (
     <form className="search-form" onSubmit={handleSearch}>
       <div className="search-input-container">
@@ -144,31 +213,14 @@ const SearchResults = () => {
     </form>
   );
 
-  const Suggestions = () => (
-    <div className="search-suggestions">
-      <p className="suggestions-label">Suggestions :</p>
-      <div className="suggestions-list">
-        {filteredSuggestions.map(s => (
-          <button
-            key={s}
-            className="suggestion-tag"
-            onClick={() => handleSelectSuggestion(s)}
-          >
-            {s}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-
   const CategoryFilter = () => (
     <div className="filter-section">
       <h4>Catégories</h4>
       <div className="category-list">
-        {CATEGORIES.map(category => {
-          const isSelected = filters.categories.includes(category);
+        {CATEGORIES.map(cat => {
+          const isSelected = filters.categories.includes(cat.slug);
           return (
-            <label key={category} className="category-item">
+            <label key={cat.slug} className="category-item">
               <input
                 type="checkbox"
                 checked={isSelected}
@@ -176,12 +228,13 @@ const SearchResults = () => {
                   setFilters(prev => ({
                     ...prev,
                     categories: e.target.checked
-                      ? [...prev.categories, category]
-                      : prev.categories.filter(c => c !== category)
+                      ? [...prev.categories, cat.slug]
+                      : prev.categories.filter(c => c !== cat.slug)
                   }));
                 }}
               />
-              <span>{category}</span>
+              <span className="category-icon">{cat.icon}</span>
+              <span className="category-name">{cat.name}</span>
             </label>
           );
         })}
@@ -202,8 +255,7 @@ const SearchResults = () => {
                 <input
                   type="number"
                   min="0"
-                  max="200"
-                  placeholder={key === 'min' ? '0' : '100'}
+                  max="500"
                   value={filters.priceRange[key]}
                   onChange={(e) => setFilters(prev => ({
                     ...prev,
@@ -243,8 +295,24 @@ const SearchResults = () => {
   );
 
   const ResultCard = ({ item }) => {
-    const imageUrl = item.image || item.thumbnail || '/default-tool.jpg';
-    const ownerName = item.ownerName || `Utilisateur ${item.ownerId || item.owner_id}`;
+    const imageUrl = item.image_url || item.image || item.thumbnail || '/default-tool.jpg';
+    const ownerName = item.owner_name || item.ownerName || 'Propriétaire inconnu';
+    const ownerAvatar = item.owner_avatar || item.ownerAvatar || '/favicon.ico';
+    const ownerId = item.ownerId || item.owner_id || item.user_id;
+    const categoryName = item.category_name || 'Catégorie';
+    const categoryIcon = item.category_icon || '📦';
+    
+    // ✅ DEBUG: Afficher les données de l'item pour vérifier les avis
+    console.log('📊 ResultCard DEBUG - Item data:', {
+      ownerName,
+      owner_rating: item.owner_rating,
+      ownerRating: item.ownerRating,
+      owner_reviews: item.owner_reviews,
+      ownerReviews: item.ownerReviews,
+      review_count: item.review_count,
+      allUserData: item.users,
+      fullItem: item
+    });
     
     return (
       <div className="result-card">
@@ -255,47 +323,71 @@ const SearchResults = () => {
             className="result-image" 
             onError={(e) => { e.target.src = '/default-tool.jpg'; }}
           />
-          <div className="result-badge">Disponible</div>
-          {item.category && <div className="result-category">{item.category}</div>}
+          <div className="result-status-badge">
+            {item.is_available ? '✅ Disponible' : '❌ Indisponible'}
+          </div>
+          {categoryName && (
+            <div className="result-category-badge">
+              {categoryIcon} {categoryName}
+            </div>
+          )}
         </div>
         
         <div className="result-content">
           <div className="result-header">
             <h3 className="result-title">{item.title || item.name}</h3>
-            {(item.rating || item.rating === 0) && (
-              <div className="result-rating">
-                <span className="stars">{"★".repeat(Math.floor(item.rating))}</span>
-                <span className="rating-value">{item.rating?.toFixed(1)}</span>
-                {item.reviews && <span className="reviews-count">({item.reviews})</span>}
-              </div>
-            )}
           </div>
           
-          {item.description && <p className="result-description">{item.description}</p>}
+          {item.description && (
+            <p className="result-description">{item.description.substring(0, 120)}...</p>
+          )}
+          
+          <div className="result-meta">
+            <div className="result-condition">
+              État: <strong>{item.condition || 'bon'}</strong>
+            </div>
+          </div>
           
           <div className="result-owner">
+            <img src={ownerAvatar} alt={ownerName} className="owner-avatar" />
             <div className="owner-info">
-              <span className="owner-label">Propriétaire :</span>
               <span className="owner-name">{ownerName}</span>
-              {item.ownerRating && <span className="owner-rating">{item.ownerRating} ★</span>}
+              <div className="owner-rating">
+                {(item.owner_rating || item.ownerRating || 0).toFixed(1)} ★
+                <span className="rating-count">({item.owner_reviews || item.ownerReviews || item.review_count || 0})</span>
+              </div>
             </div>
+            <button 
+              className="profile-btn"
+              onClick={() => handleViewProfile(ownerId, ownerName)}
+              title="Voir le profil du propriétaire"
+            >
+              👤
+            </button>
           </div>
           
           <div className="result-footer">
             <div className="result-price">
-              <span className="price">{item.price || 0}€</span>
-              <span className="period">/ {item.period || 'jour'}</span>
+              <span className="price">{item.daily_price || item.price || 0}€</span>
+              <span className="period">/ jour</span>
             </div>
             
             <div className="result-actions">
-              <button className="view-details-btn" onClick={() => handleViewDetails(item.id)}>
-                Voir détails
+              <button 
+                className="message-btn"
+                onClick={() => handleSendMessage(ownerId, ownerName, item.id)}
+                title="Envoyer un message au propriétaire"
+              >
+                💬 Message
               </button>
-              <button className="view-owner-btn" onClick={() => handleViewOwner(item.ownerId || item.owner_id)}>
-                Voir profil
-              </button>
-              <button className="reserve-btn" onClick={() => handleReserve(item.id)}>
-                Réserver
+              <button 
+                className="reserve-btn" 
+                onClick={() => {
+                  console.log('🛒 Réserver:', item.id);
+                  handleReserve(item.id);
+                }}
+              >
+                📅 Réserver
               </button>
             </div>
           </div>
@@ -307,18 +399,18 @@ const SearchResults = () => {
   const LoadingState = () => (
     <div className="loading-state">
       <div className="loading-spinner"></div>
-      <p>Recherche en cours...</p>
+      <p>Chargement des équipements...</p>
     </div>
   );
 
   const NoResults = () => (
     <div className="no-results">
       <div className="no-results-icon">🔍</div>
-      <h3>{q ? 'Aucun résultat trouvé' : 'Commencez votre recherche'}</h3>
+      <h3>{q ? 'Aucun résultat trouvé' : 'Aucun équipement disponible'}</h3>
       <p>
         {q 
           ? 'Essayez avec d\'autres termes de recherche ou ajustez vos filtres.'
-          : 'Utilisez la barre de recherche pour trouver des outils disponibles.'
+          : 'Revenez plus tard ou explorez d\'autres catégories.'
         }
       </p>
       {q && (
@@ -330,16 +422,15 @@ const SearchResults = () => {
   );
 
   return (
-  <div className="search-results-page">
-      {/* Hero Section */}
-      <div className="search-hero">
+    <>
+      <Header />
+      <div className="search-results-page">
+        {/* Hero Section */}
+        <div className="search-hero">
         <h1 className="hero-title">Trouvez l'outil pour votre projet</h1>
         <p className="hero-subtitle">Des milliers d'outils disponibles près de chez vous</p>
         <SearchBar />
       </div>
-
-      {/* Suggestions */}
-      {q && filteredSuggestions.length > 0 && <Suggestions />}
 
       <div className="search-content">
         {/* Filters Sidebar */}
@@ -348,7 +439,7 @@ const SearchResults = () => {
             <h3 className="filters-title">Filtres</h3>
             {filters.categories.length > 0 && (
               <span className="category-selected-badge">
-                {filters.categories.length} catégorie{filters.categories.length > 1 ? 's' : ''}
+                {filters.categories.length}
               </span>
             )}
           </div>
@@ -365,9 +456,7 @@ const SearchResults = () => {
               className="availability-select"
             >
               <option value="all">Tous</option>
-              <option value="today">Aujourd'hui</option>
-              <option value="tomorrow">Demain</option>
-              <option value="weekend">Ce weekend</option>
+              <option value="available">Disponibles</option>
             </select>
           </div>
 
@@ -382,7 +471,7 @@ const SearchResults = () => {
           <div className="results-header">
             <div className="results-info">
               <h2 className="results-title">
-                {q ? `Résultats pour "${q}"` : 'Outils disponibles'}
+                {q ? `Résultats pour "${q}"` : 'Tous les outils disponibles'}
               </h2>
               <p className="results-count">
                 {loading ? 'Chargement...' : `${filteredResults.length} ${filteredResults.length === 1 ? 'outil trouvé' : 'outils trouvés'}`}
@@ -421,7 +510,9 @@ const SearchResults = () => {
           )}
         </div>
       </div>
-    </div>
+      </div>
+      <Footer />
+    </>
   );
 };
 

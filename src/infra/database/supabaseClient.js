@@ -1,29 +1,15 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+// ✅ Vérifier que les variables sont présentes
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
+const supabaseKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
 
-// Ne pas throw immédiatement, logger un avertissement
-if (!supabaseUrl || !supabaseServiceRoleKey) {
-  console.warn('⚠️  Variables Supabase non définies. Les opérations Supabase échoueront.');
+if (!supabaseUrl || !supabaseKey) {
+  console.error('❌ ERREUR : Variables Supabase manquantes dans .env');
+  console.error('REACT_APP_SUPABASE_URL:', supabaseUrl);
+  console.error('REACT_APP_SUPABASE_ANON_KEY:', supabaseKey);
 }
 
-let supabase;
-
-try {
-  supabase = createClient(
-    supabaseUrl || 'https://placeholder.supabase.co',
-    supabaseServiceRoleKey || 'placeholder-key',
-    {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    }
-  );
-} catch (err) {
-  console.error('❌ Erreur initialisation Supabase:', err.message);
-  supabase = null;
-}
+const supabase = createClient(supabaseUrl || '', supabaseKey || '');
 
 export default supabase;

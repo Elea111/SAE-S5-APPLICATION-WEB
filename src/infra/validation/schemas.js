@@ -27,14 +27,14 @@ export const UpdateUserSchema = z.object({
 
 // ========== EQUIPMENT SCHEMAS ==========
 export const PublishEquipmentSchema = z.object({
-  title: z.string().min(5, "Titre min 5 caractères").max(255),
-  description: z.string().min(20, "Description min 20 caractères"),
+  title: z.string().min(3, "Titre min 3 caractères"),
+  description: z.string().min(10, "Description min 10 caractères"),
   daily_price: z.number().positive("Prix doit être positif"),
-  caution_deposit: z.number().positive().optional(),
-  location: z.string().min(3).optional(),
-  category_id: z.string().uuid().optional(),
-  condition: z.enum(['neuf', 'bon', 'acceptable']).optional(),
-  specifications: z.record(z.any()).optional()
+  caution_deposit: z.number().optional().nullable(),
+  location: z.string().min(2, "Localisation requise"),
+  condition: z.string().min(1, "Condition requise"),
+  category: z.string().optional().nullable(),  // Ancien format (slug)
+  category_id: z.string().uuid().optional().nullable()  // ✅ NOUVEAU FORMAT (UUID)
 });
 
 export const SearchEquipmentSchema = z.object({
@@ -49,15 +49,10 @@ export const SearchEquipmentSchema = z.object({
 
 // ========== BOOKING SCHEMAS ==========
 export const BookEquipmentSchema = z.object({
-  item_id: z.string().uuid("ID équipement invalide"),
-  start_date: z.string().datetime("Date de début invalide"),
-  end_date: z.string().datetime("Date de fin invalide"),
-  borrower_message: z.string().optional(),
-  total_amount: z.number().positive().optional()
-}).refine(
-  (data) => new Date(data.end_date) > new Date(data.start_date),
-  { message: "La date de fin doit être après la date de début", path: ["end_date"] }
-);
+    item_id: z.string().uuid("ID équipement invalide"),
+    start_date: z.string().datetime("Date début invalide"),
+    end_date: z.string().datetime("Date fin invalide")
+});
 
 export const UpdateBookingSchema = z.object({
   status: z.enum(['pending', 'accepted', 'rejected', 'completed']).optional(),
