@@ -81,16 +81,16 @@ export async function BookEquipment(bookingData, bookingRepository = null, equip
     if (bookingRepository && typeof bookingRepository.create === 'function') {
         const booking = await bookingRepository.create(payload);
         
-        // ✅ METTRE À JOUR LE STATUT DE L'ITEM À "en location"
+        // ✅ METTRE À JOUR LE STATUT DE L'ITEM: is_available = false (en location)
         if (equipmentRepository && typeof equipmentRepository.update === 'function') {
             try {
                 await equipmentRepository.update(item_id, {
-                    is_available: false,
-                    booking_status: 'en location'
+                    is_available: false
                 });
-                console.log(`✅ Item ${item_id} marqué comme "en location"`);
+                console.log(`✅ Item ${item_id} marqué comme non disponible (en location)`);
             } catch (err) {
                 console.warn('⚠️ Impossible de mettre à jour le statut de l\'item:', err.message);
+                // Ne pas bloquer si la mise à jour échoue
             }
         }
         
