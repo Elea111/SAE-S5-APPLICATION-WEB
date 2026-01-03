@@ -11,7 +11,8 @@ export async function PublishEquipment(equipmentData, equipmentRepository = null
       location, 
       condition, 
       user_id, 
-      category, // ✅ Recevoir 'category'
+      category, // Ancien format (slug)
+      category_id, // ✅ Nouveau format (UUID)
       images = [] 
     } = equipmentData;
 
@@ -23,7 +24,7 @@ export async function PublishEquipment(equipmentData, equipmentRepository = null
         throw new Error("Le prix journalier est requis et doit être positif");
     }
 
-    // ✅ CONSTRUCTION PAYLOAD - MAPPER category → category_id
+    // ✅ CONSTRUCTION PAYLOAD - Utiliser category_id directement (UUID)
     const payload = {
         user_id,
         title: title.trim(),
@@ -32,7 +33,7 @@ export async function PublishEquipment(equipmentData, equipmentRepository = null
         caution_deposit: caution_deposit ? parseFloat(caution_deposit) : null,
         location: location || '',
         condition: condition || 'bon',
-        category_id: category || null, // ✅ Mapper à category_id
+        category_id: category_id || category || null, // ✅ Accepter category_id OU category
         is_available: true,
         created_at: new Date().toISOString(),
     };

@@ -146,7 +146,20 @@ app.get('/api/users/:id', authMiddleware, async (req, res) => {
     }
     const user = await di.userRepository.findById(req.params.id);
     if (!user) return res.status(404).json({ message: 'User not found' });
-    res.json(user);
+    
+    // ✅ CALCULER LES STATS D'AVIS EN TEMPS RÉEL
+    const reviews = await di.reviewRepository.findByTargetUserId(req.params.id);
+    const review_count = reviews.length;
+    const avgRating = review_count > 0 
+      ? (reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / review_count).toFixed(1)
+      : 0;
+    
+    // ✅ RETOURNER L'UTILISATEUR AVEC LES STATS CALCULÉES
+    res.json({
+      ...user,
+      rating: parseFloat(avgRating),
+      review_count: review_count
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -158,14 +171,21 @@ app.get('/api/users/:id/public', async (req, res) => {
     const user = await di.userRepository.findById(req.params.id);
     if (!user) return res.status(404).json({ message: 'User not found' });
     
+    // ✅ CALCULER LES STATS D'AVIS EN TEMPS RÉEL
+    const reviews = await di.reviewRepository.findByTargetUserId(req.params.id);
+    const review_count = reviews.length;
+    const avgRating = review_count > 0 
+      ? (reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / review_count).toFixed(1)
+      : 0;
+    
     // ✅ RETOURNER SEULEMENT LES INFOS PUBLIQUES
     res.json({
       id: user.id,
       first_name: user.first_name,
       last_name: user.last_name,
       avatar_url: user.avatar_url,
-      rating: user.rating,
-      review_count: user.review_count,
+      rating: parseFloat(avgRating),
+      review_count: review_count,
       created_at: user.created_at,
       is_pro: user.is_pro
     });
@@ -456,7 +476,7 @@ app.post('/api/equipments', authMiddleware, validateBody(PublishEquipmentSchema)
 
 app.get('/api/equipments/:id', async (req, res) => {
   try {
-    // ✅ JOINDRE users ET categories ET item_photos
+    // ✅ JOINDRE users ET categories (directement via category_id) ET item_photos
     const { data, error } = await di.equipmentRepository
       .supabase
       .from('items')
@@ -472,7 +492,7 @@ app.get('/api/equipments/:id', async (req, res) => {
         is_available,
         category_id,
         created_at,
-        users:user_id (
+        users!user_id (
           id,
           first_name,
           last_name,
@@ -480,7 +500,7 @@ app.get('/api/equipments/:id', async (req, res) => {
           rating,
           review_count
         ),
-        categories:category_id (
+        categories!category_id (
           id,
           name,
           slug,
@@ -521,10 +541,11 @@ app.get('/api/equipments/:id', async (req, res) => {
       owner_rating: data.users?.rating,
       owner_reviews: data.users?.review_count,
       
-      // Catégorie
+      // ✅ Catégorie (directement de la colonne category_id + join categories)
       category_id: data.category_id,
       category_name: data.categories?.name || 'Sans catégorie',
       category_icon: data.categories?.icon,
+      category_slug: data.categories?.slug,
       
       // ✅ IMAGE PRINCIPALE (première photo)
       image_url: data.item_photos?.[0]?.image_url || null,
@@ -698,8 +719,8 @@ app.get('/api/equipments', validateQuery(SearchEquipmentSchema), async (req, res
     try {
         console.log('🔍 Requête /api/equipments reçue');
 
-        // ✅ JOINDRE users ET categories ET item_photos
-        let query = di.equipmentRepository
+        // ✅ ÉTAPE 1: RÉCUPÉRER LES ITEMS
+        const { data: items, error: itemsError } = await di.equipmentRepository
             .supabase
             .from('items')
             .select(`
@@ -714,39 +735,87 @@ app.get('/api/equipments', validateQuery(SearchEquipmentSchema), async (req, res
                 is_available,
                 category_id,
                 created_at,
-                users:user_id (
-                    id,
-                    first_name,
-                    last_name,
-                    avatar_url,
-                    rating,
-                    review_count
-                ),
-                categories:category_id (
+                categories!category_id (
                     id,
                     name,
-                    slug
+                    slug,
+                    icon
                 ),
                 item_photos (
                     id,
                     image_url,
                     sort_order
                 )
-            `);
-
-        const { data, error } = await query
+            `)
             .order('created_at', { ascending: false })
             .limit(50);
 
-        if (error) {
-            console.error('❌ Supabase error:', error);
-            throw error;
+        if (itemsError) {
+            console.error('❌ Supabase items error:', itemsError);
+            throw itemsError;
         }
 
-        console.log(`✅ ${data?.length || 0} équipements trouvés`);
+        // ✅ ÉTAPE 2: RÉCUPÉRER LES USERS SÉPARÉMENT
+        const userIds = [...new Set((items || []).map(item => item.user_id))];
+        let usersMap = {};
+        
+        if (userIds.length > 0) {
+            const { data: users, error: usersError } = await di.equipmentRepository
+                .supabase
+                .from('users')
+                .select('id, first_name, last_name, avatar_url')
+                .in('id', userIds);
+            
+            if (usersError) {
+                console.error('❌ Supabase users error:', usersError);
+            } else {
+                usersMap = Object.fromEntries((users || []).map(u => [u.id, u]));
+                console.log('✅ Users chargés:', Object.keys(usersMap).length);
+            }
+            
+            // ✅ ÉTAPE 2B: RÉCUPÉRER LES REVIEWS POUR CHAQUE USER ET CALCULER LE RATING
+            for (const userId of userIds) {
+                const reviews = await di.reviewRepository.findByTargetUserId(userId);
+                const reviewCount = reviews?.length || 0;
+                const avgRating = reviewCount > 0
+                    ? (reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviewCount).toFixed(1)
+                    : 0;
+                
+                if (usersMap[userId]) {
+                    usersMap[userId].review_count = reviewCount;
+                    usersMap[userId].rating = parseFloat(avgRating);
+                    
+                    // DEBUG
+                    if (usersMap[userId].first_name === 'Math') {
+                        console.log('🔍 DEBUG Math - Reviews:', {
+                            userId,
+                            reviewCount,
+                            avgRating,
+                            reviews
+                        });
+                    }
+                }
+            }
+        }
 
-        // ✅ MAPPER LES DONNÉES
-        const results = (data || []).map(item => ({
+        console.log(`✅ ${items?.length || 0} équipements trouvés`);
+
+        // ✅ ÉTAPE 3: MAPPER LES DONNÉES
+        const results = (items || []).map(item => {
+            const user = usersMap[item.user_id];
+            
+            // ✅ DEBUG: Vérifier les données utilisateur
+            if (item.title?.includes('Batte') || item.title?.includes('plaque')) {
+                console.log('🔍 DEBUG - Item trouvé:', {
+                    itemTitle: item.title,
+                    userId: item.user_id,
+                    userData: user,
+                    userRating: user?.rating,
+                    userReviewCount: user?.review_count
+                });
+            }
+            
+            return {
             id: item.id,
             title: item.title,
             description: item.description,
@@ -760,26 +829,30 @@ app.get('/api/equipments', validateQuery(SearchEquipmentSchema), async (req, res
             // ✅ DONNÉES DU PROPRIÉTAIRE
             ownerId: item.user_id,
             owner_id: item.user_id,
-            owner_name: item.users 
-                ? `${item.users.first_name} ${item.users.last_name}` 
+            owner_name: user 
+                ? `${user.first_name} ${user.last_name}` 
                 : 'Propriétaire inconnu',
-            ownerName: item.users 
-                ? `${item.users.first_name} ${item.users.last_name}` 
+            ownerName: user 
+                ? `${user.first_name} ${user.last_name}` 
                 : 'Propriétaire inconnu',
-            owner_avatar: item.users?.avatar_url,
-            ownerAvatar: item.users?.avatar_url,
-            owner_rating: item.users?.rating,
-            ownerRating: item.users?.rating,
-            owner_reviews: item.users?.review_count,
+            owner_avatar: user?.avatar_url,
+            ownerAvatar: user?.avatar_url,
+            owner_rating: user?.rating || 0,
+            ownerRating: user?.rating || 0,
+            owner_reviews: user?.review_count || 0,
+            ownerReviews: user?.review_count || 0,
+            review_count: user?.review_count || 0,
             
-            // ✅ DONNÉES DE CATÉGORIE
+            // ✅ DONNÉES DE CATÉGORIE (directement)
             category_id: item.category_id,
             category_name: item.categories?.name || 'Sans catégorie',
             category_slug: item.categories?.slug,
+            category_icon: item.categories?.icon,
             
             // ✅ IMAGE PRINCIPALE (première photo)
             image_url: item.item_photos?.[0]?.image_url || null
-        }));
+        };
+        });
 
         res.json(results);
     } catch (err) {
@@ -809,6 +882,77 @@ app.post('/api/bookings', authMiddleware, validateBody(BookEquipmentSchema), asy
   } catch (err) {
     console.error('Booking error:', err);
     res.status(400).json({ message: err.message });
+  }
+});
+
+/**
+ * GET /api/bookings/user/:userId
+ * Récupère toutes les réservations d'un utilisateur (comme emprunteur ou propriétaire)
+ */
+app.get('/api/bookings/user/:userId', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    
+    // Récupérer les réservations où l'utilisateur est borrower
+    const { data: borrowerBookings, error: bError } = await supabaseClient
+      .from('bookings')
+      .select(`
+        *,
+        items!item_id(id, title, daily_price, user_id),
+        users!borrower_id(id, first_name, last_name, avatar_url)
+      `)
+      .eq('borrower_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (bError) {
+      console.error('❌ Error fetching borrower bookings:', bError);
+    }
+
+    // Récupérer les réservations où l'utilisateur est owner (via items)
+    const { data: itemsOfOwner, error: iError } = await supabaseClient
+      .from('items')
+      .select('id')
+      .eq('user_id', userId);
+
+    let ownerBookings = [];
+    if (!iError && itemsOfOwner && itemsOfOwner.length > 0) {
+      const itemIds = itemsOfOwner.map(i => i.id);
+      
+      const { data: obsData, error: obError } = await supabaseClient
+        .from('bookings')
+        .select(`
+          *,
+          items!item_id(id, title, daily_price, user_id),
+          users!borrower_id(id, first_name, last_name, avatar_url)
+        `)
+        .in('item_id', itemIds)
+        .order('created_at', { ascending: false });
+
+      if (obError) {
+        console.error('❌ Error fetching owner bookings:', obError);
+      } else {
+        ownerBookings = obsData || [];
+      }
+    }
+
+    // Fusionner et dédupliquer, en ajoutant l'owner_id calculé
+    const allBookings = [
+      ...(borrowerBookings || []),
+      ...ownerBookings
+    ];
+    
+    const uniqueBookings = Array.from(
+      new Map(allBookings.map(b => [b.id, {
+        ...b,
+        owner_id: b.items?.user_id  // Ajouter owner_id calculé depuis items.user_id
+      }])).values()
+    );
+
+    console.log('✅ Bookings fetched:', uniqueBookings.length, 'for user', userId);
+    res.json(uniqueBookings || []);
+  } catch (err) {
+    console.error('❌ Error:', err);
+    res.status(500).json({ message: err.message });
   }
 });
 
@@ -844,7 +988,9 @@ app.get('/api/bookings/:id', authMiddleware, async (req, res) => {
       deposit_amount: booking.caution_amount || 0,
       start_date: booking.start_date,
       end_date: booking.end_date,
-      status: booking.status
+      status: booking.status,
+      borrower_id: booking.borrower_id,
+      owner_id: equipment?.user_id || null
     });
   } catch (err) {
     console.error('❌ Erreur récupération réservation:', err);
@@ -865,6 +1011,90 @@ app.patch('/api/bookings/:id', authMiddleware, validateBody(UpdateBookingSchema)
     const updated = await di.bookingRepository.update(bookingId, req.validated);
     res.json(updated);
   } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+/**
+ * PATCH /api/bookings/:id/status
+ * Mettre à jour le statut d'une réservation
+ * Status: pending → confirmed → handed_over → returned
+ * SI TRANSITION pending→confirmed, ENVOYER NOTIFICATION AU BORROWER
+ */
+app.patch('/api/bookings/:id/status', authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    const userId = req.user.id;
+
+    console.log('🔄 Update booking status:', { id, status, userId });
+
+    if (!status || !['pending', 'confirmed', 'handed_over', 'pickup_confirmed', 'returned', 'return_confirmed', 'cancelled'].includes(status)) {
+      console.error('❌ Invalid status:', status);
+      return res.status(400).json({ message: 'Statut invalide: ' + status });
+    }
+
+    // Vérifier que booking existe
+    const { data: booking, error: fetchError } = await supabaseClient
+      .from('bookings')
+      .select('*, items!item_id(user_id)')
+      .eq('id', id)
+      .single();
+
+    if (fetchError || !booking) {
+      return res.status(404).json({ message: 'Réservation non trouvée' });
+    }
+
+    // Récupérer owner_id depuis l'item
+    const owner_id = booking.items?.user_id;
+
+    // Vérifier que user est owner ou borrower
+    if (owner_id !== userId && booking.borrower_id !== userId) {
+      return res.status(403).json({ message: 'Accès non autorisé' });
+    }
+
+    // Mettre à jour le statut
+    const { data, error } = await supabaseClient
+      .from('bookings')
+      .update({ 
+        status, 
+        updated_at: new Date().toISOString() 
+      })
+      .eq('id', id)
+      .select();
+
+    if (error) {
+      console.error('❌ Update status error:', error);
+      return res.status(400).json({ message: error.message });
+    }
+
+    // SI TRANSITION pending→confirmed (propriétaire accepte), ENVOYER NOTIFICATION
+    if (booking.status === 'pending' && status === 'confirmed') {
+      const targetUserId = booking.borrower_id;
+      const message = `✅ Bonne nouvelle! Votre réservation a été acceptée par le propriétaire.`;
+      
+      try {
+        await supabaseClient
+          .from('messages')
+          .insert([
+            {
+              sender_id: owner_id,
+              receiver_id: targetUserId,
+              content: message,
+              booking_id: booking.id,
+              created_at: new Date().toISOString()
+            }
+          ]);
+        console.log('✅ Notification sent to borrower');
+      } catch (msgErr) {
+        console.warn('⚠️ Erreur envoi notif:', msgErr);
+      }
+    }
+
+    console.log('✅ Booking status updated:', id, '→', status);
+    res.json(data[0]);
+  } catch (err) {
+    console.error('❌ Status update error:', err.message);
     res.status(500).json({ message: err.message });
   }
 });

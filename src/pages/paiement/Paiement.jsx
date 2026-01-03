@@ -145,7 +145,23 @@ const PaiementInterne = () => {
     }
 
     try {
-      // 1️⃣ CREER LA SESSION STRIPE
+      // 1️⃣ SAUVEGARDER LES DÉTAILS DE RÉSERVATION DANS LOCALSTORAGE
+      localStorage.setItem(`booking_${booking.id}`, JSON.stringify({
+        id: booking.id,
+        equipmentTitle: booking.item_title,
+        equipmentId: booking.item_id,
+        startDate: booking.start_date,
+        endDate: booking.end_date,
+        totalDays: booking.total_days,
+        dailyPrice: booking.item_price,
+        rentalAmount: booking.amount,
+        cautionAmount: booking.caution,
+        totalPrice: booking.total
+      }));
+
+      console.log('✅ Détails réservation sauvegardés dans localStorage:', booking.id);
+
+      // 2️⃣ CREER LA SESSION STRIPE
       console.log('💳 Créant session Stripe...');
       
       const checkoutRes = await fetch(`${API_BASE}/api/stripe/checkout-session`, {

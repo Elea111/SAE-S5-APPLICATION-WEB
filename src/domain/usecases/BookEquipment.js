@@ -17,6 +17,27 @@ export async function BookEquipment(bookingData, bookingRepository = null, equip
         throw new Error("La date de fin doit être après la date de début");
     }
 
+    // ✅ VÉRIFIER S'IL Y A DÉJÀ UNE RÉSERVATION CHEVAUCHANTE
+    if (bookingRepository && typeof bookingRepository.findConflictingBookings === 'function') {
+        try {
+            const conflicts = await bookingRepository.findConflictingBookings(
+                item_id,
+                startDate.toISOString(),
+                endDate.toISOString()
+            );
+            
+            if (conflicts && conflicts.length > 0) {
+                console.warn('⚠️ Conflit de réservation détecté pour l\'item:', item_id);
+                throw new Error("Cet outil n'est pas disponible pour ces dates. Veuillez choisir d'autres dates.");
+            }
+        } catch (err) {
+            if (err.message.includes("n'est pas disponible")) {
+                throw err;
+            }
+            console.warn('⚠️ Impossible de vérifier les conflits:', err.message);
+        }
+    }
+
     // ✅ CALCULER LE NOMBRE DE JOURS
     const totalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
 
@@ -59,6 +80,20 @@ export async function BookEquipment(bookingData, bookingRepository = null, equip
     // ✅ UTILISER LE REPOSITORY
     if (bookingRepository && typeof bookingRepository.create === 'function') {
         const booking = await bookingRepository.create(payload);
+        
+        // ✅ METTRE À JOUR LE STATUT DE L'ITEM À "en location"
+        if (equipmentRepository && typeof equipmentRepository.update === 'function') {
+            try {
+                await equipmentRepository.update(item_id, {
+                    is_available: false,
+                    booking_status: 'en location'
+                });
+                console.log(`✅ Item ${item_id} marqué comme "en location"`);
+            } catch (err) {
+                console.warn('⚠️ Impossible de mettre à jour le statut de l\'item:', err.message);
+            }
+        }
+        
         return {
             id: booking.id,
             ...booking,

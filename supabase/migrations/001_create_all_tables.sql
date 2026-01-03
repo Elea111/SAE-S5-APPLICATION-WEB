@@ -71,6 +71,15 @@ CREATE TABLE IF NOT EXISTS item_categories (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(item_id, category_id)
 );
+INSERT INTO categories (name, slug, description, icon) VALUES
+('Électroportatif', 'electroportatif', 'Outils électriques et perceuses', '🔌'),
+('Jardinage', 'jardinage', 'Outils de jardin et tondeuses', '🌱'),
+('Construction', 'construction', 'Matériel de construction et bricolage', '🔨'),
+('Nettoyage', 'nettoyage', 'Machines et produits de nettoyage', '🧹'),
+('Soudure', 'soudure', 'Équipement de soudure et découpe', '⚡'),
+('Mesure', 'mesure', 'Instruments de mesure et niveau', '📏'),
+('Peinture', 'peinture', 'Matériel de peinture et revêtement', '🎨'),
+('Autre', 'autre', 'Autres outils et équipements', '📦');
 
 -- ========== BOOKINGS TABLE ==========
 CREATE TABLE IF NOT EXISTS bookings (

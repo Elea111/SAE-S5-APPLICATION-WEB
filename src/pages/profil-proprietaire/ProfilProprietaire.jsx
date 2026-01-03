@@ -317,6 +317,20 @@ const ProfilProprietaire = () => {
             </button>
           </div>
 
+          {/* ✅ RATING & QUICK ACTIONS - MOVED HERE FOR BETTER UX */}
+          <div className="profile-card-sidebar">
+            <div className="rating-section-sidebar">
+              <div className="stars">{'★'.repeat(Math.round(userData.rating || 0))}{'☆'.repeat(5 - Math.round(userData.rating || 0))}</div>
+              <span className="rating-text">{(userData.rating || 0).toFixed(1)} / 5 sur {userData.review_count || 0} avis</span>
+            </div>
+
+            <div className="profile-actions-sidebar">
+              <button className="btn-link" onClick={toggleEdit}>{editing ? 'Annuler' : 'Modifier mon profil'}</button>
+              <button className="btn-link" onClick={() => window.location.href = '/bookings'}>Mes réservations</button>
+              <button className="btn-link" onClick={() => window.location.href = '/my-listings'}>Mes annonces</button>
+            </div>
+          </div>
+
           <div className="owner-actions">
             <button className="btn-primary full" onClick={goToSearch}>Chercher un outil</button>
             <button className="btn-outline full" onClick={goToPublish}>Proposer un outil</button>
@@ -341,57 +355,46 @@ const ProfilProprietaire = () => {
               </div>
             </div>
 
-            <div className="rating-section">
-              <div className="stars">{'★'.repeat(Math.round(userData.rating || 0))}{'☆'.repeat(5 - Math.round(userData.rating || 0))}</div>
-              <span className="rating-text">{(userData.rating || 0).toFixed(1)} / 5 sur {userData.review_count || 0} avis</span>
+            <div className="profile-details">
+              {editing ? (
+                <div className="edit-form">
+                  <label>Prénom
+                    <input name="first_name" value={form.first_name} onChange={handleChange} />
+                  </label>
+                  <label>Nom
+                    <input name="last_name" value={form.last_name} onChange={handleChange} />
+                  </label>
+                  <label>Téléphone
+                    <input name="phone" value={form.phone} onChange={handleChange} />
+                  </label>
+                  <label>Adresse
+                    <input name="address" value={form.address} onChange={handleChange} />
+                  </label>
+                  <div className="edit-actions">
+                    <button className="btn-primary" onClick={saveProfile}>Enregistrer</button>
+                    <button className="btn-outline" onClick={() => setEditing(false)}>Annuler</button>
+                  </div>
+                  {message && <p className="info">{message}</p>}
+                </div>
+              ) : (
+                <div className="info-grid">
+                  <div className="info-item">
+                    <h4>Contact</h4>
+                    <p>{userData.phone || '—'}</p>
+                    <p className="muted">{userData.email}</p>
+                  </div>
+                  <div className="info-item">
+                    <h4>Adresse</h4>
+                    <p>{userData.address || '—'}</p>
+                  </div>
+                  <div className="info-item">
+                    <h4>Statistiques</h4>
+                    <p>Outils proposés: {userData.listings_count || 0}</p>
+                    <p>Locations réalisées: {userData.rental_count || 0}</p>
+                  </div>
+                </div>
+              )}
             </div>
-
-            <div className="profile-actions">
-              <button className="btn-link" onClick={toggleEdit}>{editing ? 'Annuler' : 'Modifier mon profil'}</button>
-              <button className="btn-link" onClick={() => window.location.href = '/bookings'}>Mes réservations</button>
-              <button className="btn-link" onClick={() => window.location.href = '/my-listings'}>Mes annonces</button>
-            </div>
-          </div>
-
-          <div className="profile-details">
-            {editing ? (
-              <div className="edit-form">
-                <label>Prénom
-                  <input name="first_name" value={form.first_name} onChange={handleChange} />
-                </label>
-                <label>Nom
-                  <input name="last_name" value={form.last_name} onChange={handleChange} />
-                </label>
-                <label>Téléphone
-                  <input name="phone" value={form.phone} onChange={handleChange} />
-                </label>
-                <label>Adresse
-                  <input name="address" value={form.address} onChange={handleChange} />
-                </label>
-                <div className="edit-actions">
-                  <button className="btn-primary" onClick={saveProfile}>Enregistrer</button>
-                  <button className="btn-outline" onClick={() => setEditing(false)}>Annuler</button>
-                </div>
-                {message && <p className="info">{message}</p>}
-              </div>
-            ) : (
-              <div className="info-grid">
-                <div className="info-item">
-                  <h4>Contact</h4>
-                  <p>{userData.phone || '—'}</p>
-                  <p className="muted">{userData.email}</p>
-                </div>
-                <div className="info-item">
-                  <h4>Adresse</h4>
-                  <p>{userData.address || '—'}</p>
-                </div>
-                <div className="info-item">
-                  <h4>Statistiques</h4>
-                  <p>Outils proposés: {userData.listings_count || 0}</p>
-                  <p>Locations réalisées: {userData.rental_count || 0}</p>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -430,15 +433,49 @@ const ProfilProprietaire = () => {
         </div>
 
         <div className="reviews-section">
-          <h3>Avis récents</h3>
-          {reviews.length === 0 ? <p>Aucun avis pour le moment.</p> : (
-            <ul className="reviews-list">
-              {reviews.slice(0,5).map(r => (
-                <li key={r.id}>
-                  <strong>{r.rating}★</strong> — {r.title || r.content || '—'} <span className="muted">({new Date(r.created_at || r.date || Date.now()).toLocaleDateString()})</span>
-                </li>
-              ))}
-            </ul>
+          <h3>Avis reçus ({reviews.length})</h3>
+          {reviews.length === 0 ? (
+            <p className="no-reviews">Aucun avis pour le moment.</p>
+          ) : (
+            <div className="reviews-list">
+              {reviews.map(review => {
+                const author = review.users || {};
+                const rating = Math.round(review.rating || 0);
+                return (
+                  <div key={review.id} className="review-card">
+                    <div className="review-header">
+                      <a 
+                        href={`/profil?userId=${author.id}`}
+                        className="reviewer-info-link"
+                      >
+                        <div className="reviewer-info">
+                          <img 
+                            src={author.avatar_url || '/favicon.ico'} 
+                            alt={author.first_name} 
+                            className="reviewer-avatar"
+                          />
+                          <div className="reviewer-details">
+                            <strong className="reviewer-name">
+                              {author.first_name} {author.last_name}
+                            </strong>
+                            <span className="review-date">
+                              {new Date(review.created_at).toLocaleDateString('fr-FR')}
+                            </span>
+                          </div>
+                        </div>
+                      </a>
+                      <div className="review-rating">
+                        {'★'.repeat(rating)}{'☆'.repeat(5 - rating)}
+                        <span className="rating-value">{review.rating}/5</span>
+                      </div>
+                    </div>
+                    <div className="review-body">
+                      <p>{review.comment || review.content || 'Pas de commentaire'}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           )}
         </div>
       </div>
