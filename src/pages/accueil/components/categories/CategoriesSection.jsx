@@ -12,10 +12,10 @@ const CategoriesSection = () => {
         { name: 'Jardinage', icon: iconJardinage },
         { name: 'Construction', icon: iconConstruction },
         { name: 'Peinture', icon: iconPeinture },
-        { name: 'Électroportatif', icon: iconElectroportatif },
-        { name: 'Jardinage', icon: iconJardinage },
-        { name: 'Construction', icon: iconConstruction },
-        { name: 'Peinture', icon: iconPeinture }
+        { name: 'Nettoyage', icon: iconElectroportatif },
+        { name: 'Soudure', icon: iconConstruction },
+        { name: 'Mesure', icon: iconPeinture },
+        { name: 'Autre', icon: iconJardinage }
     ];
 
     return (

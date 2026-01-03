@@ -17,6 +17,10 @@ import Payments from './pages/paiement/Paiement.jsx';
 import PaymentSuccess from './pages/paiement/PaymentSuccess.jsx';
 import Reservation from './pages/reservation/Reservation.jsx';
 import Bookings from './pages/bookings/Bookings.jsx';
+import RateBooking from './pages/rate-booking/RateBooking.jsx';
+import Terms from './pages/legal/Terms.jsx';
+import Privacy from './pages/legal/Privacy.jsx';
+import RGPD from './pages/legal/RGPD.jsx';
 import { Elements } from '@stripe/react-stripe-js';
 //import { loadStripe } from '@stripe/js';
 import { loadStripe } from '@stripe/stripe-js'; // ✅ Bon nom
@@ -49,8 +53,14 @@ function App() {
                 {path.startsWith('/paiement') && <Payments />}  {/* ✅ DANS <Elements> */}
                 {path.startsWith('/payment-success') && <PaymentSuccess />}
                 {path.startsWith('/bookings') && <Bookings />}
+                {path.startsWith('/rate-booking') && <RateBooking />}
                 {path.startsWith('/reservation') && <Reservation />}
                 {path.startsWith('/edit-listing') && <EditEquipment />}
+                
+                {/* ✅ PAGES LÉGALES */}
+                {path.startsWith('/legal/terms') && <Terms />}
+                {path.startsWith('/legal/privacy') && <Privacy />}
+                {path.startsWith('/legal/rgpd') && <RGPD />}
 
                 {/* Page d'accueil par défaut */}
                 {!path.startsWith('/') || path === '/' && (

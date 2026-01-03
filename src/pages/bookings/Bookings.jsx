@@ -4,43 +4,133 @@ import Footer from '../../components/layout/footer/Footer';
 import './Bookings.css';
 
 const Bookings = () => {
-  const [booking, setBooking] = useState(null);
+  const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [tab, setTab] = useState('borrower'); // 'borrower' ou 'owner'
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [me, setMe] = useState(null);
+  const [error, setError] = useState(null);
 
   const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:4000' : '';
 
   useEffect(() => {
-    // Récupérer bookingId depuis query params
-    const params = new URLSearchParams(window.location.search);
-    const bookingId = params.get('booking');
-
-    if (!bookingId) {
-      setError('ID réservation manquant');
-      setLoading(false);
+    const authRaw = localStorage.getItem('auth');
+    if (!authRaw) {
+      window.location.href = '/connexion';
       return;
     }
 
-    // Charger les détails de la réservation
-    const auth = JSON.parse(localStorage.getItem('auth') || '{}');
-    
-    fetch(`${API_BASE}/api/bookings/${bookingId}`, {
-      headers: auth.token ? { 'Authorization': `Bearer ${auth.token}` } : {}
+    const auth = JSON.parse(authRaw);
+    const userId = auth.userId || auth.id;
+    setMe(userId);
+
+    // Charger les réservations utilisateur depuis API
+    fetch(`${API_BASE}/api/bookings/user/${userId}`, {
+      headers: {
+        'Authorization': `Bearer ${auth.token}`
+      }
     })
-      .then(r => {
-        if (!r.ok) throw new Error('Réservation non trouvée');
-        return r.json();
-      })
+      .then(r => r.ok ? r.json() : [])
       .then(data => {
-        console.log('✅ Réservation chargée:', data);
-        setBooking(data);
+        console.log('📦 Bookings loaded:', data);
+        const bookingsArray = Array.isArray(data) ? data : [];
+        
+        // Mapper les données pour assurer les bons noms de champs
+        const mappedBookings = bookingsArray.map(b => {
+          const borrowerName = b.users 
+            ? `${b.users.first_name} ${b.users.last_name || ''}`.trim()
+            : 'Emprunteur inconnu';
+          
+          return {
+            id: b.id,
+            title: b.items?.title || 'Équipement',
+            status: b.status,
+            start_date: b.start_date,
+            end_date: b.end_date,
+            total_price: b.total_amount || 0,
+            borrower_id: b.borrower_id,
+            owner_id: b.owner_id,
+            borrower_name: borrowerName
+          };
+        });
+        
+        setBookings(mappedBookings);
+        setLoading(false);
       })
       .catch(err => {
-        console.error('❌ Erreur:', err);
-        setError('Réservation introuvable');
-      })
-      .finally(() => setLoading(false));
+        console.error('Erreur fetch bookings:', err);
+        setError('Erreur lors du chargement des réservations');
+        setLoading(false);
+      });
   }, [API_BASE]);
+
+  const handleStatusChange = async (bookingId, newStatus) => {
+    const auth = JSON.parse(localStorage.getItem('auth'));
+    
+    try {
+      const res = await fetch(`${API_BASE}/api/bookings/${bookingId}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${auth.token}`
+        },
+        body: JSON.stringify({ status: newStatus })
+      });
+
+      if (!res.ok) throw new Error('Erreur update status');
+
+      // Mettre à jour localement
+      setBookings(prev =>
+        prev.map(b => b.id === bookingId ? { ...b, status: newStatus } : b)
+      );
+
+      alert('✅ Statut mis à jour');
+    } catch (err) {
+      console.error('❌ Erreur update:', err);
+      alert('❌ Erreur lors de la mise à jour');
+    }
+  };
+
+  const getStatusLabel = status => {
+    const labels = {
+      pending: '⏳ En attente',
+      confirmed: '✅ Confirmée',
+      handed_over: '🚚 Item remis',
+      pickup_confirmed: '📥 Réception confirmée',
+      returned: '📦 Item retourné',
+      return_confirmed: '✅ Retour confirmé',
+      cancelled: '❌ Annulée'
+    };
+    return labels[status] || status;
+  };
+
+  const getStatusColor = status => {
+    const colors = {
+      pending: '#ffa500',
+      confirmed: '#4caf50',
+      handed_over: '#2196f3',
+      pickup_confirmed: '#9c27b0',
+      returned: '#ff9800',
+      return_confirmed: '#4caf50',
+      cancelled: '#f44336'
+    };
+    return colors[status] || '#999';
+  };
+
+  const filteredBookings = bookings.filter(booking => {
+    // Si l'utilisateur est borrower, il voit cette réservation dans l'onglet "emprunteur"
+    // Si l'utilisateur n'est pas borrower, il est propriétaire (owner)
+    const isUserBorrower = booking.borrower_id === me;
+    
+    // Filtrer par tab
+    if (tab === 'borrower' && !isUserBorrower) return false;
+    if (tab === 'owner' && isUserBorrower) return false;
+
+    // Filtrer par statut
+    if (filterStatus !== 'all' && booking.status !== filterStatus) return false;
+
+    return true;
+  });
 
   if (loading) {
     return (
@@ -48,22 +138,7 @@ const Bookings = () => {
         <Header />
         <div className="bookings-page">
           <div className="bookings-container">
-            <p>⏳ Chargement...</p>
-          </div>
-        </div>
-        <Footer />
-      </>
-    );
-  }
-
-  if (error) {
-    return (
-      <>
-        <Header />
-        <div className="bookings-page">
-          <div className="bookings-container">
-            <p className="error">❌ {error}</p>
-            <button onClick={() => window.location.href = '/'}>← Retour à l'accueil</button>
+            <p>⏳ Chargement des réservations...</p>
           </div>
         </div>
         <Footer />
@@ -76,112 +151,312 @@ const Bookings = () => {
       <Header />
       <div className="bookings-page">
         <div className="bookings-container">
-          {/* ✅ ICÔNE DE SUCCÈS */}
-          <div className="success-icon">✓</div>
+          <div className="bookings-header">
+            <h1>📋 Mes réservations</h1>
+            <p>Suivez vos locations et échanges d'outils</p>
+          </div>
 
-          {/* ✅ TITRE */}
-          <h1 className="success-title">Paiement réussi !</h1>
-          <p className="success-subtitle">Votre réservation a été confirmée</p>
-
-          {/* ✅ DÉTAILS DE LA RÉSERVATION */}
-          {booking ? (
-            <div className="booking-details">
-              <h2>Détails de votre réservation</h2>
-              
-              <div className="detail-row">
-                <span className="label">📅 Dates</span>
-                <span className="value">
-                  {new Date(booking.start_date).toLocaleDateString('fr-FR')} 
-                  {' → '} 
-                  {new Date(booking.end_date).toLocaleDateString('fr-FR')}
-                </span>
-              </div>
-
-              <div className="detail-row">
-                <span className="label">💰 Montant total</span>
-                <span className="value">{booking.total_price || booking.totalPrice}€</span>
-              </div>
-
-              <div className="detail-row">
-                <span className="label">📊 Statut</span>
-                <span className={`value status-${booking.status || 'pending'}`}>
-                  {booking.status === 'confirmed' ? '✅ Confirmée' : 
-                   booking.status === 'pending' ? '⏳ En attente' : 
-                   booking.status || 'En cours'}
-                </span>
-              </div>
-
-              <div className="detail-row">
-                <span className="label">📅 Créée le</span>
-                <span className="value">
-                  {new Date(booking.created_at).toLocaleDateString('fr-FR')} à {new Date(booking.created_at).toLocaleTimeString('fr-FR')}
-                </span>
-              </div>
-
-              {/* ✅ PROCHAINES ÉTAPES */}
-              <div className="next-steps">
-                <h3>Prochaines étapes</h3>
-                <ol className="steps-list">
-                  <li>
-                    <span className="step-number">1</span>
-                    <div className="step-content">
-                      <strong>Confirmez la prise en charge</strong>
-                      <p>Vous verrez bientôt les coordonnées du propriétaire pour organiser la récupération</p>
-                    </div>
-                  </li>
-                  <li>
-                    <span className="step-number">2</span>
-                    <div className="step-content">
-                      <strong>Rendez-vous pour récupérer l'outil</strong>
-                      <p>Contactez le propriétaire via la messagerie pour convenir d'un rendez-vous</p>
-                    </div>
-                  </li>
-                  <li>
-                    <span className="step-number">3</span>
-                    <div className="step-content">
-                      <strong>Utilisez l'outil</strong>
-                      <p>Profitez de votre location pendant la période convenue</p>
-                    </div>
-                  </li>
-                  <li>
-                    <span className="step-number">4</span>
-                    <div className="step-content">
-                      <strong>Rendez l'outil</strong>
-                      <p>Retournez l'outil dans le même état à la date prévue</p>
-                    </div>
-                  </li>
-                  <li>
-                    <span className="step-number">5</span>
-                    <div className="step-content">
-                      <strong>Notez votre expérience</strong>
-                      <p>Laissez un avis sur le propriétaire et l'outil</p>
-                    </div>
-                  </li>
-                </ol>
-              </div>
-            </div>
-          ) : (
-            <div className="generic-message">
-              <p>Merci pour votre achat ! Un email de confirmation a été envoyé à votre adresse.</p>
-            </div>
-          )}
-
-          {/* ✅ ACTIONS */}
-          <div className="success-actions">
-            <button 
-              className="btn-primary"
-              onClick={() => window.location.href = '/'}
+          {/* Tabs */}
+          <div className="bookings-tabs">
+            <button
+              className={`tab ${tab === 'borrower' ? 'active' : ''}`}
+              onClick={() => setTab('borrower')}
             >
-              Retour à l'accueil
+              📥 Comme emprunteur
             </button>
-            
-            <button 
-              className="btn-outline"
-              onClick={() => window.location.href = '/profil'}
+            <button
+              className={`tab ${tab === 'owner' ? 'active' : ''}`}
+              onClick={() => setTab('owner')}
             >
-              Voir mes réservations
+              📤 Comme propriétaire
             </button>
           </div>
+
+          {/* Filter by status */}
+          <div className="filter-section">
+            <label>Filtrer par statut:</label>
+            <div className="filter-buttons">
+              {[
+                { value: 'all', label: 'Tous' },
+                { value: 'pending', label: '⏳ En attente' },
+                { value: 'confirmed', label: '✅ Confirmées' },
+                { value: 'handed_over', label: '🚚 Remises' },
+                { value: 'pickup_confirmed', label: '📥 Réception confirmée' },
+                { value: 'returned', label: '📦 Retournées' },
+                { value: 'return_confirmed', label: '✅ Retour confirmé' }
+              ].map(option => (
+                <button
+                  key={option.value}
+                  className={`filter-btn ${filterStatus === option.value ? 'active' : ''}`}
+                  onClick={() => setFilterStatus(option.value)}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Error message */}
+          {error && <div className="error-message">❌ {error}</div>}
+
+          {/* Bookings list */}
+          {filteredBookings.length === 0 ? (
+            <div className="no-bookings">
+              <p>Aucune réservation pour le moment</p>
+              <button
+                className="btn-primary"
+                onClick={() => (window.location.href = '/search')}
+              >
+                Chercher des outils à louer
+              </button>
+            </div>
+          ) : (
+            <div className="bookings-list">
+              {filteredBookings.map(booking => (
+                <div key={booking.id} className="booking-card">
+                  {/* Header */}
+                  <div className="booking-header-card">
+                    <div className="booking-title">
+                      <h3>{booking.title || 'Équipement'}</h3>
+                      <span
+                        className="status-badge"
+                        style={{ backgroundColor: getStatusColor(booking.status) }}
+                      >
+                        {getStatusLabel(booking.status)}
+                      </span>
+                    </div>
+                    <div className="booking-dates">
+                      📅 {new Date(booking.start_date).toLocaleDateString('fr-FR')} →{' '}
+                      {new Date(booking.end_date).toLocaleDateString('fr-FR')}
+                    </div>
+                  </div>
+
+                  {/* Timeline */}
+                  <div className="booking-timeline">
+                    <div
+                      className={`timeline-item ${
+                        ['pending', 'confirmed', 'handed_over', 'pickup_confirmed', 'returned', 'return_confirmed'].includes(
+                          booking.status
+                        )
+                          ? 'completed'
+                          : ''
+                      }`}
+                    >
+                      <div className="timeline-marker">📋</div>
+                      <div className="timeline-label">Créée</div>
+                    </div>
+
+                    <div
+                      className={`timeline-item ${
+                        ['confirmed', 'handed_over', 'pickup_confirmed', 'returned', 'return_confirmed'].includes(
+                          booking.status
+                        )
+                          ? 'completed'
+                          : ''
+                      }`}
+                    >
+                      <div className="timeline-marker">✅</div>
+                      <div className="timeline-label">Acceptée</div>
+                    </div>
+
+                    <div
+                      className={`timeline-item ${
+                        ['handed_over', 'pickup_confirmed', 'returned', 'return_confirmed'].includes(booking.status)
+                          ? 'completed'
+                          : ''
+                      }`}
+                    >
+                      <div className="timeline-marker">🚚</div>
+                      <div className="timeline-label">Remise item</div>
+                    </div>
+
+                    <div
+                      className={`timeline-item ${
+                        ['pickup_confirmed', 'returned', 'return_confirmed'].includes(booking.status)
+                          ? 'completed'
+                          : ''
+                      }`}
+                    >
+                      <div className="timeline-marker">📥</div>
+                      <div className="timeline-label">Réception confirmée</div>
+                    </div>
+
+                    <div
+                      className={`timeline-item ${
+                        ['returned', 'return_confirmed'].includes(booking.status) ? 'completed' : ''
+                      }`}
+                    >
+                      <div className="timeline-marker">📦</div>
+                      <div className="timeline-label">Retourné</div>
+                    </div>
+
+                    <div
+                      className={`timeline-item ${
+                        booking.status === 'return_confirmed' ? 'completed' : ''
+                      }`}
+                    >
+                      <div className="timeline-marker">✅</div>
+                      <div className="timeline-label">Retour confirmé</div>
+                    </div>
+
+                    <div className="timeline-item">
+                      <div className="timeline-marker">⭐</div>
+                      <div className="timeline-label">Avis</div>
+                    </div>
+                  </div>
+
+                  {/* Details */}
+                  <div className="booking-details">
+                    <div className="detail-row">
+                      <span className="label">Montant total:</span>
+                      <span className="value">💰 {booking.total_price}€</span>
+                    </div>
+                    {booking.borrower_name && (
+                      <div className="detail-row">
+                        <span className="label">
+                          {tab === 'borrower' ? 'Propriétaire:' : 'Emprunteur:'}
+                        </span>
+                        <span className="value">{booking.borrower_name}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="booking-actions">
+                    {/* Action: ACCEPTER/REFUSER la réservation (owner, status=pending) */}
+                    {tab === 'owner' && booking.status === 'pending' && (
+                      <div className="pending-actions">
+                        <button
+                          className="btn-action btn-accept"
+                          onClick={() => handleStatusChange(booking.id, 'confirmed')}
+                        >
+                          ✅ Accepter la réservation
+                        </button>
+                        <button
+                          className="btn-action btn-reject"
+                          onClick={() => handleStatusChange(booking.id, 'cancelled')}
+                        >
+                          ❌ Refuser
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Action: Confirmer remise (owner, status=confirmed) */}
+                    {tab === 'owner' && booking.status === 'confirmed' && (
+                      <button
+                        className="btn-action"
+                        onClick={() =>
+                          handleStatusChange(booking.id, 'handed_over')
+                        }
+                      >
+                        🚚 Confirmer remise item
+                      </button>
+                    )}
+
+                    {/* Action: Confirmer retour (owner, status=handed_over) */}
+                    {tab === 'owner' && booking.status === 'handed_over' && (
+                      <button
+                        className="btn-action"
+                        onClick={() =>
+                          handleStatusChange(booking.id, 'return_confirmed')
+                        }
+                      >
+                        ✅ Marquer comme retourné
+                      </button>
+                    )}
+
+                    {/* Action: Confirmer réception item (borrower, status=handed_over) */}
+                    {tab === 'borrower' && booking.status === 'handed_over' && (
+                      <button
+                        className="btn-action btn-accept"
+                        onClick={() =>
+                          handleStatusChange(booking.id, 'pickup_confirmed')
+                        }
+                      >
+                        📥 Confirmer réception de l'item
+                      </button>
+                    )}
+
+                    {/* Action: Retourner item (borrower, status=pickup_confirmed) */}
+                    {tab === 'borrower' && booking.status === 'pickup_confirmed' && (
+                      <button
+                        className="btn-action"
+                        onClick={() =>
+                          handleStatusChange(booking.id, 'returned')
+                        }
+                      >
+                        📦 Signaler retour de l'item
+                      </button>
+                    )}
+
+                    {/* Action: Confirmer réception du retour (owner, status=returned) */}
+                    {tab === 'owner' && booking.status === 'returned' && (
+                      <button
+                        className="btn-action btn-accept"
+                        onClick={() =>
+                          handleStatusChange(booking.id, 'return_confirmed')
+                        }
+                      >
+                        ✅ Confirmer réception du retour
+                      </button>
+                    )}
+
+                    {/* Action: Signaler retour item (borrower, status=handed_over) */}
+                    {tab === 'borrower' && booking.status === 'handed_over' && (
+                      <button
+                        className="btn-action"
+                        onClick={() =>
+                          handleStatusChange(booking.id, 'returned')
+                        }
+                      >
+                        📦 Signaler retour item
+                      </button>
+                    )}
+
+                    {/* Action: Laisser avis (any user, status=returned) */}
+                    {booking.status === 'returned' && (
+                      <button
+                        className="btn-rate"
+                        onClick={() =>
+                          (window.location.href = `/rate-booking?bookingId=${booking.id}`)
+                        }
+                      >
+                        ⭐ Laisser un avis
+                      </button>
+                    )}
+
+                    {/* Action: Voir le profil */}
+                    <button
+                      className="btn-secondary"
+                      onClick={() => {
+                        const userId =
+                          tab === 'borrower'
+                            ? booking.owner_id
+                            : booking.borrower_id;
+                        window.location.href = `/profil?userId=${userId}`;
+                      }}
+                    >
+                      👤 Voir le profil
+                    </button>
+
+                    {/* Action: Contacter */}
+                    <button
+                      className="btn-secondary"
+                      onClick={() => {
+                        const userId =
+                          tab === 'borrower'
+                            ? booking.owner_id
+                            : booking.borrower_id;
+                        window.location.href = `/messages?other=${userId}`;
+                      }}
+                    >
+                      💬 Contacter
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
       <Footer />

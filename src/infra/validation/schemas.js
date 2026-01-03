@@ -33,7 +33,8 @@ export const PublishEquipmentSchema = z.object({
   caution_deposit: z.number().optional().nullable(),
   location: z.string().min(2, "Localisation requise"),
   condition: z.string().min(1, "Condition requise"),
-  category: z.string().optional().nullable()  // ← AJOUTER CETTE LIGNE SI MANQUANTE
+  category: z.string().optional().nullable(),  // Ancien format (slug)
+  category_id: z.string().uuid().optional().nullable()  // ✅ NOUVEAU FORMAT (UUID)
 });
 
 export const SearchEquipmentSchema = z.object({

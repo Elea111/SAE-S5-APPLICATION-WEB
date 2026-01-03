@@ -66,9 +66,12 @@ const Messages = () => {
   };
 
   useEffect(() => {
-    // ✅ RÉCUPÉRER otherUser DEPUIS L'URL À CHAQUE CHANGEMENT
+    // ✅ RÉCUPÉRER otherUser DEPUIS L'URL - Accepter 'other' ET 'userId'
     const params = new URLSearchParams(window.location.search);
-    const other = params.get('other');
+    const other = params.get('other') || params.get('userId');  // Support both ?other=... and ?userId=...
+    const itemId = params.get('itemId');
+    
+    console.log('📍 Messages URL params:', { other, itemId });
     setOtherUser(other);
     setLoading(true);
     

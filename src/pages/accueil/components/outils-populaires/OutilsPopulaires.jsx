@@ -75,15 +75,23 @@ const OutilsPopulaires = () => {
         <div className="tools-grid">
           {tools.map((tool) => (
             <div key={tool.id} className="tool-card">
-              <div className="tool-image">
+              <div className="tool-image-container">
                 <img
                   src={tool.image_url || tool.image || tool.thumbnail || '/default-tool.jpg'}
                   alt={tool.title || tool.name}
+                  className="tool-image"
                   onError={(e) => { e.target.src = '/default-tool.jpg'; }}
                 />
+                {tool.category_name && (
+                  <div className="tool-category-badge">
+                    {tool.category_icon || '📦'} {tool.category_name}
+                  </div>
+                )}
+                <div className="tool-availability">
+                  {tool.is_available ? '✅ Disponible' : '❌ Indisponible'}
+                </div>
               </div>
               <div className="tool-content">
-                <div className="tool-category">{tool.category || 'Catégorie'}</div>
                 <h3 className="tool-name">{tool.title || tool.name}</h3>
                 <p className="tool-description">{tool.description?.substring(0, 100)}...</p>
                 <div className="tool-footer">

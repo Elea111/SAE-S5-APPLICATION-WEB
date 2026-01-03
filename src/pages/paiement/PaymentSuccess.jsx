@@ -16,13 +16,17 @@ const PaymentSuccess = () => {
       // Récupérer les détails depuis localStorage
       const saved = localStorage.getItem(`booking_${bookingId}`);
       if (saved) {
-        setBookingDetails(JSON.parse(saved));
+        const data = JSON.parse(saved);
+        console.log('✅ Détails réservation chargés:', data);
+        setBookingDetails(data);
       }
     }
 
     // Nettoyer après un délai
     const timer = setTimeout(() => {
-      localStorage.removeItem(`booking_${bookingId}`);
+      if (bookingId) {
+        localStorage.removeItem(`booking_${bookingId}`);
+      }
     }, 5000);
 
     return () => clearTimeout(timer);
@@ -54,25 +58,30 @@ const PaymentSuccess = () => {
               <div className="detail-row">
                 <span className="label">📅 Dates</span>
                 <span className="value">
-                  {new Date(bookingDetails.startDate).toLocaleDateString('fr-FR')} 
+                  {bookingDetails.startDate}
                   {' → '} 
-                  {new Date(bookingDetails.endDate).toLocaleDateString('fr-FR')}
+                  {bookingDetails.endDate}
                 </span>
               </div>
 
               <div className="detail-row">
-                <span className="label">💰 Montant</span>
-                <span className="value">{bookingDetails.totalPrice}€</span>
+                <span className="label">📆 Durée</span>
+                <span className="value">{bookingDetails.totalDays} jour(s)</span>
               </div>
 
               <div className="detail-row">
-                <span className="label">🏠 Propriétaire</span>
-                <span className="value">{bookingDetails.ownerName || 'À déterminer'}</span>
+                <span className="label">💰 Montant location</span>
+                <span className="value">{(bookingDetails.rentalAmount || 0).toFixed(2)}€</span>
               </div>
 
               <div className="detail-row">
-                <span className="label">📍 Localisation</span>
-                <span className="value">{bookingDetails.location || 'Non spécifiée'}</span>
+                <span className="label">🛡️ Caution</span>
+                <span className="value">{(bookingDetails.cautionAmount || 0).toFixed(2)}€</span>
+              </div>
+
+              <div className="detail-row total">
+                <span className="label">💳 Total TTC</span>
+                <span className="value">{(bookingDetails.totalPrice || 0).toFixed(2)}€</span>
               </div>
             </div>
           ) : (
