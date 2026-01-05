@@ -5,7 +5,11 @@ export const RegisterSchema = z.object({
   firstName: z.string().min(2, "Prénom requis (min 2 caractères)"),
   lastName: z.string().min(2, "Nom requis (min 2 caractères)"),
   email: z.string().email("Email invalide"),
-  password: z.string().min(6, "Mot de passe min 6 caractères"),
+  // ✅ ENHANCED PASSWORD VALIDATION
+  password: z.string()
+    .min(8, "Mot de passe minimum 8 caractères")
+    .regex(/[A-Z]/, "Mot de passe doit contenir au moins une majuscule")
+    .regex(/\d/, "Mot de passe doit contenir au moins un chiffre"),
   isPro: z.boolean().optional().default(false)
 });
 

@@ -12,6 +12,16 @@ const ProfilProprietaire = () => {
   const [form, setForm] = useState({});
   const [message, setMessage] = useState('');
   const [avatarUploading, setAvatarUploading] = useState(false);
+  
+  // ✅ REVENUE DASHBOARD STATE
+  const [bookings, setBookings] = useState([]);
+  const [revenueStats, setRevenueStats] = useState({
+    totalRental: 0,
+    totalCaution: 0,
+    totalRevenue: 0,
+    completedBookings: 0,
+    activeBookings: 0
+  });
 
   const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:4000' : '';
 
@@ -133,6 +143,56 @@ const ProfilProprietaire = () => {
           listings_count: 0
         }));
       });
+
+    // ✅ FETCH BOOKINGS POUR LE DASHBOARD DE REVENU
+    const isOwnProfile = !queryUserId || queryUserId === (auth.userId || auth.id);
+    if (isOwnProfile) {
+      fetch(`${API_BASE}/api/bookings/user/proprietaire`, {
+        headers: {
+          'Authorization': `Bearer ${auth.token}`
+        }
+      })
+        .then(r => r.ok ? r.json() : [])
+        .then(bookingsData => {
+          const bookingsArray = Array.isArray(bookingsData) ? bookingsData : [];
+          setBookings(bookingsArray);
+
+          // ✅ CALCULER LES STATISTIQUES
+          let totalRental = 0;
+          let totalCaution = 0;
+          let completedCount = 0;
+          let activeCount = 0;
+
+          bookingsArray.forEach(booking => {
+            const rentalAmount = parseFloat(booking.rental_amount) || 0;
+            const cautionAmount = parseFloat(booking.caution_amount) || 0;
+            
+            totalRental += rentalAmount;
+            totalCaution += cautionAmount;
+
+            const now = new Date();
+            const endDate = new Date(booking.end_date);
+            
+            if (endDate < now) {
+              completedCount++;
+            } else {
+              activeCount++;
+            }
+          });
+
+          setRevenueStats({
+            totalRental,
+            totalCaution,
+            totalRevenue: totalRental + totalCaution,
+            completedBookings: completedCount,
+            activeBookings: activeCount
+          });
+        })
+        .catch(err => {
+          console.warn('Erreur fetch bookings:', err);
+          setBookings([]);
+        });
+    }
   }, [API_BASE, window.location.search]);
 
   const handleLogout = () => {
@@ -400,6 +460,39 @@ const ProfilProprietaire = () => {
       </div>
 
       <hr className="section-divider" />
+
+      {/* ✅ REVENUE DASHBOARD - ONLY FOR OWN PROFILE */}
+      {isOwnProfile() && revenueStats.totalRevenue > 0 || bookings.length > 0 ? (
+        <>
+          <div className="revenue-dashboard">
+            <h2 className="section-title">📊 Tableau de bord - Revenus</h2>
+            <div className="revenue-cards">
+              <div className="revenue-card">
+                <h4>Revenus totaux</h4>
+                <p className="revenue-amount">{revenueStats.totalRevenue.toFixed(2)} €</p>
+                <small>Loyers + cautions</small>
+              </div>
+              <div className="revenue-card">
+                <h4>Loyers reçus</h4>
+                <p className="revenue-amount">{revenueStats.totalRental.toFixed(2)} €</p>
+                <small>{revenueStats.completedBookings} locations complétées</small>
+              </div>
+              <div className="revenue-card">
+                <h4>Cautions</h4>
+                <p className="revenue-amount">{revenueStats.totalCaution.toFixed(2)} €</p>
+                <small>{revenueStats.activeBookings} locations en cours</small>
+              </div>
+              <div className="revenue-card">
+                <h4>Locations</h4>
+                <p className="revenue-amount">{bookings.length}</p>
+                <small>{revenueStats.completedBookings} complétées, {revenueStats.activeBookings} actives</small>
+              </div>
+            </div>
+          </div>
+
+          <hr className="section-divider" />
+        </>
+      ) : null}
 
       <div className="tools-section">
         <div className="section-header">

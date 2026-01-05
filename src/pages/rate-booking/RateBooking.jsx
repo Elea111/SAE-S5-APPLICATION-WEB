@@ -13,6 +13,9 @@ const RateBooking = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+  // ✅ CHECK IF ALREADY REVIEWED
+  const [existingReview, setExistingReview] = useState(null);
+  const [hasReviewed, setHasReviewed] = useState(false);
 
   const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:4000' : '';
 
@@ -73,6 +76,23 @@ const RateBooking = () => {
       .then(r => r.json())
       .then(userData => setReviewedUser(userData))
       .catch(err => console.error('❌ Erreur utilisateur:', err));
+
+    // ✅ CHECK IF ALREADY REVIEWED THIS BOOKING
+    fetch(`${API_BASE}/api/reviews?booking_id=${booking.id}&reviewer_id=${currentUserId}`, {
+      headers: {
+        'Authorization': `Bearer ${auth.token}`
+      }
+    })
+      .then(r => r.json())
+      .then(reviews => {
+        if (reviews && reviews.length > 0) {
+          setExistingReview(reviews[0]);
+          setHasReviewed(true);
+          setRating(reviews[0].rating);
+          setContent(reviews[0].comment || reviews[0].content || '');
+        }
+      })
+      .catch(err => console.error('❌ Erreur vérification avis:', err));
   }, [booking]);
 
   const handleSubmit = async (e) => {
@@ -101,8 +121,12 @@ const RateBooking = () => {
     const userToReview = booking.owner_id === currentUserId ? booking.borrower_id : booking.owner_id;
 
     try {
-      const res = await fetch(`${API_BASE}/api/reviews`, {
-        method: 'POST',
+      // ✅ IF ALREADY REVIEWED, UPDATE; OTHERWISE CREATE NEW
+      const method = hasReviewed ? 'PATCH' : 'POST';
+      const endpoint = hasReviewed ? `${API_BASE}/api/reviews/${existingReview.id}` : `${API_BASE}/api/reviews`;
+
+      const res = await fetch(endpoint, {
+        method: method,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${auth.token}`
@@ -187,6 +211,13 @@ const RateBooking = () => {
             <div className="rate-header">
               <h1>Évaluer votre location</h1>
               <p>Partagez votre expérience pour aider les autres utilisateurs</p>
+              
+              {/* ✅ SHOW MESSAGE IF ALREADY REVIEWED */}
+              {hasReviewed && (
+                <div className="already-reviewed-notice">
+                  ℹ️ Vous avez déjà évalué cette location. Vous pouvez modifier votre avis ci-dessous.
+                </div>
+              )}
             </div>
 
             {/* Infos location */}
@@ -286,7 +317,7 @@ const RateBooking = () => {
                   className="btn-primary"
                   disabled={submitting || !rating || content.length < 5}
                 >
-                  {submitting ? '⏳ Envoi...' : '✅ Envoyer mon avis'}
+                  {submitting ? '⏳ Envoi...' : hasReviewed ? '✏️ Modifier mon avis' : '✅ Envoyer mon avis'}
                 </button>
                 <button
                   type="button"
@@ -307,3 +338,4 @@ const RateBooking = () => {
 };
 
 export default RateBooking;
+
