@@ -499,6 +499,64 @@
   }
 }
 
+/* ✅ REVENUE DASHBOARD */
+.revenue-dashboard {
+  max-width: 1200px;
+  margin: 2rem auto 0;
+  padding: 0 2rem;
+}
+
+.revenue-dashboard .section-title {
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+
+.revenue-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.revenue-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  border-left: 4px solid #999e48;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.revenue-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+}
+
+.revenue-card h4 {
+  font-size: 0.95rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.revenue-amount {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #999e48;
+  margin: 0.5rem 0;
+}
+
+.revenue-card small {
+  font-size: 0.85rem;
+  color: #999;
+  display: block;
+  margin-top: 0.5rem;
+}
+
 @media (max-width: 768px) {
   .profil-proprietaire-page {
     padding: 1rem;
@@ -508,6 +566,49 @@
     padding: 1rem;
   }
 
+  .revenue-cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .revenue-card {
+    padding: 1rem;
+  }
+
+  .revenue-amount {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .revenue-dashboard {
+    padding: 0 1rem;
+  }
+
+  .revenue-cards {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .revenue-card {
+    padding: 0.75rem;
+  }
+
+  .revenue-amount {
+    font-size: 1.3rem;
+  }
+
+  .revenue-card h4 {
+    font-size: 0.85rem;
+  }
+
+  .revenue-card small {
+    font-size: 0.75rem;
+  }
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
   .profile-image {
     width: 150px;
     height: 150px;

@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import Header from '../../components/layout/header/Header';
 import Footer from '../../components/layout/footer/Footer';
+import Ecology from '../../components/layout/ecology/Ecology';
 import './SearchResults.css';
 
 const CATEGORIES = [
@@ -511,6 +512,7 @@ const SearchResults = () => {
         </div>
       </div>
       </div>
+      <Ecology />
       <Footer />
     </>
   );

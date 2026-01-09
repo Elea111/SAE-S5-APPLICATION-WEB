@@ -1,0 +1,168 @@
+/* ✅ ECOLOGY SECTION STYLING */
+.ecology-section {
+  background: linear-gradient(135deg, #f0f4ed 0%, #e8f1e4 100%);
+  padding: 4rem 2rem;
+  border-top: 2px solid #999e48;
+}
+
+.ecology-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.ecology-content {
+  text-align: center;
+}
+
+.ecology-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 2rem;
+  letter-spacing: -0.5px;
+}
+
+/* BENEFITS GRID */
+.ecology-benefits {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.benefit-card {
+  background: white;
+  padding: 2rem 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border-top: 3px solid #999e48;
+}
+
+.benefit-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.benefit-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.benefit-card h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.75rem;
+}
+
+.benefit-card p {
+  font-size: 0.95rem;
+  color: #666;
+  line-height: 1.5;
+}
+
+/* ECOLOGY MESSAGE */
+.ecology-message {
+  background: rgba(153, 158, 72, 0.1);
+  border: 1px solid #999e48;
+  border-radius: 8px;
+  padding: 2rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.ecology-message p {
+  font-size: 1rem;
+  color: #333;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.ecology-message strong {
+  color: #999e48;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .ecology-section {
+    padding: 2.5rem 1rem;
+  }
+
+  .ecology-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .ecology-benefits {
+    gap: 1.5rem;
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .benefit-card {
+    padding: 1.5rem 1rem;
+  }
+
+  .benefit-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .benefit-card h3 {
+    font-size: 1rem;
+  }
+
+  .benefit-card p {
+    font-size: 0.9rem;
+  }
+
+  .ecology-message {
+    padding: 1.5rem;
+  }
+
+  .ecology-message p {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .ecology-section {
+    padding: 2rem 0.75rem;
+  }
+
+  .ecology-title {
+    font-size: 1.3rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .ecology-benefits {
+    gap: 1rem;
+    grid-template-columns: 1fr;
+  }
+
+  .benefit-card {
+    padding: 1.25rem;
+  }
+
+  .benefit-icon {
+    font-size: 2rem;
+  }
+
+  .benefit-card h3 {
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .benefit-card p {
+    font-size: 0.85rem;
+  }
+
+  .ecology-message {
+    padding: 1rem;
+  }
+
+  .ecology-message p {
+    font-size: 0.9rem;
+  }
+}

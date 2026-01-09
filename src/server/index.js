@@ -889,6 +889,58 @@ app.post('/api/bookings', authMiddleware, validateBody(BookEquipmentSchema), asy
  * GET /api/bookings/user/:userId
  * Récupère toutes les réservations d'un utilisateur (comme emprunteur ou propriétaire)
  */
+
+// ✅ GET /api/bookings/user/proprietaire
+// Endpoint spécifique pour récupérer les bookings où l'utilisateur est propriétaire
+app.get('/api/bookings/user/proprietaire', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user?.id || req.user?.userId;
+    
+    if (!userId) {
+      return res.status(401).json({ message: 'Utilisateur non authentifié' });
+    }
+
+    // 1. Récupérer tous les items de l'utilisateur
+    const { data: itemsOfOwner, error: iError } = await supabaseClient
+      .from('items')
+      .select('id')
+      .eq('user_id', userId);
+
+    if (iError) {
+      console.error('❌ Error fetching user items:', iError);
+      return res.status(500).json({ message: 'Erreur lors de la récupération des outils' });
+    }
+
+    if (!itemsOfOwner || itemsOfOwner.length === 0) {
+      return res.json([]); // Pas d'outils = pas de bookings
+    }
+
+    // 2. Récupérer les bookings pour ces items
+    const itemIds = itemsOfOwner.map(i => i.id);
+    
+    const { data: bookingsData, error: bError } = await supabaseClient
+      .from('bookings')
+      .select(`
+        *,
+        items!item_id(id, title, daily_price, user_id),
+        users!borrower_id(id, first_name, last_name, avatar_url, email)
+      `)
+      .in('item_id', itemIds)
+      .order('created_at', { ascending: false });
+
+    if (bError) {
+      console.error('❌ Error fetching proprietaire bookings:', bError);
+      return res.status(500).json({ message: 'Erreur lors de la récupération des réservations' });
+    }
+
+    console.log('✅ Proprietaire bookings fetched:', bookingsData?.length || 0, 'for user', userId);
+    res.json(bookingsData || []);
+  } catch (err) {
+    console.error('❌ Error:', err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
 app.get('/api/bookings/user/:userId', authMiddleware, async (req, res) => {
   try {
     const userId = req.params.userId;
@@ -1111,12 +1163,86 @@ app.post('/api/payments', authMiddleware, validateBody(ProcessPaymentSchema), as
 });
 
 // ========== REVIEW ENDPOINTS ==========
+// ✅ GET /api/reviews - List reviews with filters
+app.get('/api/reviews', authMiddleware, async (req, res) => {
+  try {
+    const { booking_id, reviewer_id } = req.query;
+    
+    let query = supabaseClient.from('reviews').select('*');
+    
+    if (booking_id) {
+      query = query.eq('booking_id', booking_id);
+    }
+    
+    if (reviewer_id) {
+      query = query.eq('author_id', reviewer_id);
+    }
+    
+    const { data: reviews, error } = await query;
+    
+    if (error) {
+      throw error;
+    }
+    
+    res.json(reviews || []);
+  } catch (err) {
+    console.error('❌ Error fetching reviews:', err);
+    res.status(400).json({ message: err.message });
+  }
+});
+
 app.post('/api/reviews', authMiddleware, validateBody(LeaveReviewSchema), async (req, res) => {
   try {
     const reviewData = { ...req.validated, author_id: req.user.id };
     const review = await LeaveReview(reviewData, di.reviewRepository);
     res.status(201).json(review);
   } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+// ✅ PATCH /api/reviews/:id - Update existing review
+app.patch('/api/reviews/:id', authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { rating, comment } = req.body;
+    
+    // Get the review first to verify ownership
+    const { data: review, error: fetchError } = await supabaseClient
+      .from('reviews')
+      .select('*')
+      .eq('id', id)
+      .single();
+    
+    if (fetchError || !review) {
+      return res.status(404).json({ message: 'Avis non trouvé' });
+    }
+    
+    // Check if user is the author
+    if (review.author_id !== req.user.id) {
+      return res.status(403).json({ message: 'Non autorisé à modifier cet avis' });
+    }
+    
+    // Update the review
+    const { data: updated, error: updateError } = await supabaseClient
+      .from('reviews')
+      .update({
+        rating: rating || review.rating,
+        comment: comment || review.comment,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (updateError) {
+      throw updateError;
+    }
+    
+    console.log('✅ Review updated:', id);
+    res.json(updated);
+  } catch (err) {
+    console.error('❌ Error updating review:', err);
     res.status(400).json({ message: err.message });
   }
 });
