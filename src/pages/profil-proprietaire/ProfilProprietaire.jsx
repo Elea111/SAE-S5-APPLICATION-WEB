@@ -361,6 +361,7 @@ const ProfilProprietaire = () => {
       setUserData(updatedUserData);
       setMessage('Profil mis à jour localement');
     }
+    
   } catch (err) {
     console.error('Erreur lors de la sauvegarde:', err);
     // Mettre à jour localement en cas d'erreur réseau

@@ -182,6 +182,7 @@ const Avis = ({ reviews, renderStars }) => {
                     </div>
                   </div>
 
+
                   <p className="review-content">{r.content || r.title || '—'}</p>
 
                   {r.tool_name && (

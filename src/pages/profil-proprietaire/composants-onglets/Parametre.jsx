@@ -379,6 +379,7 @@ const Parametre = ({ handleLogout, handleDeleteAccount }) => {
               className="settings-section-card"
               onClick={() => handleSectionClick(key)}
             >
+              
               <div className="section-card-icon">
                 {section.icon}
               </div>

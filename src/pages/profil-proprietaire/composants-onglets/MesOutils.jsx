@@ -173,6 +173,7 @@ const MesOutils = ({ userData, setActiveTab }) => {
             </div>
           </>
         ) : (
+          
           <div className="empty-outils">
             <div className="empty-icon">
               <FiTool size={64} />
