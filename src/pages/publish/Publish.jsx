@@ -11,6 +11,7 @@ const CONDITIONS = [
 ];
 
 const Publish = () => {
+  const [fileInputKey, setFileInputKey] = useState(Date.now()); 
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -33,6 +34,33 @@ const Publish = () => {
   const [categoryMap, setCategoryMap] = useState({}); // ✅ AJOUTER
 
   const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:4000' : '';
+  
+  const handleReset = () => {
+    setFormData({
+      title: '',
+      description: '',
+      dailyPrice: '',
+      caution: '',
+      location: '',
+      condition: 'bon',
+      category: categories.length > 0 ? categories[0].value : '',
+      images: []
+    });
+    setPreviews([]);
+    setError('');
+    setMsg('');
+    setSuccess('');
+    
+    // Réinitialiser l'input file en changeant sa clé
+    setFileInputKey(Date.now());
+    
+    // Nettoyer également les URLs d'objets créés pour les prévisualisations
+    previews.forEach(preview => {
+      if (preview.url) {
+        URL.revokeObjectURL(preview.url);
+      }
+    });
+  };
 
   useEffect(() => {
     const auth = JSON.parse(localStorage.getItem('auth') || '{}');
@@ -109,6 +137,9 @@ const Publish = () => {
   };
 
   const removeImage = (index) => {
+    if (previews[index] && previews[index].url) {
+      URL.revokeObjectURL(previews[index].url);
+    }
     setPreviews(prev => prev.filter((_, i) => i !== index));
     setFormData(prev => ({
       ...prev,
@@ -463,6 +494,7 @@ const Publish = () => {
               <span className="label-hint">Max 5 images, format JPG/PNG</span>
             </label>
             <input
+              key={fileInputKey} 
               id="images"
               type="file"
               name="images"
@@ -470,13 +502,13 @@ const Publish = () => {
               onChange={handleImageChange}
               multiple
               className={`form-input ${error && error.includes('image') ? 'error' : ''}`}
-              required
+              required={previews.length === 0}
             />
             {error && error.includes('image') && <span className="error-text">{error}</span>}
 
             {previews.length > 0 && (
               <div className="images-preview">
-                <p className="preview-label">{previews.length} image(s)</p>
+                <p className="preview-label">{previews.length} image(s) sélectionnée(s)</p>
                 <div className="thumbs">
                   {previews.map((src, i) => (
                     <div key={i} className="thumb-container">
@@ -499,27 +531,15 @@ const Publish = () => {
           {/* ACTIONS */}
           <div className="form-actions">
             <button className="btn-primary" type="submit" disabled={loading}>
-              👁️ Aperçu
+              Aperçu
             </button>
             <button
               className="btn-outline"
               type="button"
-              onClick={() => {
-                setFormData({
-                  title: '',
-                  description: '',
-                  dailyPrice: '',
-                  caution: '',
-                  location: '',
-                  condition: 'bon',
-                  category: '',
-                  images: []
-                });
-                setError('');
-                setMsg('');
-              }}
+              onClick={handleReset} 
+              disabled={loading}
             >
-              🔄 Réinitialiser
+              Réinitialiser
             </button>
           </div>
 
