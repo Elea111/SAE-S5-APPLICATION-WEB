@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import './Parametre.css';
-import { FiLogOut, FiArrowLeft, FiBell, FiLock, FiUser, FiShield, FiMail, FiHelpCircle, FiGlobe, FiSave } from 'react-icons/fi';
+import { 
+  FiLogOut, FiArrowLeft, FiBell, FiLock, FiUser, FiShield, 
+  FiMail, FiHelpCircle, FiGlobe, FiSave, FiKey, FiDownload, 
+  FiPauseCircle, FiEye, FiEyeOff, FiMapPin, FiMessageSquare 
+} from 'react-icons/fi';
 
 const Parametre = ({ handleLogout, handleDeleteAccount }) => {
   const [selectedSection, setSelectedSection] = useState(null);
@@ -11,22 +15,31 @@ const Parametre = ({ handleLogout, handleDeleteAccount }) => {
     email: true,
     reminders: true,
     promotions: false,
-    reviews: true
+    reviews: true,
+    messages: true,
+    push: true
   });
   
   // États pour la confidentialité
   const [privacySettings, setPrivacySettings] = useState({
     profileVisible: true,
     hideContact: false,
-    shareStats: true
+    shareStats: true,
+    showLocation: true,
+    whoCanContact: 'everyone' // everyone, verified, none
   });
-  
-  // États pour les préférences
-  const [preferences, setPreferences] = useState({
-    language: 'fr',
-    currency: 'EUR',
-    timezone: 'europe/paris'
+
+  // États pour le changement de mot de passe
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
   });
+
+  // États pour la suppression de compte
+  const [deleteReason, setDeleteReason] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [confirmDisable, setConfirmDisable] = useState(false);
 
   const handleNotificationChange = (setting) => {
     setNotificationSettings(prev => ({
@@ -35,51 +48,144 @@ const Parametre = ({ handleLogout, handleDeleteAccount }) => {
     }));
   };
 
-  const handlePrivacyChange = (setting) => {
+  const handlePrivacyChange = (setting, value) => {
     setPrivacySettings(prev => ({
-      ...prev,
-      [setting]: !prev[setting]
-    }));
-  };
-
-  const handlePreferenceChange = (setting, value) => {
-    setPreferences(prev => ({
       ...prev,
       [setting]: value
     }));
   };
 
-  const saveNotificationSettings = () => {
-    // Ici, vous pourriez envoyer les paramètres à votre API
-    console.log('Sauvegarde des paramètres de notification:', notificationSettings);
-    setMessage('Paramètres de notification enregistrés avec succès !');
-    setTimeout(() => {
-      setMessage('');
-      setSelectedSection(null);
-    }, 2000);
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordForm(prev => ({ ...prev, [name]: value }));
   };
 
-  const savePrivacySettings = () => {
-    // Ici, vous pourriez envoyer les paramètres à votre API
-    console.log('Sauvegarde des paramètres de confidentialité:', privacySettings);
-    setMessage('Paramètres de confidentialité enregistrés avec succès !');
-    setTimeout(() => {
-      setMessage('');
-      setSelectedSection(null);
-    }, 2000);
+  // Fonction pour changer le mot de passe
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    setMessage('');
+
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setMessage('❌ Les mots de passe ne correspondent pas');
+      return;
+    }
+
+    if (passwordForm.newPassword.length < 8) {
+      setMessage('❌ Le mot de passe doit contenir au moins 8 caractères');
+      return;
+    }
+
+    try {
+      // Ici, vous pourriez appeler l'API pour changer le mot de passe
+      console.log('Changement de mot de passe:', passwordForm);
+      
+      setMessage('✅ Mot de passe changé avec succès!');
+      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      
+      setTimeout(() => {
+        setMessage('');
+        setSelectedSection(null);
+      }, 2000);
+    } catch (err) {
+      setMessage(`❌ ${err.message}`);
+    }
   };
 
-  const savePreferences = () => {
-    // Ici, vous pourriez envoyer les paramètres à votre API
-    console.log('Sauvegarde des préférences:', preferences);
-    setMessage('Préférences enregistrées avec succès !');
+  // Fonction pour télécharger les données
+  const handleDownloadData = () => {
+    // Simuler le téléchargement des données
+    const data = {
+      user: "Données utilisateur",
+      tools: "Outils publiés",
+      bookings: "Réservations",
+      reviews: "Avis",
+      createdAt: new Date().toISOString()
+    };
+    
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `mes-donnees-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    setMessage('✅ Données téléchargées avec succès!');
+    setTimeout(() => setMessage(''), 2000);
+  };
+
+  // Fonction pour désactiver le compte temporairement
+  const handleDisableAccount = () => {
+    if (!confirmDisable) {
+      setConfirmDisable(true);
+      return;
+    }
+
+    // Ici, vous pourriez appeler l'API pour désactiver le compte
+    console.log('Compte désactivé temporairement');
+    setMessage('✅ Compte désactivé pour 30 jours');
+    
     setTimeout(() => {
-      setMessage('');
-      setSelectedSection(null);
+      localStorage.removeItem('auth');
+      window.location.href = '/connexion';
     }, 2000);
   };
 
   const sections = {
+    security: {
+      title: "Sécurité",
+      icon: <FiKey />,
+      content: (
+        <div className="section-content">
+          <h4>Sécurité du compte</h4>
+          <p>Gérez la sécurité de votre compte et votre mot de passe.</p>
+          <form onSubmit={handleChangePassword} className="password-form">
+            <div className="form-group">
+              <label>Mot de passe actuel</label>
+              <input
+                type="password"
+                name="currentPassword"
+                value={passwordForm.currentPassword}
+                onChange={handlePasswordChange}
+                placeholder="Votre mot de passe actuel"
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>Nouveau mot de passe</label>
+              <input
+                type="password"
+                name="newPassword"
+                value={passwordForm.newPassword}
+                onChange={handlePasswordChange}
+                placeholder="Minimum 8 caractères"
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>Confirmer le mot de passe</label>
+              <input
+                type="password"
+                name="confirmPassword"
+                value={passwordForm.confirmPassword}
+                onChange={handlePasswordChange}
+                placeholder="Retapez le nouveau mot de passe"
+                required
+              />
+            </div>
+            <div className="section-actions">
+              <button type="submit" className="btn-save">
+                <FiSave /> Changer le mot de passe
+              </button>
+            </div>
+          </form>
+          <div className="security-tip">
+            <FiShield />
+            <span>Utilisez un mot de passe fort avec majuscules, minuscules, chiffres et caractères spéciaux.</span>
+          </div>
+        </div>
+      )
+    },
     notifications: {
       title: "Notifications",
       icon: <FiBell />,
@@ -118,12 +224,12 @@ const Parametre = ({ handleLogout, handleDeleteAccount }) => {
               <label>
                 <input 
                   type="checkbox" 
-                  checked={notificationSettings.promotions}
-                  onChange={() => handleNotificationChange('promotions')}
+                  checked={notificationSettings.messages}
+                  onChange={() => handleNotificationChange('messages')}
                 />
                 <div className="setting-info">
-                  <span className="setting-title">Promotions et offres</span>
-                  <span className="setting-desc">Recevoir des offres spéciales et des nouvelles fonctionnalités</span>
+                  <span className="setting-title">Messages</span>
+                  <span className="setting-desc">Recevoir des notifications pour les nouveaux messages</span>
                 </div>
               </label>
             </div>
@@ -140,9 +246,26 @@ const Parametre = ({ handleLogout, handleDeleteAccount }) => {
                 </div>
               </label>
             </div>
+            <div className="setting-item expanded">
+              <label>
+                <input 
+                  type="checkbox" 
+                  checked={notificationSettings.push}
+                  onChange={() => handleNotificationChange('push')}
+                />
+                <div className="setting-info">
+                  <span className="setting-title">Notifications push</span>
+                  <span className="setting-desc">Recevoir des notifications sur votre appareil</span>
+                </div>
+              </label>
+            </div>
           </div>
           <div className="section-actions">
-            <button className="btn-save" onClick={saveNotificationSettings}>
+            <button className="btn-save" onClick={() => {
+              console.log('Notifications sauvegardées:', notificationSettings);
+              setMessage('✅ Paramètres de notification enregistrés');
+              setTimeout(() => setMessage(''), 2000);
+            }}>
               <FiSave /> Enregistrer les paramètres
             </button>
           </div>
@@ -162,7 +285,7 @@ const Parametre = ({ handleLogout, handleDeleteAccount }) => {
                 <input 
                   type="checkbox" 
                   checked={privacySettings.profileVisible}
-                  onChange={() => handlePrivacyChange('profileVisible')}
+                  onChange={() => handlePrivacyChange('profileVisible', !privacySettings.profileVisible)}
                 />
                 <div className="setting-info">
                   <span className="setting-title">Profil visible par tous</span>
@@ -172,27 +295,33 @@ const Parametre = ({ handleLogout, handleDeleteAccount }) => {
             </div>
             <div className="setting-item expanded">
               <label>
-                <input 
-                  type="checkbox" 
-                  checked={privacySettings.hideContact}
-                  onChange={() => handlePrivacyChange('hideContact')}
-                />
                 <div className="setting-info">
-                  <span className="setting-title">Cacher mes coordonnées</span>
-                  <span className="setting-desc">Votre numéro de téléphone ne sera pas visible publiquement</span>
+                  <span className="setting-title">Qui peut me contacter</span>
+                  <span className="setting-desc">Contrôlez qui peut vous envoyer des messages</span>
                 </div>
+                <select 
+                  value={privacySettings.whoCanContact}
+                  onChange={(e) => handlePrivacyChange('whoCanContact', e.target.value)}
+                  className="privacy-select"
+                >
+                  <option value="everyone">👥 Tout le monde</option>
+                  <option value="verified">✓ Utilisateurs vérifiés</option>
+                  <option value="none">❌ Personne</option>
+                </select>
               </label>
             </div>
             <div className="setting-item expanded">
               <label>
                 <input 
                   type="checkbox" 
-                  checked={privacySettings.shareStats}
-                  onChange={() => handlePrivacyChange('shareStats')}
+                  checked={privacySettings.showLocation}
+                  onChange={() => handlePrivacyChange('showLocation', !privacySettings.showLocation)}
                 />
                 <div className="setting-info">
-                  <span className="setting-title">Partager les statistiques d'utilisation</span>
-                  <span className="setting-desc">Aidez-nous à améliorer notre service (données anonymisées)</span>
+                  <span className="setting-title">
+                    <FiMapPin /> Afficher ma localisation
+                  </span>
+                  <span className="setting-desc">Partager votre position avec les autres utilisateurs</span>
                 </div>
               </label>
             </div>
@@ -202,98 +331,56 @@ const Parametre = ({ handleLogout, handleDeleteAccount }) => {
             </div>
           </div>
           <div className="section-actions">
-            <button className="btn-save" onClick={savePrivacySettings}>
+            <button className="btn-save" onClick={() => {
+              console.log('Confidentialité sauvegardée:', privacySettings);
+              setMessage('✅ Paramètres de confidentialité enregistrés');
+              setTimeout(() => setMessage(''), 2000);
+            }}>
               <FiSave /> Enregistrer les paramètres
             </button>
           </div>
         </div>
       )
     },
-    preferences: {
-      title: "Préférences",
-      icon: <FiGlobe />,
+    data: {
+      title: "Mes données",
+      icon: <FiDownload />,
       content: (
         <div className="section-content">
-          <h4>Personnalisez votre expérience</h4>
-          <p>Adaptez la plateforme à vos besoins et préférences.</p>
-          <div className="settings-list">
-            <div className="setting-item expanded">
-              <label>
-                <div className="setting-info">
-                  <span className="setting-title">Langue</span>
-                  <select 
-                    className="language-select"
-                    value={preferences.language}
-                    onChange={(e) => handlePreferenceChange('language', e.target.value)}
-                  >
-                    <option value="fr">Français</option>
-                    <option value="en">English</option>
-                    <option value="es">Español</option>
-                    <option value="de">Deutsch</option>
-                  </select>
-                </div>
-              </label>
-            </div>
-            <div className="setting-item expanded">
-              <label>
-                <div className="setting-info">
-                  <span className="setting-title">Devise</span>
-                  <select 
-                    className="currency-select"
-                    value={preferences.currency}
-                    onChange={(e) => handlePreferenceChange('currency', e.target.value)}
-                  >
-                    <option value="EUR">Euro (€)</option>
-                    <option value="USD">Dollar US ($)</option>
-                    <option value="GBP">Livre sterling (£)</option>
-                  </select>
-                </div>
-              </label>
-            </div>
-            <div className="setting-item expanded">
-              <label>
-                <div className="setting-info">
-                  <span className="setting-title">Fuseau horaire</span>
-                  <select 
-                    className="timezone-select"
-                    value={preferences.timezone}
-                    onChange={(e) => handlePreferenceChange('timezone', e.target.value)}
-                  >
-                    <option value="europe/paris">Europe/Paris (UTC+1)</option>
-                    <option value="utc">UTC</option>
-                    <option value="america/new_york">America/New York (UTC-5)</option>
-                  </select>
-                </div>
-              </label>
+          <h4>Gestion de vos données (RGPD)</h4>
+          <p>Contrôlez vos données personnelles conformément au RGPD.</p>
+          
+          <div className="data-options">
+            <div className="data-option">
+              <h5><FiDownload /> Télécharger mes données</h5>
+              <p>Récupérez une copie de toutes vos données personnelles au format JSON.</p>
+              <button className="btn-outline" onClick={handleDownloadData}>
+                Télécharger mes données
+              </button>
             </div>
           </div>
-          <div className="section-actions">
-            <button className="btn-save" onClick={savePreferences}>
-              <FiSave /> Enregistrer les préférences
-            </button>
-          </div>
-        </div>
-      )
-    },
-    account: {
-      title: "Compte",
-      icon: <FiUser />,
-      content: (
-        <div className="section-content">
-          <h4>Gestion de votre compte</h4>
-          <p>Modifiez les paramètres liés à votre compte et votre sécurité.</p>
-          <div className="account-actions">
-            <div className="account-action-item danger">
-              <h5>Zone dangereuse</h5>
-              <p>Actions irréversibles concernant votre compte</p>
-              <div className="danger-actions">
-                <button className="btn-outline" onClick={handleLogout}>
-                  <FiLogOut /> Se déconnecter
+          
+          <div className="account-warning">
+            <div className="warning-section">
+              <h5><FiPauseCircle /> Désactiver temporairement mon compte</h5>
+              <p>Votre compte sera désactivé pour 30 jours. Vous pourrez le réactiver en vous reconnectant.</p>
+              {!confirmDisable ? (
+                <button className="btn-warning" onClick={() => setConfirmDisable(true)}>
+                  Désactiver mon compte
                 </button>
-                <button className="btn-danger" onClick={handleDeleteAccount}>
-                  Supprimer mon compte
-                </button>
-              </div>
+              ) : (
+                <div className="confirmation-box">
+                  <p>⚠️ <strong>Êtes-vous sûr?</strong> Votre compte sera désactivé pendant 30 jours.</p>
+                  <div className="confirmation-actions">
+                    <button className="btn-danger" onClick={handleDisableAccount}>
+                      Confirmer la désactivation
+                    </button>
+                    <button className="btn-secondary" onClick={() => setConfirmDisable(false)}>
+                      Annuler
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -315,7 +402,7 @@ const Parametre = ({ handleLogout, handleDeleteAccount }) => {
               </div>
             </a>
             <a href="#" className="help-option">
-              <FiMail />
+              <FiMessageSquare />
               <div>
                 <h5>Contactez-nous</h5>
                 <p>Envoyez-nous un message</p>
@@ -331,17 +418,72 @@ const Parametre = ({ handleLogout, handleDeleteAccount }) => {
           </div>
         </div>
       )
+    },
+    account: {
+      title: "Compte",
+      icon: <FiUser />,
+      content: (
+        <div className="section-content">
+          <h4>Gestion de votre compte</h4>
+          <p>Modifiez les paramètres liés à votre compte et votre sécurité.</p>
+          <div className="account-actions">
+            <div className="account-action-item danger">
+              <h5>Zone dangereuse</h5>
+              <p>Actions irréversibles concernant votre compte</p>
+              
+              {!confirmDelete ? (
+                <>
+                  <div className="danger-actions">
+                    <button className="btn-outline" onClick={handleLogout}>
+                      <FiLogOut /> Se déconnecter
+                    </button>
+                    <button className="btn-danger" onClick={() => setConfirmDelete(true)}>
+                      Supprimer mon compte
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="confirmation-box">
+                  <p>⚠️ <strong>DERNIÈRE CONFIRMATION:</strong> Vous êtes sur le point de supprimer définitivement votre compte.</p>
+                  <textarea
+                    placeholder="Dites-nous pourquoi vous supprimez votre compte (optionnel)..."
+                    value={deleteReason}
+                    onChange={(e) => setDeleteReason(e.target.value)}
+                    className="delete-reason"
+                  />
+                  <div className="confirmation-actions">
+                    <button className="btn-danger" onClick={() => {
+                      setConfirmDelete(false);
+                      handleDeleteAccount();
+                    }}>
+                      ✓ OUI, SUPPRIMER MON COMPTE
+                    </button>
+                    <button className="btn-secondary" onClick={() => setConfirmDelete(false)}>
+                      ✗ Annuler
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )
     }
   };
 
   const handleSectionClick = (sectionKey) => {
     setSelectedSection(sectionKey);
     setMessage('');
+    // Réinitialiser les confirmations
+    setConfirmDelete(false);
+    setConfirmDisable(false);
   };
 
   const handleBack = () => {
     setSelectedSection(null);
     setMessage('');
+    setConfirmDelete(false);
+    setConfirmDisable(false);
   };
 
   return (
@@ -356,7 +498,7 @@ const Parametre = ({ handleLogout, handleDeleteAccount }) => {
       </div>
       
       {message && (
-        <div className="settings-message success">
+        <div className={`settings-message ${message.includes('✅') ? 'success' : 'error'}`}>
           {message}
         </div>
       )}
@@ -379,7 +521,6 @@ const Parametre = ({ handleLogout, handleDeleteAccount }) => {
               className="settings-section-card"
               onClick={() => handleSectionClick(key)}
             >
-              
               <div className="section-card-icon">
                 {section.icon}
               </div>
