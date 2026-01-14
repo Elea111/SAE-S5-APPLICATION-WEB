@@ -1143,6 +1143,24 @@ app.patch('/api/bookings/:id/status', authMiddleware, async (req, res) => {
       }
     }
 
+    // ✅ SI TRANSITION return_confirmed (réservation finie), RENDRE L'ITEM DISPONIBLE
+    if (status === 'return_confirmed') {
+      try {
+        const { error: updateError } = await supabaseClient
+          .from('items')
+          .update({ is_available: true })
+          .eq('id', booking.item_id);
+        
+        if (updateError) {
+          console.warn('⚠️ Erreur mise à jour disponibilité item:', updateError);
+        } else {
+          console.log(`✅ Item ${booking.item_id} remis disponible après retour confirmé`);
+        }
+      } catch (err) {
+        console.warn('⚠️ Erreur rendre item disponible:', err.message);
+      }
+    }
+
     console.log('✅ Booking status updated:', id, '→', status);
     res.json(data[0]);
   } catch (err) {

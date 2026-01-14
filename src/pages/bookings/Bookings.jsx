@@ -3,7 +3,7 @@ import Header from '../../components/layout/header/Header';
 import Footer from '../../components/layout/footer/Footer';
 import './Bookings.css';
 
-const Bookings = () => {
+const Bookings = ({ isTab = false }) => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState('borrower'); // 'borrower' ou 'owner'
@@ -135,20 +135,20 @@ const Bookings = () => {
   if (loading) {
     return (
       <>
-        <Header />
+        {!isTab && <Header />}
         <div className="bookings-page">
           <div className="bookings-container">
             <p>⏳ Chargement des réservations...</p>
           </div>
         </div>
-        <Footer />
+        {!isTab && <Footer />}
       </>
     );
   }
 
   return (
     <>
-      <Header />
+      {!isTab && <Header />}
       <div className="bookings-page">
         <div className="bookings-container">
           <div className="bookings-header">
@@ -413,8 +413,8 @@ const Bookings = () => {
                       </button>
                     )}
 
-                    {/* Action: Laisser avis (any user, status=returned) */}
-                    {booking.status === 'returned' && (
+                    {/* Action: Laisser avis (any user, status=returned or return_confirmed) */}
+                    {(booking.status === 'returned' || booking.status === 'return_confirmed') && (
                       <button
                         className="btn-rate"
                         onClick={() =>
@@ -459,7 +459,7 @@ const Bookings = () => {
           )}
         </div>
       </div>
-      <Footer />
+      {!isTab && <Footer />}
     </>
   );
 };

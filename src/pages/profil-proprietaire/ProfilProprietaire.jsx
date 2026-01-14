@@ -2,6 +2,12 @@
 import React, { useEffect, useState } from 'react';
 import Header from '../../components/layout/header/Header';
 import Footer from '../../components/layout/footer/Footer';
+import Apercu from './composants-onglets/Apercu';
+import MesOutils from './composants-onglets/MesOutils';
+import Avis from './composants-onglets/Avis';
+import Parametre from './composants-onglets/Parametre';
+import Bookings from '../../pages/bookings/Bookings';
+import { FiHome, FiTool, FiStar, FiSettings, FiLogOut, FiEdit2, FiMail, FiCalendar } from 'react-icons/fi';
 import './ProfilProprietaire.css';
 
 const ProfilProprietaire = () => {
@@ -12,8 +18,8 @@ const ProfilProprietaire = () => {
   const [form, setForm] = useState({});
   const [message, setMessage] = useState('');
   const [avatarUploading, setAvatarUploading] = useState(false);
-  
-  // ✅ REVENUE DASHBOARD STATE
+  const [activeTab, setActiveTab] = useState('overview');
+  const [recentActivity, setRecentActivity] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [revenueStats, setRevenueStats] = useState({
     totalRental: 0,
@@ -25,50 +31,205 @@ const ProfilProprietaire = () => {
 
   const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:4000' : '';
 
+  // ✅ GÉNÉRER L'ACTIVITÉ RÉCENTE
+  const generateRecentActivity = () => {
+    const activities = [];
+    if (listings.length > 0) {
+      activities.push({
+        id: 'recent-listing',
+        title: 'Nouvel outil publié',
+        description: listings[0]?.title || 'Un outil',
+        time: 'Il y a quelques jours',
+        icon: '📦',
+        color: '#999e48'
+      });
+    }
+    if (reviews.length > 0) {
+      activities.push({
+        id: 'recent-review',
+        title: 'Nouvel avis reçu',
+        description: `${reviews[0]?.users?.first_name || 'Un client'} a laissé un avis`,
+        time: 'Récemment',
+        icon: '⭐',
+        color: '#FFC107'
+      });
+    }
+    return activities;
+  };
+
+  // ✅ FONCTIONS HELPER
+  const isOwnProfile = () => {
+    const auth = JSON.parse(localStorage.getItem('auth') || '{}');
+    const currentUserId = auth.userId || auth.id;
+    return userData?.id === currentUserId;
+  };
+
+  const toggleEdit = () => {
+    setEditing(!editing);
+    setMessage('');
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const saveProfile = async () => {
+    setMessage('');
+    if (!userData) return;
+    const userId = userData.id;
+    try {
+      const res = await fetch(`${API_BASE}/api/users/${userId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          first_name: form.first_name,
+          last_name: form.last_name,
+          phone: form.phone,
+          address: form.address,
+          bio: form.bio
+        })
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setUserData(updated);
+        setMessage('Profil mis à jour');
+      } else {
+        setUserData(prev => ({ ...prev, ...form }));
+        setMessage('Profil mis à jour localement (mock)');
+      }
+    } catch (err) {
+      setUserData(prev => ({ ...prev, ...form }));
+      setMessage('Sauvegarde locale effectuée (mock)');
+    } finally {
+      setEditing(false);
+    }
+  };
+
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file || !userData) return;
+
+    if (!userData.id) {
+      setMessage('Erreur : ID utilisateur manquant');
+      return;
+    }
+
+    setAvatarUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('avatar', file);
+
+      console.log(`📸 Upload avatar pour user: ${userData.id}`);
+
+      const res = await fetch(`${API_BASE}/api/users/${userData.id}/avatar`, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (res.ok) {
+        const result = await res.json();
+        
+        setUserData(prev => ({
+          ...prev,
+          avatar_url: result.data.avatar_url
+        }));
+
+        const authRaw = localStorage.getItem('auth');
+        if (authRaw) {
+          const auth = JSON.parse(authRaw);
+          auth.avatarUrl = result.data.avatar_url;
+          localStorage.setItem('auth', JSON.stringify(auth));
+        }
+
+        setMessage('Avatar mis à jour ! 🎉');
+        
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      } else {
+        const error = await res.json();
+        setMessage(`Erreur : ${error.error || 'Impossible d\'uploader l\'avatar'}`);
+      }
+    } catch (err) {
+      setMessage(`Erreur réseau : ${err.message}`);
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('auth');
+    window.location.href = '/';
+  };
+
+  const handleDeleteAccount = async () => {
+    const auth = JSON.parse(localStorage.getItem('auth') || '{}');
+    const userId = userData?.id;
+    
+    if (!userId) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/api/users/${userId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${auth.token}` }
+      });
+      
+      if (res.ok) {
+        localStorage.removeItem('auth');
+        window.location.href = '/';
+      }
+    } catch (err) {
+      console.error('Erreur suppression compte:', err);
+    }
+  };
+
+  const renderStars = (rating) => {
+    const filled = Math.round(rating || 0);
+    const empty = 5 - filled;
+    return (
+      <span>
+        {'★'.repeat(filled)}
+        {'☆'.repeat(empty)}
+      </span>
+    );
+  };
+
+  // ✅ FETCH DATA
   useEffect(() => {
-    // ✅ VÉRIFIER D'ABORD LE QUERY PARAM ?userId=...
     const params = new URLSearchParams(window.location.search);
     const queryUserId = params.get('userId');
     
     const authRaw = localStorage.getItem('auth');
     const auth = authRaw ? JSON.parse(authRaw) : {};
     
-    // ✅ UTILISER SOIT LE QUERY PARAM (profil d'un autre), SOIT L'UTILISATEUR ACTUEL
     let targetUserId;
     if (queryUserId) {
-      // Visite du profil d'un autre utilisateur
       targetUserId = queryUserId;
       console.log('📍 Affichage du profil d\'un autre utilisateur:', targetUserId);
     } else {
-      // Profil de l'utilisateur actuel
       targetUserId = auth.userId || auth.id;
       console.log('📍 Affichage du profil de l\'utilisateur actuel:', targetUserId);
     }
     
-    // ✅ SI PAS DE USER -> PAGE DEMO
     if (!targetUserId) {
       console.warn('❌ Pas de userId');
       setUserData(null);
       return;
     }
 
-    console.log('🔄 Chargement des données pour:', targetUserId);
-
-    // ✅ RÉINITIALISER LES STATES AVANT DE CHARGER DE NOUVELLES DONNÉES
     setUserData(null);
     setListings([]);
     setReviews([]);
     setEditing(false);
 
-    // ✅ UTILISER /public SI C'EST UN AUTRE UTILISATEUR, SINON /api/users/:id
     const isOtherUser = queryUserId && queryUserId !== (auth.userId || auth.id);
     const userEndpoint = isOtherUser 
       ? `${API_BASE}/api/users/${targetUserId}/public`
       : `${API_BASE}/api/users/${targetUserId}`;
-    
-    console.log('📡 Endpoint utilisé:', userEndpoint, '(autre utilisateur:', isOtherUser, ')');
 
-    // fetch user
+    // Fetch user
     fetch(userEndpoint, {
       headers: {
         'Authorization': `Bearer ${auth.token}`
@@ -82,10 +243,10 @@ const ProfilProprietaire = () => {
           last_name: u.last_name || auth.last_name || '',
           phone: u.phone || '',
           address: u.address || '',
+          bio: u.bio || ''
         });
       })
       .catch((err) => {
-        // ✅ FALLBACK: créer profil minimal, SANS avatar de localStorage (force refresh depuis Supabase)
         console.warn('Erreur fetch user, création fallback:', err);
         setUserData({
           id: targetUserId,
@@ -93,7 +254,7 @@ const ProfilProprietaire = () => {
           first_name: auth.first_name || 'Utilisateur',
           last_name: auth.last_name || '',
           is_pro: auth.isPro || false,
-          avatar_url: null, // ← Forcer à vide, sera rafraîchi au prochain chargement
+          avatar_url: null,
           created_at: new Date().toISOString(),
           rating: 0,
           review_count: 0,
@@ -104,11 +265,12 @@ const ProfilProprietaire = () => {
           first_name: auth.first_name || '',
           last_name: auth.last_name || '',
           phone: auth.phone || '',
-          address: auth.address || ''
+          address: auth.address || '',
+          bio: ''
         });
       });
 
-    // fetch reviews
+    // Fetch reviews
     fetch(`${API_BASE}/api/users/${targetUserId}/reviews`, {
       headers: {
         'Authorization': `Bearer ${auth.token}`
@@ -118,18 +280,15 @@ const ProfilProprietaire = () => {
       .then(rs => setReviews(rs || []))
       .catch(() => setReviews([]));
 
-    // ✅ FETCH LISTINGS DE L'UTILISATEUR
+    // Fetch listings
     fetch(`${API_BASE}/api/users/${targetUserId}/equipments`)
       .then(r => {
         if (!r.ok) throw new Error('Not found');
         return r.json();
       })
       .then(items => {
-        console.log('📦 Listings chargés:', items);
         const listingsArray = Array.isArray(items) ? items : [];
         setListings(listingsArray);
-        
-        // ✅ METTRE À JOUR LE COMPTEUR DANS USERDATA
         setUserData(prev => ({
           ...prev,
           listings_count: listingsArray.length
@@ -138,15 +297,11 @@ const ProfilProprietaire = () => {
       .catch(err => {
         console.warn('Erreur fetch listings:', err);
         setListings([]);
-        setUserData(prev => ({
-          ...prev,
-          listings_count: 0
-        }));
       });
 
-    // ✅ FETCH BOOKINGS POUR LE DASHBOARD DE REVENU
-    const isOwnProfile = !queryUserId || queryUserId === (auth.userId || auth.id);
-    if (isOwnProfile) {
+    // Fetch bookings (only for own profile)
+    const checkOwnProfile = !queryUserId || queryUserId === (auth.userId || auth.id);
+    if (checkOwnProfile) {
       fetch(`${API_BASE}/api/bookings/user/proprietaire`, {
         headers: {
           'Authorization': `Bearer ${auth.token}`
@@ -157,7 +312,6 @@ const ProfilProprietaire = () => {
           const bookingsArray = Array.isArray(bookingsData) ? bookingsData : [];
           setBookings(bookingsArray);
 
-          // ✅ CALCULER LES STATISTIQUES
           let totalRental = 0;
           let totalCaution = 0;
           let completedCount = 0;
@@ -195,146 +349,17 @@ const ProfilProprietaire = () => {
     }
   }, [API_BASE, window.location.search]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('auth');
-    window.location.href = '/';
-  };
+  useEffect(() => {
+    setRecentActivity(generateRecentActivity());
+  }, [listings, reviews]);
 
-  const goToSearch = () => {
-    // ✅ REDIRECT À /search
-    window.location.href = '/search';
-  };
-
-  const goToPublish = () => {
-    // ✅ REDIRECT À /publish
-    window.location.href = '/publish';
-  };
-
-  const goToMessages = (other) => {
-    // open messages page; frontend expects query param "other" for conversations
-    window.location.href = `/messages?other=${other}`;
-  };
-
-  // ✅ VÉRIFIER SI C'EST LE PROPRE PROFIL DE L'UTILISATEUR
-  const isOwnProfile = () => {
-    const auth = JSON.parse(localStorage.getItem('auth') || '{}');
-    const currentUserId = auth.userId || auth.id;
-    return userData?.id === currentUserId;
-  };
-
-  const toggleEdit = () => {
-    setEditing(!editing);
-    setMessage('');
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
-  };
-
-  const saveProfile = async () => {
-    setMessage('');
-    if (!userData) return;
-    const userId = userData.id;
-    try {
-      const res = await fetch(`${API_BASE}/api/users/${userId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          first_name: form.first_name,
-          last_name: form.last_name,
-          phone: form.phone,
-          address: form.address,
-        })
-      });
-      if (res.ok) {
-        const updated = await res.json();
-        setUserData(updated);
-        setMessage('Profil mis à jour');
-      } else {
-        // fallback: update locally (mock)
-        setUserData(prev => ({ ...prev, ...form }));
-        setMessage('Profil mis à jour localement (mock)');
-      }
-    } catch (err) {
-      // network / CORS / route missing
-      setUserData(prev => ({ ...prev, ...form }));
-      setMessage('Sauvegarde locale effectuée (mock)');
-    } finally {
-      setEditing(false);
-    }
-  };
-
-  // ✅ UPLOAD AVATAR VERS SUPABASE
-  const handleAvatarChange = async (e) => {
-    const file = e.target.files && e.target.files[0];
-    if (!file || !userData) return;
-
-    // ✅ VERIFIER QUE L'ID EXISTE
-    if (!userData.id) {
-      setMessage('Erreur : ID utilisateur manquant');
-      return;
-    }
-
-    setAvatarUploading(true);
-
-    try {
-      const formData = new FormData();
-      formData.append('avatar', file);
-
-      console.log(`📸 Upload avatar pour user: ${userData.id}`);
-
-      const res = await fetch(`${API_BASE}/api/users/${userData.id}/avatar`, {
-        method: 'POST',
-        body: formData
-      });
-
-      if (res.ok) {
-        const result = await res.json();
-        
-        // Mettre à jour l'UI
-        setUserData(prev => ({
-          ...prev,
-          avatar_url: result.data.avatar_url
-        }));
-
-        // Sauvegarder en localStorage
-        const authRaw = localStorage.getItem('auth');
-        if (authRaw) {
-          const auth = JSON.parse(authRaw);
-          auth.avatarUrl = result.data.avatar_url;
-          localStorage.setItem('auth', JSON.stringify(auth));
-        }
-
-        setMessage('Avatar mis à jour ! 🎉');
-        
-        // ✅ FORCER REFRESH de tous les éléments pour que la photo s'affiche partout
-        setTimeout(() => {
-          window.location.reload();
-        }, 1500);
-      } else {
-        const error = await res.json();
-        setMessage(`Erreur : ${error.error || 'Impossible d\'uploader l\'avatar'}`);
-      }
-    } catch (err) {
-      setMessage(`Erreur réseau : ${err.message}`);
-    } finally {
-      setAvatarUploading(false);
-    }
-  };
-
-  // ✅ SI userData EST NULL -> PAGE DEMO (DECONNECTE)
-  // ✅ SINON -> PAGE PROFIL COMPLETE
+  // ✅ RENDER PROFILE PAGE OR EMPTY STATE
   if (userData === null) {
     return (
       <div className="profil-proprietaire-page">
-        <div className="profile-empty">
-          <p>Profil démo — connectez-vous pour gérer votre compte.</p>
-          <div className="quick-actions">
-            <button className="btn-primary" onClick={goToSearch}>Chercher un outil</button>
-            <button className="btn-secondary" onClick={() => window.location.href = '/connexion'}>Se connecter</button>
-          </div>
-        </div>
+        <p style={{textAlign: 'center', marginTop: '40px', color: '#999'}}>
+          Profil démo — connectez-vous pour gérer votre compte.
+        </p>
       </div>
     );
   }
@@ -343,236 +368,168 @@ const ProfilProprietaire = () => {
     <>
       <Header />
       <div className="profil-proprietaire-page">
-      <div className="profile-header-section">
-        <div className="profile-left">
-          <div className="profile-image-container">
-            <img
-              src={userData.avatar_url || '/favicon.ico'}
-              alt={userData.first_name || userData.email}
-              className="profile-image"
-            />
-          </div>
+        <div className="profile-main-content">
+          {/* ✅ SIDEBAR */}
+          <div className="profile-sidebar">
+            <div className="avatar-section">
+              <div className="avatar-container">
+                <img
+                  src={userData.avatar_url || '/favicon.ico'}
+                  alt={userData.first_name}
+                  className="profile-avatar"
+                />
+                {isOwnProfile() && (
+                  <label className="avatar-upload-label">
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      onChange={handleAvatarChange}
+                      disabled={avatarUploading}
+                    />
+                    <div className="avatar-upload-overlay">
+                      📸
+                    </div>
+                  </label>
+                )}
+              </div>
 
-          {/* ✅ UPLOAD AVATAR INPUT - IMPORTANT: utiliser useRef pour accéder au input */}
-          <div className="avatar-upload-container">
-            <input 
-              ref={(input) => { window.avatarInput = input; }}
-              type="file" 
-              accept="image/*" 
-              onChange={handleAvatarChange}
-              disabled={avatarUploading}
-              style={{display:'none'}} 
-              id="avatar-input"
-            />
-            <button 
-              className="btn-outline" 
-              type="button"
-              disabled={avatarUploading}
-              onClick={() => {
-                const input = document.getElementById('avatar-input');
-                if (input) input.click();
-              }}
-            >
-              {avatarUploading ? 'Upload en cours...' : 'Changer la photo'}
-            </button>
-          </div>
+              <div className="user-basic-info">
+                <h2 className="user-name">{userData.first_name} {userData.last_name}</h2>
+                
+                {userData.is_pro && (
+                  <div className="user-badges">
+                    <div className="profile-badge profile-badge-pro">⭐ Professionnel</div>
+                  </div>
+                )}
 
-          {/* ✅ RATING & QUICK ACTIONS - MOVED HERE FOR BETTER UX */}
-          <div className="profile-card-sidebar">
-            <div className="rating-section-sidebar">
-              <div className="stars">{'★'.repeat(Math.round(userData.rating || 0))}{'☆'.repeat(5 - Math.round(userData.rating || 0))}</div>
-              <span className="rating-text">{(userData.rating || 0).toFixed(1)} / 5 sur {userData.review_count || 0} avis</span>
-            </div>
+                <div className="stars-display">
+                  <span className="star-filled">
+                    {'★'.repeat(Math.round(userData.rating || 0))}
+                  </span>
+                  <span className="star-empty">
+                    {'☆'.repeat(5 - Math.round(userData.rating || 0))}
+                  </span>
+                  <span className="rating-value">{(userData.rating || 0).toFixed(1)}</span>
+                </div>
 
-            <div className="profile-actions-sidebar">
-              <button className="btn-link" onClick={toggleEdit}>{editing ? 'Annuler' : 'Modifier mon profil'}</button>
-              <button className="btn-link" onClick={() => window.location.href = '/bookings'}>Mes réservations</button>
-              <button className="btn-link" onClick={() => window.location.href = '/my-listings'}>Mes annonces</button>
-            </div>
-          </div>
+                <p className="member-since">
+                  Membre depuis {new Date(userData.created_at).getFullYear()}
+                </p>
+              </div>
 
-          <div className="owner-actions">
-            <button className="btn-primary full" onClick={goToSearch}>Chercher un outil</button>
-            <button className="btn-outline full" onClick={goToPublish}>Proposer un outil</button>
-            {!isOwnProfile() && (
-              <button className="btn-secondary full" onClick={() => goToMessages(userData?.id)}>Messagerie</button>
-            )}
-            <button className="btn-logout full" onClick={handleLogout}>Se déconnecter</button>
-          </div>
-        </div>
-
-        <div className="profile-right">
-          <div className="profile-main-info">
-            <div className="name-row">
-              <h1 className="profile-name">{userData.first_name} {userData.last_name}</h1>
-              <button className="profile-settings-btn" title="Paramètres" onClick={()=>window.location.href='/settings'}>⚙ Paramètres</button>
-              <div className="member-meta">
-                <span>Membre depuis {new Date(userData.created_at || Date.now()).getFullYear()}</span>
-                <span className="dot">•</span>
-                <strong className={`role-tag ${userData.is_pro ? 'role-pro' : 'role-part'}`}>
-                    {userData.is_pro ? 'Professionnel' : 'Particulier'}
-                </strong>
+              <div className="sidebar-actions">
+                {isOwnProfile() ? (
+                  <>
+                    <button className="sidebar-btn primary" onClick={() => window.location.href = '/publish'}>
+                      <FiTool /> Publier un outil
+                    </button>
+                    <button className="sidebar-btn" onClick={() => window.location.href = '/search'}>
+                      <FiHome /> Chercher un outil
+                    </button>
+                    <button className="sidebar-btn secondary" onClick={handleLogout}>
+                      <FiLogOut /> Se déconnecter
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button className="sidebar-btn primary" onClick={() => window.location.href = `/messages?other=${userData.id}`}>
+                      <FiMail /> Contacter
+                    </button>
+                    <button className="sidebar-btn secondary" onClick={() => window.location.href = '/search'}>
+                      <FiHome /> Chercher un outil
+                    </button>
+                  </>
+                )}
               </div>
             </div>
+          </div>
 
-            <div className="profile-details">
-              {editing ? (
-                <div className="edit-form">
-                  <label>Prénom
-                    <input name="first_name" value={form.first_name} onChange={handleChange} />
-                  </label>
-                  <label>Nom
-                    <input name="last_name" value={form.last_name} onChange={handleChange} />
-                  </label>
-                  <label>Téléphone
-                    <input name="phone" value={form.phone} onChange={handleChange} />
-                  </label>
-                  <label>Adresse
-                    <input name="address" value={form.address} onChange={handleChange} />
-                  </label>
-                  <div className="edit-actions">
-                    <button className="btn-primary" onClick={saveProfile}>Enregistrer</button>
-                    <button className="btn-outline" onClick={() => setEditing(false)}>Annuler</button>
-                  </div>
-                  {message && <p className="info">{message}</p>}
-                </div>
-              ) : (
-                <div className="info-grid">
-                  <div className="info-item">
-                    <h4>Contact</h4>
-                    <p>{userData.phone || '—'}</p>
-                    <p className="muted">{userData.email}</p>
-                  </div>
-                  <div className="info-item">
-                    <h4>Adresse</h4>
-                    <p>{userData.address || '—'}</p>
-                  </div>
-                  <div className="info-item">
-                    <h4>Statistiques</h4>
-                    <p>Outils proposés: {userData.listings_count || 0}</p>
-                    <p>Locations réalisées: {userData.rental_count || 0}</p>
-                  </div>
-                </div>
+          {/* ✅ CONTENU PRINCIPAL AVEC ONGLETS */}
+          <div className="profile-content">
+            <div className="profile-tabs">
+              <button 
+                className={`profile-tab-btn ${activeTab === 'overview' ? 'active' : ''}`}
+                onClick={() => setActiveTab('overview')}
+              >
+                <FiHome /> Aperçu
+              </button>
+              <button 
+                className={`profile-tab-btn ${activeTab === 'tools' ? 'active' : ''}`}
+                onClick={() => setActiveTab('tools')}
+              >
+                <FiTool /> Mes outils
+              </button>
+              {isOwnProfile() && (
+                <button 
+                  className={`profile-tab-btn ${activeTab === 'bookings' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('bookings')}
+                >
+                  <FiCalendar /> Mes réservations
+                </button>
+              )}
+              <button 
+                className={`profile-tab-btn ${activeTab === 'reviews' ? 'active' : ''}`}
+                onClick={() => setActiveTab('reviews')}
+              >
+                <FiStar /> Avis ({reviews.length})
+              </button>
+              {isOwnProfile() && (
+                <button 
+                  className={`profile-tab-btn ${activeTab === 'settings' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('settings')}
+                >
+                  <FiSettings /> Paramètres
+                </button>
+              )}
+            </div>
+
+            <div className="tab-content">
+              {activeTab === 'overview' && (
+                <Apercu
+                  userData={userData}
+                  form={form}
+                  editing={editing}
+                  message={message}
+                  recentActivity={recentActivity}
+                  toggleEdit={toggleEdit}
+                  handleChange={handleChange}
+                  saveProfile={saveProfile}
+                  setEditing={setEditing}
+                  setActiveTab={setActiveTab}
+                  bookings={bookings}
+                  revenueStats={revenueStats}
+                />
+              )}
+
+              {activeTab === 'tools' && (
+                <MesOutils
+                  userData={userData}
+                  listings={listings}
+                  setActiveTab={setActiveTab}
+                />
+              )}
+
+              {activeTab === 'bookings' && isOwnProfile() && (
+                <Bookings isTab={true} />
+              )}
+
+              {activeTab === 'reviews' && (
+                <Avis
+                  reviews={reviews}
+                  renderStars={renderStars}
+                />
+              )}
+
+              {activeTab === 'settings' && isOwnProfile() && (
+                <Parametre
+                  handleLogout={handleLogout}
+                  handleDeleteAccount={handleDeleteAccount}
+                />
               )}
             </div>
           </div>
         </div>
       </div>
-
-      <hr className="section-divider" />
-
-      {/* ✅ REVENUE DASHBOARD - ONLY FOR OWN PROFILE */}
-      {isOwnProfile() && revenueStats.totalRevenue > 0 || bookings.length > 0 ? (
-        <>
-          <div className="revenue-dashboard">
-            <h2 className="section-title">📊 Tableau de bord - Revenus</h2>
-            <div className="revenue-cards">
-              <div className="revenue-card">
-                <h4>Revenus totaux</h4>
-                <p className="revenue-amount">{revenueStats.totalRevenue.toFixed(2)} €</p>
-                <small>Loyers + cautions</small>
-              </div>
-              <div className="revenue-card">
-                <h4>Loyers reçus</h4>
-                <p className="revenue-amount">{revenueStats.totalRental.toFixed(2)} €</p>
-                <small>{revenueStats.completedBookings} locations complétées</small>
-              </div>
-              <div className="revenue-card">
-                <h4>Cautions</h4>
-                <p className="revenue-amount">{revenueStats.totalCaution.toFixed(2)} €</p>
-                <small>{revenueStats.activeBookings} locations en cours</small>
-              </div>
-              <div className="revenue-card">
-                <h4>Locations</h4>
-                <p className="revenue-amount">{bookings.length}</p>
-                <small>{revenueStats.completedBookings} complétées, {revenueStats.activeBookings} actives</small>
-              </div>
-            </div>
-          </div>
-
-          <hr className="section-divider" />
-        </>
-      ) : null}
-
-      <div className="tools-section">
-        <div className="section-header">
-          <h2 className="section-title">Outils proposés</h2>
-          <div className="header-actions">
-            <button className="btn-outline" onClick={() => window.location.href = '/publish'}>Publier un outil</button>
-          </div>
-        </div>
-
-        <div className="tools-grid">
-          {listings && listings.length > 0 ? (
-            listings.map(tool => (
-              <div key={tool.id} className="tool-card small">
-                <img src={tool.image_url || tool.image || '/favicon.ico'} alt={tool.title} className="tool-thumb" />
-                <div className="tool-body">
-                  <h4>{tool.title}</h4>
-                  <p className="muted">{tool.daily_price ? `${tool.daily_price} € / jour` : 'Prix non défini'}</p>
-                  <div className="tool-actions">
-                    <button className="btn-link" onClick={() => window.location.href = `/equipments/${tool.id}`}>Voir</button>
-                    <button className="btn-link" onClick={() => window.location.href = `/edit-listing?item=${tool.id}`}>Éditer</button>
-                  </div>
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="no-tools">
-              <p>Aucun outil publié pour le moment.</p>
-              <button className="btn-primary" onClick={() => window.location.href = '/publish'}>Publier mon premier outil</button>
-            </div>
-          )}
-        </div>
-
-        <div className="reviews-section">
-          <h3>Avis reçus ({reviews.length})</h3>
-          {reviews.length === 0 ? (
-            <p className="no-reviews">Aucun avis pour le moment.</p>
-          ) : (
-            <div className="reviews-list">
-              {reviews.map(review => {
-                const author = review.users || {};
-                const rating = Math.round(review.rating || 0);
-                return (
-                  <div key={review.id} className="review-card">
-                    <div className="review-header">
-                      <a 
-                        href={`/profil?userId=${author.id}`}
-                        className="reviewer-info-link"
-                      >
-                        <div className="reviewer-info">
-                          <img 
-                            src={author.avatar_url || '/favicon.ico'} 
-                            alt={author.first_name} 
-                            className="reviewer-avatar"
-                          />
-                          <div className="reviewer-details">
-                            <strong className="reviewer-name">
-                              {author.first_name} {author.last_name}
-                            </strong>
-                            <span className="review-date">
-                              {new Date(review.created_at).toLocaleDateString('fr-FR')}
-                            </span>
-                          </div>
-                        </div>
-                      </a>
-                      <div className="review-rating">
-                        {'★'.repeat(rating)}{'☆'.repeat(5 - rating)}
-                        <span className="rating-value">{review.rating}/5</span>
-                      </div>
-                    </div>
-                    <div className="review-body">
-                      <p>{review.comment || review.content || 'Pas de commentaire'}</p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
       <Footer />
     </>
   );

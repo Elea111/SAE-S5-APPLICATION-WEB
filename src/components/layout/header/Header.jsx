@@ -89,10 +89,15 @@ const Header = () => {
                                     💬
                                     {unreadCount > 0 && <span className="badge">{unreadCount}</span>}
                                 </button>
-                                <button className="icon-btn" title="Paramètres" onClick={() => window.location.href = '/settings'}>⚙️</button>
                                 <button className="profile-btn" onClick={() => window.location.href = '/profil'}>
-                                    {userAvatar ? <img src={userAvatar} alt="avatar" className="header-avatar" /> : <span className="header-initial">{(userDisplayName || 'U').charAt(0)}</span>}
-                                    <span className="profile-label">{userDisplayName || 'Mon compte'}</span>
+                                    {userAvatar ? (
+                                        <>
+                                            <img src={userAvatar} alt="avatar" className="header-avatar" />
+                                            <span className="profile-label">{userDisplayName || 'Mon compte'}</span>
+                                        </>
+                                    ) : (
+                                        <span className="header-initial">{(userDisplayName || 'U').charAt(0)}</span>
+                                    )}
                                 </button>
                                 <button className="logout-btn" onClick={() => { localStorage.removeItem('auth'); window.location.reload(); }}>Déconnexion</button>
                             </>
