@@ -18,7 +18,7 @@
 
 ## 🎯 Vue d'ensemble
 
-Cette session a porté sur la correction et l'amélioration de la plateforme **OutilPartage** - une application de partage d'outils en économie circulaire.
+Cette session a porté sur la correction et l'amélioration de la plateforme **Outillio** - une application de partage d'outils en économie circulaire.
 
 ### Objectifs atteints:
 - ✅ Corriger les bugs critiques de sécurité
