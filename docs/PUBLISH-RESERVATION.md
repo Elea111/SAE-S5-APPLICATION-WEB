@@ -45,9 +45,9 @@ L'utilisateur commence sur la page d'accueil où il peut choisir entre publier u
       |
 [Serveur - Node.js/Express.js]
       |
-      | Mongoose
+      | PostgreSQL
       |
-[Base de données - MongoDB]
+[Base de données - Supabase]
 ```
 
 ---
