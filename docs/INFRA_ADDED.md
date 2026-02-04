@@ -1,6 +1,12 @@
 # Infra & Domain additions (summary)
 
 Ce document décrit les fichiers ajoutés pour rendre les usecases exécutables en local (mock/in-memory) et les value‑objects/enums créés.
+Le projet dispose désormais d'une véritable base de données, les simulations ne sont donc plus nécessaires, mais ce document est conservé afin de mieux comprendre l'historique des implémentations.
+
+
+
+
+
 
 ## 1 — Value objects / enums ajoutés
 - src/domain/value-objects/Money.js — simple VO pour montants.

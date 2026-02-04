@@ -1,4 +1,4 @@
-# Changes, New Tests & How to run them (detailed, updated)
+# Changes, New Tests & How to run them 
 
 Ce document décrit précisément les fichiers ajoutés/modifiés récemment, la raison de chaque changement, et comment valider le comportement en local.
 
