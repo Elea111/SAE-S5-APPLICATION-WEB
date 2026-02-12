@@ -16,6 +16,11 @@ export async function LoginUser(email, password, userRepository = null) {
             throw new Error('Utilisateur non trouvé');
         }
 
+        // ✅ Vérifier si c'est un utilisateur OAuth (password_hash vide ou absent)
+        if (!user.password_hash || user.password_hash === '' || user.password_hash === 'temp_hash') {
+            throw new Error('Cet utilisateur s\'est inscrit via OAuth (Google/GitHub). Connectez-vous avec le même fournisseur.');
+        }
+
         // Vérifier le mot de passe
         const isValid = await bcryptjs.compare(password, user.password_hash);
         if (!isValid) {

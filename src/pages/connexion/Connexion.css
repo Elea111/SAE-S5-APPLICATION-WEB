@@ -215,6 +215,34 @@
   margin-top: 10px;
 }
 
+.divider-section {
+  display: flex;
+  align-items: center;
+  margin: 1.5rem 0;
+  gap: 12px;
+}
+
+.divider {
+  flex: 1;
+  height: 1px;
+  background-color: #e5e7eb;
+  position: relative;
+}
+
+.divider::before {
+  content: 'OU';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: #ffffff;
+  padding: 0 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #999;
+  white-space: nowrap;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .connexion-container {

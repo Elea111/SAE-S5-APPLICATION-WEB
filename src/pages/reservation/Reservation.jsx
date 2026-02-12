@@ -98,6 +98,7 @@ const Reservation = () => {
     // Soumettre la réservation
     setSubmitting(true);
     try {
+      const auth = JSON.parse(localStorage.getItem('auth') || '{}');
       const res = await fetch(`${API_BASE}/api/bookings`, {
         method: 'POST',
         headers: {

@@ -6,6 +6,7 @@ import Accueil from './pages/accueil/Accueil.js';
 import Footer from './components/layout/footer/Footer.jsx';
 import ProfilPropietaire from './pages/profil-proprietaire/ProfilProprietaire.jsx';
 import Connexion from "./pages/connexion/Connexion.jsx";
+import AuthCallback from './pages/auth/AuthCallback.jsx';
 import EquipmentDetails from './pages/equipment/EquipmentDetails.jsx';
 import Schedule from './pages/schedule/Schedule.jsx';
 import Messages from './pages/messages/Messages.jsx';
@@ -43,6 +44,7 @@ function App() {
             <>
                 {path.startsWith('/inscription') && <Inscription />}
                 {path.startsWith('/connexion') && <Connexion />}
+                {path.startsWith('/auth/callback') && <AuthCallback />}
                 {path.startsWith('/profil') && <ProfilPropietaire />}
                 {(path.startsWith('/equipments/') || path.startsWith('/equipment/')) && <EquipmentDetails />}
                 {path.startsWith('/schedule') && <Schedule />}
