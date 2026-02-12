@@ -949,7 +949,18 @@ app.get('/api/equipments', validateQuery(SearchEquipmentSchema), async (req, res
 app.post('/api/bookings', authMiddleware, validateBody(BookEquipmentSchema), async (req, res) => {
   try {
     const { item_id, start_date, end_date } = req.validated;
+    
+    // ✅ DEBUG: Vérifier que l'utilisateur est bien authentifié
+    if (!req.user || !req.user.id) {
+      console.error('❌ Erreur auth: req.user ou req.user.id manquant');
+      console.log('   req.user:', req.user);
+      console.log('   headers:', req.headers.authorization?.substring(0, 50) + '...');
+      return res.status(401).json({ message: 'Authentification invalide - ID utilisateur manquant' });
+    }
+    
     const borrower_id = req.user.id;
+    
+    console.log(`📝 Nouvelle réservation: borrower=${borrower_id}, item=${item_id}, dates=${start_date}→${end_date}`);
 
     const booking = await BookEquipment(
       {
@@ -961,6 +972,8 @@ app.post('/api/bookings', authMiddleware, validateBody(BookEquipmentSchema), asy
       di.bookingRepository,
       di.equipmentRepository
     );
+
+    console.log(`✅ Réservation créée: ID=${booking.id}`);
 
     // 📧 Envoyer les emails de notification (en background)
     (async () => {
@@ -1200,7 +1213,7 @@ app.patch('/api/bookings/:id', authMiddleware, validateBody(UpdateBookingSchema)
  * Status: pending → confirmed → handed_over → returned
  * SI TRANSITION pending→confirmed, ENVOYER NOTIFICATION AU BORROWER
  */
-app.patch('/api/bookings/:id/status', authMiddleware, csrfProtection, async (req, res) => {
+app.patch('/api/bookings/:id/status', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
@@ -1336,7 +1349,7 @@ app.get('/api/reviews', authMiddleware, async (req, res) => {
   }
 });
 
-app.post('/api/reviews', authMiddleware, csrfProtection, validateBody(LeaveReviewSchema), async (req, res) => {
+app.post('/api/reviews', authMiddleware, validateBody(LeaveReviewSchema), async (req, res) => {
   try {
     const reviewData = { ...req.validated, author_id: req.user.id };
     const review = await LeaveReview(reviewData, di.reviewRepository);
@@ -1347,7 +1360,7 @@ app.post('/api/reviews', authMiddleware, csrfProtection, validateBody(LeaveRevie
 });
 
 // ✅ PATCH /api/reviews/:id - Update existing review
-app.patch('/api/reviews/:id', authMiddleware, csrfProtection, async (req, res) => {
+app.patch('/api/reviews/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     const { rating, comment } = req.body;
@@ -1393,7 +1406,7 @@ app.patch('/api/reviews/:id', authMiddleware, csrfProtection, async (req, res) =
 });
 
 // ========== MESSAGE ENDPOINTS ==========
-app.post('/api/messages', authMiddleware, csrfProtection, validateBody(SendMessageSchema), async (req, res) => {
+app.post('/api/messages', authMiddleware, validateBody(SendMessageSchema), async (req, res) => {
   try {
     const { receiver_id, content, booking_id = null } = req.validated;
     const msg = await di.messageRepository.create({
@@ -1827,7 +1840,7 @@ app.get('/api/messages/conversations', authMiddleware, async (req, res) => {
  * PATCH /api/messages/:id/read
  * Marquer un message comme lu
  */
-app.patch('/api/messages/:id/read', authMiddleware, csrfProtection, async (req, res) => {
+app.patch('/api/messages/:id/read', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
 

@@ -1,9 +1,12 @@
-import supabaseClient from '../database/supabaseClient.js';
+import { Resend } from 'resend';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 /**
- * EmailService - Gère l'envoi d'emails via Supabase Email API
+ * EmailService - Gère l'envoi d'emails via Resend
  * 
- * Documentation: https://supabase.com/docs/reference/javascript/auth-resend-email
+ * Configuration: Ajouter RESEND_API_KEY dans .env
+ * Créer compte gratuit: https://resend.com
  */
 
 class EmailService {
@@ -17,7 +20,7 @@ class EmailService {
    * @param {string} params.startDate - Date de début (format YYYY-MM-DD)
    * @param {string} params.endDate - Date de fin (format YYYY-MM-DD)
    * @param {number} params.dailyPrice - Prix journalier
-   * @param {number} params.bookingId - ID de la réservation
+   * @param {string} params.borrowerEmail - Email de l'emprunteur
    */
   async sendNewBookingNotification(params) {
     const {
@@ -50,9 +53,9 @@ class EmailService {
             </div>
 
             <p style="margin-top: 25px;">
-              <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/bookings/user/proprietaire" 
-                 style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
-                Accepter ou refuser la demande
+              <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/bookings" 
+                 style="background-color: #a5b552; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                Voir la demande
               </a>
             </p>
 
@@ -67,13 +70,13 @@ class EmailService {
       // 📧 Email à l'emprunteur
       await this.sendEmail({
         to: borrowerEmail,
-        subject: `✅ Votre demande de réservation a été envoyée`,
+        subject: `✅ Votre réservation a été envoyée au propriétaire`,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #333;">Demande envoyée! ✅</h2>
+            <h2 style="color: #333;">Réservation confirmée! ✅</h2>
             <p>Bonjour <strong>${borrowerName}</strong>,</p>
             
-            <p>Votre demande de réservation pour <strong>${itemTitle}</strong> a été envoyée au propriétaire.</p>
+            <p>Votre réservation pour <strong>${itemTitle}</strong> a été envoyée au propriétaire.</p>
             
             <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
               <p><strong>📦 Outil:</strong> ${itemTitle}</p>
@@ -81,7 +84,7 @@ class EmailService {
               <p><strong>💰 Prix:</strong> ${dailyPrice}€/jour</p>
             </div>
 
-            <p>⏳ Vous recevrez une notification dès que <strong>${ownerName}</strong> aura répondu à votre demande.</p>
+            <p>⏳ Vous recevrez une notification dès que <strong>${ownerName}</strong> aura accepté votre réservation.</p>
 
             <hr style="margin-top: 30px; border: none; border-top: 1px solid #ddd;">
             <p style="font-size: 12px; color: #999;">
@@ -91,17 +94,16 @@ class EmailService {
         `
       });
 
-      console.log(`✅ Emails envoyés pour la réservation de ${itemTitle}`);
-      return { success: true };
+      console.log(`✅ Emails envoyés pour la réservation de "${itemTitle}" aux adresses ${ownerEmail} et ${borrowerEmail}`);
+      return { success: true, message: 'Emails envoyés avec succès' };
     } catch (error) {
-      console.error('❌ Erreur lors de l\'envoi d\'emails:', error);
-      // ⚠️ On ne throw pas - l'email n'est pas critique pour le flux
+      console.error('❌ Erreur lors de l\'envoi d\'emails:', error.message);
       return { success: false, error: error.message };
     }
   }
 
   /**
-   * Envoie un email générique
+   * Envoie un email générique via Resend
    * @param {Object} params
    * @param {string} params.to - Adresse email destinataire
    * @param {string} params.subject - Sujet de l'email
@@ -109,38 +111,32 @@ class EmailService {
    */
   async sendEmail({ to, subject, html }) {
     try {
-      // 🔌 Utiliser Supabase Admin Auth pour envoyer un email
-      // Note: Cela nécessite que Supabase Email soit configuré
-      // dans le dashboard Supabase (Settings → Email Templates ou intégration SMTP)
-      
-      // Pour l'instant, on utilise Supabase RLS pour envoyer via une function
-      // Ou on peut utiliser une API externe si Supabase Email n'est pas disponible
-      
-      // Option 1: Via une fonction SQL dans Supabase (à créer)
-      const { data, error } = await supabaseClient
-        .rpc('send_email', {
-          p_to: to,
-          p_subject: subject,
-          p_html: html
-        });
-
-      if (error) {
-        // Si la fonction n'existe pas, on log l'erreur mais on continue
-        console.warn('⚠️  Fonction send_email non disponible. Email simulé:', {
-          to,
-          subject,
-          timestamp: new Date().toISOString()
-        });
-        // En production, on pourrait utiliser un provider comme Sendgrid ici
+      if (!process.env.RESEND_API_KEY) {
+        console.warn('⚠️ RESEND_API_KEY non configurée. Ajoute à .env');
+        console.log('📧 [EMAIL SIMULÉ]');
+        console.log('   À:', to);
+        console.log('   Sujet:', subject);
+        return { success: false, message: 'API key manquante' };
       }
 
-      return { success: !error, error: error?.message };
+      // ✅ Envoyer via Resend
+      const response = await resend.emails.send({
+        from: 'noreply@outillio.fr', // À remplacer par votre domaine Resend
+        to: to,
+        subject: subject,
+        html: html
+      });
+
+      if (response.error) {
+        console.error('❌ Erreur Resend:', response.error);
+        return { success: false, error: response.error };
+      }
+
+      console.log(`✅ Email envoyé à ${to} (ID: ${response.data.id})`);
+      return { success: true, emailId: response.data.id };
     } catch (error) {
-      console.error('❌ Erreur Supabase Email:', error.message);
-      // Fallback: simulation d'envoi pour les tests
-      console.log('📧 [SIMULATED EMAIL] To:', to);
-      console.log('📧 [SIMULATED EMAIL] Subject:', subject);
-      return { success: true, simulated: true };
+      console.error('❌ Erreur lors de l\'envoi d\'email:', error.message);
+      return { success: false, error: error.message };
     }
   }
 
@@ -175,7 +171,12 @@ class EmailService {
             <p><strong>Note:</strong> ${'⭐'.repeat(reviewerRating)} (${reviewerRating}/5)</p>
           </div>
 
-          <p>Consultez l'avis complet sur votre profil.</p>
+          <p>
+            <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/profil" 
+               style="background-color: #a5b552; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
+              Voir l'avis complet
+            </a>
+          </p>
 
           <hr style="margin-top: 30px; border: none; border-top: 1px solid #ddd;">
           <p style="font-size: 12px; color: #999;">
@@ -209,7 +210,7 @@ class EmailService {
 
           <p>
             <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/messages" 
-               style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
+               style="background-color: #a5b552; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
               Voir la conversation
             </a>
           </p>

@@ -2,30 +2,38 @@ import JwtService from '../services/JwtService.js';
 import supabase from '../database/supabaseClient.js';
 
 /**
- * Créer l'utilisateur dans la table users s'il n'existe pas
- * (pour les utilisateurs OAuth qui n'ont pas passé par RegisterUser)
+ * Créer ou mettre à jour l'utilisateur dans la table users
+ * Gère les cas: nouvel utilisateur OAuth, utilisateur existant, doublons email
  */
 async function ensureUserExists(userId, email) {
   try {
-    // Vérifier si l'utilisateur existe
-    const { data: existingUser, error: checkError } = await supabase
+    // 1️⃣ Vérifier si utilisateur existe par ID
+    const { data: userById, error: checkByIdError } = await supabase
       .from('users')
-      .select('id')
+      .select('id, email')
       .eq('id', userId)
       .single();
 
-    if (checkError && checkError.code !== 'PGRST116') {
-      // PGRST116 = no rows found (normal)
-      console.error('❌ Erreur vérification user:', checkError);
+    if (userById) {
+      // L'utilisateur existe déjà par ID - rien à faire
+      console.log(`✅ User ${userId} existe déjà`);
       return;
     }
 
-    if (existingUser) {
-      // L'utilisateur existe déjà
+    // 2️⃣ Vérifier si email existe déjà (depuis email/password ou OAuth différent)
+    const { data: userByEmail, error: checkByEmailError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('email', email)
+      .single();
+
+    if (userByEmail) {
+      // L'email existe déjà mais pas cet ID - c'est un utilisateur existant
+      console.log(`⚠️  Email ${email} existe déjà (user ${userByEmail.id}). Pas de duplication.`);
       return;
     }
 
-    // Créer l'utilisateur
+    // 3️⃣ Créer nouvel utilisateur
     const { error: insertError } = await supabase
       .from('users')
       .insert([{
@@ -36,15 +44,23 @@ async function ensureUserExists(userId, email) {
         last_name: '',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
-      }]);
+      }])
+      .select();
 
     if (insertError) {
+      if (insertError.code === '23505') {
+        // Duplicate key - l'email existe déjà
+        console.warn(`⚠️  Email ${email} existe déjà (création en doublon évitée)`);
+        return;
+      }
       console.error('❌ Erreur création user OAuth:', insertError);
-    } else {
-      console.log('✅ User OAuth créé:', userId);
+      throw insertError;
     }
+
+    console.log(`✅ User OAuth créé: ${userId} (${email})`);
   } catch (err) {
-    console.error('❌ Exception ensureUserExists:', err);
+    console.error('❌ Exception ensureUserExists:', err.message);
+    // Ne pas throw - l'authentification peut continuer même si la création échoue
   }
 }
 

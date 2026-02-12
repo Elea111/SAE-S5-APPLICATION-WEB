@@ -9,9 +9,10 @@
  */
 
 import di from '../../boot/di.js';
+import supabase from '../database/supabaseClient.js';
 
 const OLLAMA_API = 'http://localhost:11434/api/generate';
-const MODEL = 'neural-chat'; // ou 'llama2', 'mistral', etc.
+const MODEL = 'llama2'; // llama2 suit mieux les instructions
 
 class ChatService {
   /**
@@ -22,21 +23,29 @@ class ChatService {
    */
   async chat(message, userId) {
     try {
-      // ✅ Déterminer si on a besoin contexte BD
+      // ✅ Determiner si on a besoin contexte BD
       const needsContext = this.needsSearchContext(message);
       
       let context = '';
       if (needsContext) {
         context = await this.buildContextFromDatabase(message, userId);
+        if (context) {
+          console.log('✅ Contexte BD trouvé');
+        } else {
+          console.log('⚠️ Pas d\'outils trouvés en BD');
+        }
       }
       
       // ✅ Construire le prompt système
       const systemPrompt = this.buildSystemPrompt();
       
       // ✅ Construire prompt utilisateur enrichi
-      const userPrompt = context 
-        ? `Contexte Outillio:\n${context}\n\nQuestion: ${message}`
-        : message;
+      let userPrompt = message;
+      if (context) {
+        userPrompt = `Outils disponibles Outillio:\n${context}\n---\nClient demande: ${message}\n\nRECOMMENDE UNIQUEMENT les outils ci-dessus.`;
+      } else if (needsContext) {
+        userPrompt = `Pas d'outils disponibles maintenant.\n\nClient: ${message}\n\nRéponds: "Aucun outil disponible présentement"`;
+      }
       
       // ✅ Appeler Ollama
       const response = await this.callOllama(systemPrompt, userPrompt);
@@ -67,32 +76,45 @@ class ChatService {
    */
   async buildContextFromDatabase(message, userId) {
     try {
-      // Récupérer location utilisateur si possible
-      const user = await di.userRepository.findById(userId);
-      const userLocation = user?.location || 'France';
+      // Requête Supabase: récupérer équipements disponibles
+      const { data: items, error } = await supabase
+        .from('items')
+        .select(`
+          id,
+          title,
+          description,
+          daily_price,
+          average_rating,
+          user_id,
+          is_available
+        `)
+        .eq('is_available', true)
+        .order('average_rating', { ascending: false })
+        .limit(5);
       
-      // Chercher outils disponibles (top 5)
-      const items = await di.itemRepository.search({
-        limit: 5,
-        sortBy: 'rating',
-        available: true
-      });
-      
-      if (items.length === 0) {
+      if (error) {
+        console.error('Erreur requête BD:', error);
         return '';
       }
       
+      if (!items || items.length === 0) {
+        console.log('⚠️ Aucun équipement disponible');
+        return '';
+      }
+      
+      console.log(`✅ ${items.length} équipements trouvés`);
+      
       // Formater les outils
-      let context = `📍 Localisation: ${userLocation}\n\n`;
-      context += '🔧 Outils disponibles:\n';
+      let context = '🔧 Équipements disponibles Outillio:\n';
       
       items.forEach((item, idx) => {
         const rating = item.average_rating ? `⭐ ${item.average_rating}/5` : '⭐ Non noté';
-        context += `${idx + 1}. ${item.name}\n`;
-        context += `   Prix: ${item.price}€/jour | ${rating}\n`;
-        context += `   Propriétaire: ${item.owner_name}\n\n`;
+        const price = item.daily_price ? `${item.daily_price}€` : 'Prix à confirmer';
+        context += `${idx + 1}. ${item.title}\n`;
+        context += `   💰 ${price}/jour | ${rating}\n`;
       });
       
+      context += '\n→ Ces outils sont disponibles maintenant sur Outillio';
       return context;
     } catch (error) {
       console.error('Erreur récupération contexte BD:', error);
@@ -104,19 +126,16 @@ class ChatService {
    * Construire le prompt système
    */
   buildSystemPrompt() {
-    return `Tu es Assistant IA Outillio, une plateforme de location d'équipements entre professionnels.
+    return `Tu es assistant client Outillio - plateforme de location d'outils.
 
-Tes responsabilités:
-- Répondre en FRANÇAIS aux questions sur Outillio
-- Aider les utilisateurs à trouver des outils
-- Donner des conseils sur les prix
-- Expliquer comment utiliser la plateforme
-- Recommander les meilleurs outils basés sur leurs besoins
-- Diriger vers l'équipe support pour problèmes graves
+RÈGLES STRICTES:
+1. FRANÇAIS uniquement - JAMAIS anglais
+2. RECOMMANDE UNIQUEMENT les outils du contexte donné
+3. Si pas d'outils dans le contexte: "Aucun outil disponible maintenant, réessayez plus tard"
+4. Réponses courtes (2-3 phrases max)
+5. Ignore questions hors-sujet
 
-Ton ton: Professionnel, sympa, concis.
-Limite tes réponses à 2-3 phrases max.
-Si tu ne sais pas, dis-le franchement.`;
+Action: Recommande par nom + prix/jour + propriétaire`;
   }
 
   /**
@@ -128,16 +147,25 @@ Si tu ne sais pas, dis-le franchement.`;
       console.log('  Model:', MODEL);
       console.log('  Message:', userMessage.substring(0, 50) + '...');
       
+      // Utiliser /api/chat pour meilleure gestion du system prompt
       const payload = {
         model: MODEL,
-        prompt: userMessage,
-        system: systemPrompt,
+        messages: [
+          {
+            role: 'system',
+            content: systemPrompt
+          },
+          {
+            role: 'user',
+            content: userMessage
+          }
+        ],
         stream: false,
-        temperature: 0.7,
-        num_predict: 150, // Limiter à 150 tokens pour réponses courtes
+        temperature: 0.2, // Très bas: réponses déterministes
+        num_predict: 80, // Court: max 80 tokens
       };
       
-      const response = await fetch(OLLAMA_API, {
+      const response = await fetch('http://localhost:11434/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -145,11 +173,17 @@ Si tu ne sais pas, dis-le franchement.`;
       });
       
       if (!response.ok) {
+        // Gestion spéciale du 404 (modèle non trouvé)
+        if (response.status === 404) {
+          console.error(`❌ Modèle '${MODEL}' non trouvé. Veuillez le télécharger.`);
+          return `⚠️ Le modèle IA '${MODEL}' n'est pas installé. Téléchargez-le avec:\n\n$ ollama pull ${MODEL}`;
+        }
         throw new Error(`Ollama API error: ${response.status}`);
       }
       
       const data = await response.json();
-      const botResponse = data.response?.trim() || 'Je n\'ai pas pu générer une réponse.';
+      // /api/chat retourne {message: {content: "...", role: "assistant"}}
+      const botResponse = data.message?.content?.trim() || 'Je n\'ai pas pu générer une réponse.';
       
       console.log('✅ Réponse Ollama reçue');
       return botResponse;
