@@ -5,6 +5,7 @@ import CategoriesSection from "./components/categories/CategoriesSection.jsx";
 import OutilsPopulaires from './components/outils-populaires/OutilsPopulaires.jsx';
 import CommentCaMarche from "./components/comment-ca-marche/CommentCaMarche.jsx";
 import Ecology from '../../components/layout/ecology/Ecology.jsx';
+import ChatBot from '../../components/ChatBot/ChatBot.jsx';
 
 function Accueil() {
       return (
@@ -14,6 +15,7 @@ function Accueil() {
               <OutilsPopulaires />
               <CommentCaMarche />
               <Ecology />
+              <ChatBot />
           </div>
       );
 }

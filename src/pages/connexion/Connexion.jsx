@@ -3,6 +3,7 @@ import './Connexion.css';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import Header from '../../components/layout/header/Header.jsx';
 import Footer from '../../components/layout/footer/Footer.jsx';
+import { OAuthButtons } from './OAuthButtons.jsx';
 
 const Connexion = () => {
   const [formData, setFormData] = useState({
@@ -35,13 +36,13 @@ const Connexion = () => {
 
         const data = await res.json();
 
-        if (res.ok && data.token && data.id) {
-            // ✅ SAUVEGARDER TOUTES LES DONNÉES ESSENTIELLES
+        if (res.ok && data.id) {
+            // ✅ SAUVEGARDER les données utilisateur + token
             localStorage.setItem('auth', JSON.stringify({
                 userId: data.id,        // ← Clé canonique
                 id: data.id,            // ← Alias pour compatibilité
-                token: data.token,
                 email: data.email,
+                token: data.token,      // ← Token en localStorage (dev mode)
                 isPro: data.isPro || false,
                 first_name: data.first_name || '',
                 last_name: data.last_name || ''
@@ -118,6 +119,12 @@ const Connexion = () => {
                 {message}
               </p>
             )}
+
+            <div className="divider-section">
+              <div className="divider">OU</div>
+            </div>
+
+            <OAuthButtons />
 
             <p className="signup-redirect">
               Pas encore inscrit ? <a href="/inscription" className="signup-link">Créer un compte</a>

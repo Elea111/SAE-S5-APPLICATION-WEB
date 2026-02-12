@@ -4,16 +4,21 @@ import './Header.css';
 const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
+    const [auth, setAuth] = useState({});
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
     const handleInscription = () => { window.location.href = '/inscription'; };
     const handleConnexion = () => { window.location.href = '/connexion'; };
 
-    // read auth to determine logged state
-    const authRaw = typeof window !== 'undefined' ? localStorage.getItem('auth') : null;
-    const auth = authRaw ? JSON.parse(authRaw) : {};
-    // ✅ ACCEPTER TANT userId QUE id
-    const isLogged = !!(auth && (auth.userId || auth.id) && auth.token);
+    // ✅ Lire auth depuis localStorage ET re-render quand il change
+    useEffect(() => {
+      const authRaw = localStorage.getItem('auth');
+      const authData = authRaw ? JSON.parse(authRaw) : {};
+      setAuth(authData);
+    }, []);
+
+    // ✅ Vérifier juste la présence du token
+    const isLogged = !!(auth && auth.token);
     const userDisplayName = auth?.first_name && auth?.last_name 
       ? `${auth.first_name} ${auth.last_name}` 
       : auth?.email || null;
@@ -47,7 +52,7 @@ const Header = () => {
       // Vérifier toutes les 10 secondes
       const interval = setInterval(fetchUnreadCount, 10000);
       return () => clearInterval(interval);
-    }, [isLogged, auth.token]);
+    }, [isLogged]);
 
     return (
         <header className="header">
@@ -99,7 +104,7 @@ const Header = () => {
                                         <span className="header-initial">{(userDisplayName || 'U').charAt(0)}</span>
                                     )}
                                 </button>
-                                <button className="logout-btn" onClick={() => { localStorage.removeItem('auth'); window.location.reload(); }}>Déconnexion</button>
+                                <button className="logout-btn" onClick={() => { localStorage.removeItem('auth'); window.location.href = '/'; }}>Déconnexion</button>
                             </>
                         ) : (
                             <>

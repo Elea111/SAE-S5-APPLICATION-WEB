@@ -4,14 +4,21 @@ import '../config/env.js';
 import express from 'express';
 import cors from 'cors';
 import multer from 'multer';
+import rateLimit from 'express-rate-limit';
+import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
+import csrf from 'csurf';
 import di from '../boot/di.js';
 import SupabaseStorageRepository from '../infra/repositories/SupabaseStorageRepository.js';
 import supabaseClient from '../infra/database/supabaseClient.js'; // ✅ AJOUTER IMPORT
+import { sessionMiddleware } from '../infra/middleware/sessionMiddleware.js';
 
 // Puis tous les autres imports
 import bodyParser from 'body-parser';
 import { z } from 'zod';  // ← ZULU
 import stripeService from '../infra/services/StripeService.js';  // ← STRIPE SERVICE
+import emailService from '../infra/services/EmailService.js';  // ← EMAIL SERVICE
+import chatService from '../infra/services/ChatService.js';  // ← IA CHATBOT
 import { RegisterUser } from '../domain/usecases/RegisterUser.js';
 import { LoginUser } from '../domain/usecases/LoginUser.js';
 import { PublishEquipment } from '../domain/usecases/PublishEquipment.js';
@@ -38,6 +45,55 @@ import {
 const app = express();
 
 // ============================================
+// 🔒 SÉCURITÉ - MIDDLEWARE
+// ============================================
+
+// ✅ Security Headers (Helmet)
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", 'data:', 'https:'],
+      connectSrc: ["'self'", 'https:']
+    }
+  },
+  hsts: {
+    maxAge: 31536000, // 1 year
+    includeSubDomains: true,
+    preload: true
+  }
+}));
+
+// ✅ Rate Limiting - Login (5 tentatives par 5 min)
+const loginLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000, // 5 minutes
+  max: 5,
+  skipSuccessfulRequests: true, // Reset après succès
+  standardHeaders: true, // Envoyer info dans le header `RateLimit-*`
+  legacyHeaders: false, // Désactiver les headers `X-RateLimit-*`
+  handler: (req, res) => {
+    res.status(429).json({ 
+      message: 'Trop de tentatives de login. Réessayez dans 5 minutes.' 
+    });
+  }
+});
+
+// ✅ Rate Limiting - Général API (augmenté pour dev, à réduire en prod)
+// En dev: 10000 requêtes par heure (pratiquement pas de limite)
+// En prod: réduire à 100 requêtes par 15 min
+const apiLimiter = rateLimit({
+  windowMs: process.env.NODE_ENV === 'production' ? 15 * 60 * 1000 : 60 * 60 * 1000, // 15 min en prod, 1h en dev
+  max: process.env.NODE_ENV === 'production' ? 100 : 10000, // Strict en prod, très permissif en dev
+  handler: (req, res) => {
+    res.status(429).json({ 
+      message: 'Trop de requêtes. Réessayez plus tard.' 
+    });
+  }
+});
+
+// ============================================
 // MIDDLEWARE
 // ============================================
 app.use(cors({
@@ -47,6 +103,24 @@ app.use(cors({
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+// ✅ Cookie Parser (pour CSRF)
+app.use(cookieParser());
+
+// ✅ Session Middleware (créer sessionId + CSRF token)
+app.use(sessionMiddleware);
+
+// ✅ CSRF Protection (valider CSRF token sur POST/PATCH/DELETE)
+const csrfProtection = csrf({
+  cookie: false, // Ne pas utiliser de cookie pour le token (utiliser la session)
+  value: (req) => {
+    // Récupérer token du header X-CSRF-Token
+    return req.headers['x-csrf-token'] || req.body?._csrf
+  }
+});
+
+// ✅ Appliquer rate limiting APRÈS les parsers
+app.use('/api/', apiLimiter); // General API rate limit
 
 // ✅ MULTER POUR LES UPLOADS
 const storage = multer.memoryStorage();
@@ -88,8 +162,13 @@ app.use(optionalAuthMiddleware);
 // ========== PUBLIC ENDPOINTS ==========
 app.get('/api/health', (_, res) => res.json({ ok: true }));
 
+// ✅ GET /api/csrf-token: Retourner le CSRF token
+app.get('/api/csrf-token', csrfProtection, (req, res) => {
+  res.json({ csrfToken: req.csrfToken() });
+});
+
 // POST /api/login
-app.post('/api/login', validateBody(LoginSchema), async (req, res) => {
+app.post('/api/login', loginLimiter, validateBody(LoginSchema), async (req, res) => {
   try {
     const { email, password } = req.validated;
     const user = await di.userRepository.findByEmail(email);
@@ -98,6 +177,8 @@ app.post('/api/login', validateBody(LoginSchema), async (req, res) => {
     }
 
     const result = await LoginUser(email, password, di.userRepository);
+
+    // ✅ Retourner le token directement (dev mode - on met la sécurité en prod)
     res.json({
       id: result.id,
       email: result.email,
@@ -108,8 +189,11 @@ app.post('/api/login', validateBody(LoginSchema), async (req, res) => {
       avatar_url: user.avatar_url || null
     });
   } catch (err) {
-    console.error('Login error:', err);
-    res.status(401).json({ message: 'Email ou mot de passe incorrect' });
+    console.error('Login error:', err.message);
+    const message = err.message && err.message.includes('Utilisateur') 
+      ? err.message 
+      : 'Email ou mot de passe incorrect';
+    res.status(401).json({ message });
   }
 });
 
@@ -878,6 +962,49 @@ app.post('/api/bookings', authMiddleware, validateBody(BookEquipmentSchema), asy
       di.equipmentRepository
     );
 
+    // 📧 Envoyer les emails de notification (en background)
+    (async () => {
+      try {
+        // Récupérer les infos de l'emprunteur
+        const { data: borrower } = await supabaseClient
+          .from('users')
+          .select('first_name, last_name, email')
+          .eq('id', borrower_id)
+          .single();
+
+        // Récupérer les infos de l'outil et du propriétaire
+        const { data: item } = await supabaseClient
+          .from('items')
+          .select('title, daily_price, user_id')
+          .eq('id', item_id)
+          .single();
+
+        if (item && borrower) {
+          const { data: owner } = await supabaseClient
+            .from('users')
+            .select('first_name, last_name, email')
+            .eq('id', item.user_id)
+            .single();
+
+          if (owner) {
+            await emailService.sendNewBookingNotification({
+              ownerEmail: owner.email,
+              ownerName: owner.first_name || 'Propriétaire',
+              borrowerName: borrower.first_name || 'Emprunteur',
+              borrowerEmail: borrower.email,
+              itemTitle: item.title,
+              startDate: start_date,
+              endDate: end_date,
+              dailyPrice: item.daily_price
+            });
+          }
+        }
+      } catch (emailErr) {
+        console.error('⚠️  Email error (non-critical):', emailErr.message);
+        // L'email n'est pas critique, on continue
+      }
+    })();
+
     res.status(201).json(booking);
   } catch (err) {
     console.error('Booking error:', err);
@@ -1073,7 +1200,7 @@ app.patch('/api/bookings/:id', authMiddleware, validateBody(UpdateBookingSchema)
  * Status: pending → confirmed → handed_over → returned
  * SI TRANSITION pending→confirmed, ENVOYER NOTIFICATION AU BORROWER
  */
-app.patch('/api/bookings/:id/status', authMiddleware, async (req, res) => {
+app.patch('/api/bookings/:id/status', authMiddleware, csrfProtection, async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
@@ -1209,7 +1336,7 @@ app.get('/api/reviews', authMiddleware, async (req, res) => {
   }
 });
 
-app.post('/api/reviews', authMiddleware, validateBody(LeaveReviewSchema), async (req, res) => {
+app.post('/api/reviews', authMiddleware, csrfProtection, validateBody(LeaveReviewSchema), async (req, res) => {
   try {
     const reviewData = { ...req.validated, author_id: req.user.id };
     const review = await LeaveReview(reviewData, di.reviewRepository);
@@ -1220,7 +1347,7 @@ app.post('/api/reviews', authMiddleware, validateBody(LeaveReviewSchema), async 
 });
 
 // ✅ PATCH /api/reviews/:id - Update existing review
-app.patch('/api/reviews/:id', authMiddleware, async (req, res) => {
+app.patch('/api/reviews/:id', authMiddleware, csrfProtection, async (req, res) => {
   try {
     const { id } = req.params;
     const { rating, comment } = req.body;
@@ -1266,7 +1393,7 @@ app.patch('/api/reviews/:id', authMiddleware, async (req, res) => {
 });
 
 // ========== MESSAGE ENDPOINTS ==========
-app.post('/api/messages', authMiddleware, validateBody(SendMessageSchema), async (req, res) => {
+app.post('/api/messages', authMiddleware, csrfProtection, validateBody(SendMessageSchema), async (req, res) => {
   try {
     const { receiver_id, content, booking_id = null } = req.validated;
     const msg = await di.messageRepository.create({
@@ -1700,7 +1827,7 @@ app.get('/api/messages/conversations', authMiddleware, async (req, res) => {
  * PATCH /api/messages/:id/read
  * Marquer un message comme lu
  */
-app.patch('/api/messages/:id/read', authMiddleware, async (req, res) => {
+app.patch('/api/messages/:id/read', authMiddleware, csrfProtection, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -1726,6 +1853,40 @@ app.patch('/api/messages/:id/read', authMiddleware, async (req, res) => {
 // ============================================
 // �📦 CATEGORIES ENDPOINTS
 // ============================================
+
+/**
+ * GET /api/categories
+ * Récupérer toutes les catégories
+ */
+app.post('/api/chat', authMiddleware, async (req, res) => {
+  try {
+    const { message } = req.body;
+    
+    // Validation
+    if (!message || typeof message !== 'string') {
+      return res.status(400).json({ error: 'Message vide ou invalide' });
+    }
+    
+    if (message.trim().length === 0) {
+      return res.status(400).json({ error: 'Message vide' });
+    }
+    
+    // Appeler le service chat
+    console.log(`Chat request from ${req.user.email}: "${message.substring(0, 50)}..."`);
+    const response = await chatService.chat(message, req.user.id);
+    
+    // Retourner la réponse
+    res.json({ 
+      message: response,
+      timestamp: new Date()
+    });
+  } catch (err) {
+    console.error('Chat error:', err);
+    res.status(500).json({ 
+      error: err.message || 'Erreur serveur lors du chat'
+    });
+  }
+});
 
 /**
  * GET /api/categories
