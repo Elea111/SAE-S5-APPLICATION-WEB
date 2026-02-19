@@ -1161,8 +1161,21 @@ app.get('/api/bookings/:id', authMiddleware, async (req, res) => {
       return res.status(404).json({ message: 'Réservation non trouvée' });
     }
 
-    // Vérifier que c'est l'utilisateur qui fait la demande
-    if (booking.borrower_id !== req.user.id) {
+    // ✅ Vérifier que c'est soit l'emprunteur SOIT le propriétaire
+    const item = await di.equipmentRepository.findById(booking.item_id);
+    const owner_id = item?.owner_id;
+    
+    console.log('🔍 DEBUG GET /api/bookings/:id');
+    console.log('  bookingId:', bookingId);
+    console.log('  booking.borrower_id:', booking.borrower_id);
+    console.log('  booking.owner_id:', booking.owner_id); 
+    console.log('  owner_id from item:', owner_id);
+    console.log('  req.user.id:', req.user.id);
+    console.log('  Est borrower?:', booking.borrower_id === req.user.id);
+    console.log('  Est owner?:', owner_id === req.user.id);
+    
+    if (booking.borrower_id !== req.user.id && owner_id !== req.user.id) {
+      console.log('❌ Accès refusé - pas borrower ni owner');
       return res.status(403).json({ message: 'Accès non autorisé' });
     }
 
@@ -1917,6 +1930,92 @@ app.get('/api/categories', async (req, res) => {
     res.json(data || []);
   } catch (err) {
     console.error('❌ Get categories error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * POST /api/test-email-noauth
+ * Endpoint de TEST: Envoyer un email de test (SANS authentification)
+ */
+app.post('/api/test-email-noauth', async (req, res) => {
+  try {
+    const { to, subject, html } = req.body;
+    
+    if (!to || !subject || !html) {
+      return res.status(400).json({ 
+        message: 'Paramètres manquants: to, subject, html' 
+      });
+    }
+
+    console.log('\n🧪 === TEST EMAIL DIRECT ===');
+    console.log('📤 Envoi d\'un email de test...');
+    console.log('   To:', to);
+    console.log('   Subject:', subject);
+
+    const result = await emailService.sendEmail({ to, subject, html });
+
+    if (result.success) {
+      console.log('✅ Email test envoyé avec succès');
+      console.log('   ID Resend:', result.emailId);
+      res.json({ 
+        success: true, 
+        message: 'Email de test envoyé',
+        resendId: result.emailId
+      });
+    } else {
+      console.error('❌ Erreur Resend:', result.error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Erreur Resend',
+        error: result.error 
+      });
+    }
+  } catch (err) {
+    console.error('❌ Test email error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * POST /api/test-email
+ * Endpoint de TEST: Envoyer un email de test pour déboguer (avec auth)
+ */
+app.post('/api/test-email', authMiddleware, async (req, res) => {
+  try {
+    const { to, subject, html } = req.body;
+    
+    if (!to || !subject || !html) {
+      return res.status(400).json({ 
+        message: 'Paramètres manquants: to, subject, html' 
+      });
+    }
+
+    console.log('\n🧪 === TEST EMAIL DIRECT ===');
+    console.log('📤 Envoi d\'un email de test...');
+    console.log('   To:', to);
+    console.log('   Subject:', subject);
+
+    const result = await emailService.sendEmail({ to, subject, html });
+
+    if (result.success) {
+      console.log('✅ Email test envoyé avec succès');
+      console.log('   ID Resend:', result.emailId);
+      res.json({ 
+        success: true, 
+        message: 'Email de test envoyé',
+        resendId: result.emailId
+      });
+    } else {
+      console.error('❌ Erreur Resend:', result.error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Erreur Resend',
+        error: result.error 
+      });
+    }
+  } catch (err) {
+    console.error('❌ Test email error:', err.message);
     res.status(500).json({ error: err.message });
   }
 });
