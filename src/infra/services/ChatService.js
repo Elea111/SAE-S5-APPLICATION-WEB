@@ -84,12 +84,10 @@ class ChatService {
           title,
           description,
           daily_price,
-          average_rating,
           user_id,
           is_available
         `)
         .eq('is_available', true)
-        .order('average_rating', { ascending: false })
         .limit(5);
       
       if (error) {
@@ -108,10 +106,9 @@ class ChatService {
       let context = '🔧 Équipements disponibles Outillio:\n';
       
       items.forEach((item, idx) => {
-        const rating = item.average_rating ? `⭐ ${item.average_rating}/5` : '⭐ Non noté';
         const price = item.daily_price ? `${item.daily_price}€` : 'Prix à confirmer';
         context += `${idx + 1}. ${item.title}\n`;
-        context += `   💰 ${price}/jour | ${rating}\n`;
+        context += `   💰 ${price}/jour\n`;
       });
       
       context += '\n→ Ces outils sont disponibles maintenant sur Outillio';
