@@ -12,7 +12,7 @@ import di from '../../boot/di.js';
 import supabase from '../database/supabaseClient.js';
 
 const OLLAMA_API = 'http://localhost:11434/api/generate';
-const MODEL = 'llama2'; // llama2 suit mieux les instructions
+const MODEL = 'mistral'; // Mistral: meilleur modèle, réponses de qualité
 
 class ChatService {
   /**

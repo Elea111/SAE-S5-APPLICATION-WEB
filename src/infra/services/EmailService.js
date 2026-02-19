@@ -121,7 +121,7 @@ class EmailService {
 
       // ✅ Envoyer via Resend
       const response = await resend.emails.send({
-        from: 'noreply@outillio.fr', // À remplacer par votre domaine Resend
+        from: 'onboarding@resend.dev', // Domaine de test Resend pour développement
         to: to,
         subject: subject,
         html: html
